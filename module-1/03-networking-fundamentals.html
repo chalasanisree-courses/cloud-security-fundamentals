@@ -16,12 +16,16 @@
 }
 body{ font-family:'Barlow',sans-serif; background:var(--bg); color:var(--text); line-height:1.65; min-height:100vh; }
 
-/* top nav */
-.top-nav{ background:var(--slate-dark); padding:12px 0; }
-.nav-inner{ max-width:920px; margin:0 auto; padding:0 32px; display:flex; justify-content:space-between; align-items:center; font-size:11px; }
-.nav-inner a{ color:rgba(255,255,255,0.5); text-decoration:none; font-weight:500; letter-spacing:0.03em; transition:color 0.15s; }
-.nav-inner a:hover{ color:#fff; }
-.nav-eyebrow{ color:rgba(255,255,255,0.4); font-weight:600; letter-spacing:0.1em; text-transform:uppercase; }
+/* page nav (header + footer) */
+.pagenav{ background:var(--slate-dark); }
+.pagenav.foot{ margin-top:48px; }
+.pagenav-inner{ max-width:920px; margin:0 auto; padding:11px 32px; display:flex; justify-content:space-between; align-items:center; gap:16px; }
+.pagenav .brand{ color:rgba(255,255,255,0.45); font-size:11px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; white-space:nowrap; }
+.navbtns{ display:flex; gap:8px; }
+.navbtn{ display:inline-flex; align-items:center; gap:6px; font-family:'Barlow',sans-serif; font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#fff; background:rgba(255,255,255,0.10); border:1px solid rgba(255,255,255,0.22); border-radius:6px; padding:7px 13px; text-decoration:none; transition:0.15s; white-space:nowrap; }
+.navbtn:hover{ background:var(--accent); border-color:var(--accent); }
+.navbtn.disabled{ opacity:0.28; pointer-events:none; }
+@media(max-width:560px){ .pagenav .brand{ display:none } .pagenav-inner{ justify-content:center } }
 
 /* header */
 .header{ background:#fff; padding:56px 0 44px; border-bottom:0.5px solid var(--border); }
@@ -114,10 +118,14 @@ input[type=range]{ accent-color:var(--accent); }
 .kbd{ display:inline-block; background:#fff; border:1px solid #d6dbde; border-bottom-width:2px; border-radius:5px; padding:.05em .45em; font-family:'JetBrains Mono',monospace; font-size:.82em; }
 </style>
 </head><body>
-<div class="top-nav"><div class="nav-inner">
-  <span class="nav-eyebrow">Cloud Security Fundamentals</span>
-  <a href="../index.html">&larr; Course Home</a>
-</div></div>
+<header class="pagenav"><div class="pagenav-inner">
+  <span class="brand">Cloud Security Fundamentals</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn" href="02-enterprise-trends.html">&larr; Prev</a>
+    <span class="navbtn disabled">Next &rarr;</span>
+  </nav>
+</div></header>
 
 <div class="header"><div class="header-inner">
   <div class="header-eyebrow">Module 1 &nbsp;·&nbsp; Basics of Internet Communications</div>
@@ -279,6 +287,15 @@ input[type=range]{ accent-color:var(--accent); }
   </div>
 
 </div>
+
+<footer class="pagenav foot"><div class="pagenav-inner">
+  <span class="brand">Module 1 &middot; Basics of Internet Communications</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn" href="02-enterprise-trends.html">&larr; Prev</a>
+    <span class="navbtn disabled">Next &rarr;</span>
+  </nav>
+</div></footer>
 
 <script>function toggleConcept(id){
   const body=document.getElementById(id);
