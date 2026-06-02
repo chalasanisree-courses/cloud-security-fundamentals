@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Networking Fundamentals</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+* { box-sizing:border-box; margin:0; padding:0; }
+:root{
+  --slate-dark:#1A202C; --slate:#2D3748;
+  --accent:#0E7490; --accent-dark:#0B5567; --accent-soft:#CFF1F6;
+  --info:#1E40AF; --info-soft:#DBEAFE;
+  --text:#1a1a18; --text-muted:#5f5e5a; --text-light:#888780;
+  --border:rgba(0,0,0,0.09); --bg:#fafaf8; --bg-card:#fff; --bg-code:#f6f6f3; --tag-bg:#f1f0eb;
+  /* widget-compat tokens */
+  --rust:#B45309; --soft:#888780; --muted:#5f5e5a; --rule:rgba(0,0,0,0.09);
+  --ok:#2e7d57; --callout-bg:#f1f9fb; --code-bg:#f6f6f3;
+}
+body{ font-family:'Barlow',sans-serif; background:var(--bg); color:var(--text); line-height:1.65; min-height:100vh; }
+
+/* top nav */
+.top-nav{ background:var(--slate-dark); padding:12px 0; }
+.nav-inner{ max-width:920px; margin:0 auto; padding:0 32px; display:flex; justify-content:space-between; align-items:center; font-size:11px; }
+.nav-inner a{ color:rgba(255,255,255,0.5); text-decoration:none; font-weight:500; letter-spacing:0.03em; transition:color 0.15s; }
+.nav-inner a:hover{ color:#fff; }
+.nav-eyebrow{ color:rgba(255,255,255,0.4); font-weight:600; letter-spacing:0.1em; text-transform:uppercase; }
+
+/* header */
+.header{ background:#fff; padding:56px 0 44px; border-bottom:0.5px solid var(--border); }
+.header-inner{ max-width:920px; margin:0 auto; padding:0 32px; }
+.header-eyebrow{ font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:14px; display:flex; align-items:center; gap:12px; }
+.header-eyebrow::after{ content:''; flex:1; height:0.5px; background:var(--border); max-width:120px; }
+.header h1{ font-family:'Barlow Condensed',sans-serif; font-size:clamp(34px,4.5vw,52px); font-weight:900; letter-spacing:-0.01em; line-height:1.05; color:var(--text); margin-bottom:18px; }
+.header h1 em{ font-style:normal; color:var(--accent); }
+.header-meta-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+.module-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:var(--slate); color:#fff; }
+.topic-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:#F1F5F9; color:#475569; }
+.topic-pill.accent{ background:var(--accent-soft); color:var(--accent-dark); }
+
+/* page */
+.page{ max-width:920px; margin:0 auto; padding:0 32px 48px; }
+
+/* objectives */
+.objectives{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--accent); border-radius:6px; padding:22px 28px; margin:36px 0 14px; }
+.obj-label{ font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:14px; }
+.objectives ul{ list-style:none; }
+.objectives ul li{ font-size:14px; color:var(--text); padding:5px 0 5px 20px; position:relative; line-height:1.55; }
+.objectives ul li::before{ content:'◇'; position:absolute; left:0; color:var(--accent); font-size:10px; top:9px; }
+
+/* sections */
+section{ margin-top:44px; }
+section h2{ font-family:'Barlow Condensed',sans-serif; font-size:28px; font-weight:800; letter-spacing:0.005em; color:var(--text); margin-bottom:20px; display:flex; align-items:baseline; gap:20px; }
+section h2 .num{ font-family:'Barlow Condensed',sans-serif; font-size:56px; font-weight:900; color:var(--accent); letter-spacing:-0.02em; line-height:0.85; min-width:42px; }
+section h3{ font-family:'Barlow',sans-serif; font-size:17px; font-weight:700; color:var(--text); margin:28px 0 12px; }
+section p{ font-size:14.5px; color:var(--text); line-height:1.75; margin-bottom:14px; }
+section p strong{ font-weight:700; color:var(--text); }
+section ul{ font-size:14.5px; line-height:1.75; color:var(--text); padding-left:22px; margin:8px 0 16px; }
+section ul li{ margin:4px 0; }
+section a{ color:var(--accent-dark); text-decoration:underline; text-decoration-color:rgba(0,0,0,0.2); text-underline-offset:2px; }
+section a:hover{ text-decoration-color:var(--accent); }
+
+/* compare tables */
+.compare-table{ width:100%; border-collapse:collapse; margin:16px 0 20px; font-size:13.5px; background:var(--bg-card); border:0.5px solid var(--border); border-radius:6px; overflow:hidden; }
+.compare-table thead th{ font-size:10px; font-weight:700; color:var(--text-light); text-transform:uppercase; letter-spacing:0.06em; padding:11px 16px; text-align:left; border-bottom:0.5px solid var(--border); background:#fafaf8; }
+.compare-table tbody td{ padding:11px 16px; border-bottom:0.5px solid #f0efe8; vertical-align:top; color:var(--text); line-height:1.55; }
+.compare-table tbody td:first-child{ font-weight:600; background:#fafaf8; width:28%; }
+.compare-table tbody tr:last-child td{ border-bottom:none; }
+
+/* code */
+pre{ font-family:'JetBrains Mono',monospace; background:var(--bg-code); border:0.5px solid var(--border); border-radius:6px; padding:14px 18px; font-size:12px; line-height:1.7; color:var(--text); overflow-x:auto; margin:12px 0 18px; }
+pre code{ font-family:inherit; }
+.code-label{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-light); margin:14px 0 6px; }
+.code-comment{ color:#9a988f; }
+.code-cmd{ color:var(--accent); font-weight:600; }
+.code-key{ color:var(--info); font-weight:600; }
+code.inline{ font-family:'JetBrains Mono',monospace; font-size:12.5px; background:var(--tag-bg); padding:1px 6px; border-radius:3px; color:var(--text); }
+
+/* callout boxes */
+.keybox{ background:var(--accent-soft); border-left:3px solid var(--accent); border-radius:0 6px 6px 0; padding:14px 18px; margin:14px 0 18px; font-size:13.5px; line-height:1.65; color:var(--text); }
+.keybox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--accent-dark); margin-bottom:6px; }
+.keybox b{ color:var(--accent-dark); }
+.notebox{ background:#FBF3E8; border-left:3px solid var(--rust); border-radius:0 6px 6px 0; padding:14px 18px; margin:14px 0 18px; font-size:13.5px; line-height:1.65; }
+.notebox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--rust); margin-bottom:6px; }
+
+/* concept cards */
+.concept-grid{ display:flex; flex-direction:column; gap:10px; margin-top:14px; }
+.concept-card{ background:var(--bg-card); border:0.5px solid var(--border); border-radius:7px; overflow:hidden; }
+.concept-head{ display:flex; align-items:center; gap:14px; padding:14px 20px; cursor:pointer; user-select:none; transition:background 0.15s; }
+.concept-head:hover{ background:#fafaf8; }
+.concept-icon{ font-size:16px; flex-shrink:0; color:var(--accent); }
+.concept-title{ flex:1; font-size:14.5px; font-weight:700; color:var(--text); }
+.concept-sub{ font-size:12px; color:var(--text-muted); font-weight:400; margin-top:1px; }
+.concept-chev{ font-size:10px; color:var(--text-light); }
+.concept-body{ display:none; padding:0 20px 18px; border-top:0.5px solid #f0efe8; }
+.concept-body.open{ display:block; }
+.concept-body p{ font-size:13.5px; line-height:1.7; color:var(--text); margin-top:12px; }
+.concept-body ul{ font-size:13.5px; margin-top:8px; }
+
+/* assessment / summary box */
+.assessment-box{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--slate); border-radius:0 6px 6px 0; padding:20px 24px; margin:30px 0 0; }
+.assessment-box .assess-label{ font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); margin-bottom:10px; }
+.assessment-box p{ font-size:13.5px; line-height:1.7; margin-bottom:10px; }
+.assessment-box p:last-child{ margin-bottom:0; }
+
+/* ===== interactive widgets ===== */
+.widget{ border:0.5px solid var(--border); border-radius:8px; padding:20px; margin:16px 0; background:var(--bg-card); }
+.widget h4{ margin:0 0 14px; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); font-weight:700; }
+.controls{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:14px; }
+button.ui{ font-family:'Barlow',sans-serif; cursor:pointer; border:1px solid var(--accent); background:var(--accent); color:#fff; padding:7px 16px; border-radius:6px; font-size:12.5px; font-weight:600; transition:0.15s; }
+button.ui:hover{ background:var(--accent-dark); border-color:var(--accent-dark); }
+button.ui.ghost{ background:#fff; color:var(--accent); }
+button.ui.ghost:hover{ background:var(--accent-soft); }
+.fade{ animation:fade 0.35s ease; }
+@keyframes fade{ from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+input[type=range]{ accent-color:var(--accent); }
+.kbd{ display:inline-block; background:#fff; border:1px solid #d6dbde; border-bottom-width:2px; border-radius:5px; padding:.05em .45em; font-family:'JetBrains Mono',monospace; font-size:.82em; }
+</style>
+</head><body>
+<div class="top-nav"><div class="nav-inner">
+  <span class="nav-eyebrow">Cloud Security Fundamentals</span>
+  <a href="../index.html">&larr; Course Home</a>
+</div></div>
+
+<div class="header"><div class="header-inner">
+  <div class="header-eyebrow">Module 1 &nbsp;·&nbsp; Basics of Internet Communications</div>
+  <h1>Networking <em>Fundamentals</em></h1>
+  <div class="header-meta-row">
+    <span class="module-pill">Module 1</span>
+    <span class="topic-pill">Foundations</span>
+    <span class="topic-pill accent">TCP/IP · DNS · CIDR</span>
+  </div>
+</div></div>
+
+<div class="page">
+
+  <div class="objectives">
+    <div class="obj-label">Learning Objectives</div>
+    <ul>
+      <li>Follow a single browser request all the way down the TCP/IP stack and back</li>
+      <li>Explain IP routing as next&#8209;hop forwarding, using the postal&#8209;service analogy</li>
+      <li>Distinguish IP addressing from MAC addressing and say when each is used</li>
+      <li>Describe DNS resolution and the TCP three&#8209;way handshake</li>
+      <li>Compare IPv4 and IPv6, and explain why NAT exists</li>
+      <li>Read CIDR notation and compute how many hosts a subnet holds</li>
+    </ul>
+  </div>
+
+  <section>
+    <h2><span class="num">1</span> Where we are</h2>
+    <p>The internet took off because of two standard protocols: <strong>TCP</strong> (Transmission Control Protocol) and <strong>IP</strong> (Internet Protocol). This lecture follows one ordinary action &mdash; typing <code class="inline">example.com</code> into a browser &mdash; all the way down the <strong>TCP/IP stack</strong> and across the internet to a server, then back. Understanding this path is the prerequisite for everything we secure later: firewalls, VPCs, TLS, and more all operate on the mechanics below.</p>
+    <div class="keybox">
+      <div class="lbl">The client&#8209;server model</div>
+      Your device acts as a <b>client</b>: it goes out over the internet, fetches the page from the <b>web server</b> that hosts <code class="inline">example.com</code>, and loads it. Everything below explains <em>how</em> that round trip actually happens.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> IP routing is like the postal service</h2>
+    <p>IP routing works hop by hop. No single point knows the whole path &mdash; each stop only knows its <strong>next hop</strong>. Sending a letter from San Jose to Sofia, Bulgaria, every facility that doesn't know how to reach the destination simply forwards it to the next stop up the chain, until one does. Step through it:</p>
+    <div class="widget" id="postal">
+      <h4>Packet journey &mdash; next-hop forwarding</h4>
+      <div id="hops" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px"></div>
+      <div id="packet" style="font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--bg-code);border:0.5px solid var(--border);border-radius:6px;padding:12px 14px"></div>
+      <div class="controls">
+        <button class="ui" id="hopNext">Next hop &rarr;</button>
+        <button class="ui ghost" id="hopReset">Reset</button>
+      </div>
+    </div>
+    <div class="notebox">
+      <div class="lbl">The crucial detail</div>
+      At every hop the <strong>destination IP stays the same</strong> (it's the final address), but the <strong>MAC address is rewritten</strong> to point at the <em>next</em> machine in the chain. IP says where it's ultimately going; MAC says the very next physical step.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> What's inside the packet &mdash; and DNS</h2>
+    <p>Routing uses numbers, not names. So the first thing your browser does with <code class="inline">example.com</code> is a <strong>DNS resolution</strong> (Domain Name Service) to turn the name into an IP address. Then your client fills in a packet:</p>
+    <table class="compare-table">
+      <thead><tr><th>Field</th><th>Value your client can set</th></tr></thead>
+      <tbody>
+        <tr><td>Source IP</td><td>Your machine's IP &mdash; known</td></tr>
+        <tr><td>Source MAC</td><td>Your machine's physical address &mdash; known</td></tr>
+        <tr><td>Destination IP</td><td>Resolved by DNS &mdash; known</td></tr>
+        <tr><td>Destination MAC</td><td><em>Unknown</em> &mdash; so set to the <strong>next hop</strong> (your home router), then rewritten at each hop</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> Finding your own addresses</h2>
+    <p>You can inspect your machine's addresses from a terminal &mdash; <span class="kbd">ipconfig</span> on Windows, <span class="kbd">ifconfig</span> on macOS/Linux:</p>
+    <div class="code-label">Terminal &mdash; ifconfig (macOS)</div>
+<pre><code>en0:  <span class="code-comment">(Wi-Fi interface)</span>
+  ether   a4:83:e7:2b:6d:1f          <span class="code-comment"># MAC address (physical, fixed)</span>
+  inet    <span class="code-key">192.168.1.165</span>             <span class="code-comment"># IPv4 address (given by your router)</span>
+  inet6   fe80::1c3a:...             <span class="code-comment"># IPv6 address</span></code></pre>
+    <p>Every device on your home network shares the same network prefix and gets a different host number: your Mac <code class="inline">192.168.1.165</code>, your phone <code class="inline">192.168.1.250</code>, the router <code class="inline">192.168.1.254</code>.</p>
+    <div class="keybox">
+      <div class="lbl">IP routes across networks; MAC routes within one</div>
+      Leave home and join the Starbucks Wi&#8209;Fi: your <b>MAC stays the same</b> (it's the physical address of your network card), but you get a <b>new IP</b> from the Starbucks router. MAC = which device on this local network. IP = how to cross between networks.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">5</span> IPv4 vs IPv6, and NAT</h2>
+    <div class="widget" id="ipv">
+      <h4>Address space</h4>
+      <div class="controls" style="margin-top:0;margin-bottom:16px">
+        <button class="ui" data-v="4">IPv4</button>
+        <button class="ui ghost" data-v="6">IPv6</button>
+      </div>
+      <div id="ipvStage"></div>
+    </div>
+    <p>Because IPv4 ran short, your home router performs <strong>NAT</strong> (Network Address Translation): every device on your private network shares one <strong>public IP</strong> on the way out. Load <code class="inline">showmyip.com</code> and you'll see something like <code class="inline">104.56.116.217</code> &mdash; not your private <code class="inline">192.168.x.x</code>. NAT exists for two reasons: it <strong>conserves scarce IPv4 addresses</strong> (many devices behind one public IP), and it adds a measure of <strong>security</strong> by hiding your internal addresses.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">6</span> The transport layer &mdash; the handshake</h2>
+    <p>Before any web page is fetched, the client and server must agree to talk. That's the <strong>TCP three&#8209;way handshake</strong>:</p>
+    <div class="widget" id="hs">
+      <h4>Three-way handshake</h4>
+      <div id="hsStage" style="position:relative;height:170px;margin-bottom:10px"></div>
+      <div class="controls" style="margin-top:0">
+        <button class="ui" id="hsPlay">Play handshake</button>
+        <button class="ui ghost" id="hsReset">Reset</button>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">7</span> Seeing it for real &mdash; Wireshark</h2>
+    <p><strong>Wireshark</strong> captures the actual packets. Typing <code class="inline">example.com</code> produces this sequence:</p>
+    <div class="widget" id="pcap"><h4>Packet capture (PCAP)</h4><div id="pcapList"></div></div>
+    <p>Note the redirect: typing plain <code class="inline">example.com</code> hits HTTP first, then gets redirected to <strong>HTTPS on port 443</strong> &mdash; the secure protocol.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">8</span> The stack &mdash; TCP/IP vs OSI</h2>
+    <table class="compare-table">
+      <thead><tr><th>TCP/IP layer</th><th>What we saw</th><th>OSI equivalent</th></tr></thead>
+      <tbody>
+        <tr><td>Application</td><td>HTTP <code class="inline">GET</code> request for the page</td><td>Application / Presentation / Session</td></tr>
+        <tr><td>Transport</td><td>TCP session &mdash; the SYN / SYN&#8209;ACK / ACK handshake</td><td>Transport</td></tr>
+        <tr><td>Internet</td><td>IP routing, hop by hop across networks</td><td>Network</td></tr>
+        <tr><td>Network Access</td><td>MAC / Ethernet &mdash; routing within the local network</td><td>Data Link / Physical</td></tr>
+      </tbody>
+    </table>
+    <p>OSI is a 7&#8209;layer <em>theoretical</em> model; in practice we work with the 4&#8209;layer TCP/IP stack.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">9</span> Subnets and CIDR</h2>
+    <p>A <strong>subnet mask</strong> says how many bits of an address are the <strong>network</strong> portion and how many are the <strong>host</strong> portion. A mask of <code class="inline">255.255.255.0</code> means the first 24 bits are network and the last 8 are host &mdash; written in CIDR as <code class="inline">/24</code>. That's why every device on the home network shares <code class="inline">192.168.1.</code> and only the last number changes.</p>
+    <p>An IPv4 address is <strong>32 bits</strong> (four 8&#8209;bit octets). Host bits = <code class="inline">32 &minus; prefix</code>. Drag the slider to explore &mdash; this recreates the <code class="inline">cidr.xyz</code> demo:</p>
+    <div class="widget" id="cidr">
+      <h4>CIDR calculator</h4>
+      <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:18px">10.0.0.0<span style="color:var(--accent);font-weight:700">/<span id="cidrVal">24</span></span></span>
+      </div>
+      <input type="range" id="cidrSlide" min="8" max="32" value="24" style="width:100%;margin:14px 0">
+      <div id="cidrBits" style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:14px"></div>
+      <table class="compare-table" style="margin:0">
+        <tbody>
+          <tr><td>Network bits</td><td id="cNet"></td></tr>
+          <tr><td>Host bits</td><td id="cHost"></td></tr>
+          <tr><td>Total addresses</td><td id="cTotal"></td></tr>
+          <tr><td>Usable hosts <span style="font-weight:400;color:var(--text-light)">(minus network + broadcast)</span></td><td id="cUsable"></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notebox">
+      <div class="lbl">Worked example</div>
+      A <code class="inline">/28</code> leaves <code class="inline">32 &minus; 28 = 4</code> host bits &rarr; <code class="inline">2&#8308; = 16</code> total addresses &rarr; <strong>14 usable</strong> (one reserved for the network ID, one for broadcast). So a <code class="inline">/28</code> can't number 20 devices.
+    </div>
+  </section>
+
+  <div class="assessment-box">
+    <div class="assess-label">Remember</div>
+    <p>Establish a session first (the TCP handshake), then route packets hop by hop (IP), resolve names with DNS, and deliver within the local network by MAC. <strong>TCP = a reliable conversation; IP = step&#8209;by&#8209;step delivery.</strong></p>
+    <p>Next, the course begins layering security onto exactly these communications &mdash; Module 2, Securing Internet Communications (encryption, hashing, and digital certificates).</p>
+  </div>
+
+</div>
+
+<script>function toggleConcept(id){
+  const body=document.getElementById(id);
+  const chev=document.getElementById(id+'-chev');
+  const open=body.classList.contains('open');
+  body.classList.toggle('open',!open);
+  chev.textContent=open?'▶':'▼';
+}
+
+/* ---------- Postal / next-hop ---------- */
+const HOPS=[
+  {n:"Your computer (San Jose)",mac:"a4:83:e7:2b:6d:1f &rarr; <b>router</b>"},
+  {n:"Home router",mac:"rewritten &rarr; <b>ISP router</b>"},
+  {n:"ISP router (San Francisco)",mac:"rewritten &rarr; <b>next router</b>"},
+  {n:"Backbone router (Washington, D.C.)",mac:"rewritten &rarr; <b>international hub</b>"},
+  {n:"International hub (London)",mac:"rewritten &rarr; <b>Bulgaria router</b>"},
+  {n:"Destination server (Sofia)",mac:"final delivery &mdash; arrived"}
+];
+let hop=0;
+const hopsEl=document.getElementById('hops'),pktEl=document.getElementById('packet');
+function renderHops(){
+  hopsEl.innerHTML=HOPS.map((h,i)=>{
+    const done=i<hop, cur=i===hop;
+    const bg=cur?"#0E7490":done?"#cfe0e8":"#eef3f5";
+    const fg=cur?"#fff":done?"#0B5567":"#9aabb2";
+    return `<span style="background:${bg};color:${fg};border-radius:20px;padding:4px 11px;font-size:.76rem;font-weight:700">${i+1}</span>`;
+  }).join('<span style="color:#cdd6da;align-self:center">&rarr;</span>');
+  const h=HOPS[hop];
+  pktEl.innerHTML=`<div style="color:var(--soft);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">At hop ${hop+1}: ${h.n}</div>
+    <div>Destination IP: <span style="color:var(--ok)">93.184.216.34</span> <span style="color:var(--soft)">(never changes)</span></div>
+    <div>Next-hop MAC: <span style="color:var(--rust)">${h.mac}</span></div>`;
+}
+document.getElementById('hopNext').onclick=()=>{if(hop<HOPS.length-1){hop++;renderHops();pktEl.classList.remove('fade');void pktEl.offsetWidth;pktEl.classList.add('fade');}};
+document.getElementById('hopReset').onclick=()=>{hop=0;renderHops();};
+renderHops();
+
+/* ---------- IPv4 / IPv6 ---------- */
+const ipvStage=document.getElementById('ipvStage');
+const IPV={
+  4:{bits:"32 bits",total:"2³² &asymp; 4.3 billion",fmt:"<code>192.168.1.165</code> &mdash; four 8&#8209;bit octets",
+     note:"Sounds huge, but with billions of people each owning many devices, we <b>ran out</b>."},
+  6:{bits:"128 bits",total:"2¹²⁸ &mdash; an astronomically large number",fmt:"<code>2606:2800:220:1:248:...</code> &mdash; eight 16&#8209;bit groups",
+     note:"128 bits (8 groups &times; 16 bits) gives effectively unlimited addresses &mdash; which is why we moved to IPv6."}
+};
+function renderIPV(v){
+  const d=IPV[v];
+  ipvStage.innerHTML=`<table style="margin:0"><tbody>
+    <tr><th style="width:30%">Length</th><td>${d.bits}</td></tr>
+    <tr><th>Format</th><td>${d.fmt}</td></tr>
+    <tr><th>Address space</th><td>${d.total}</td></tr>
+  </tbody></table><p style="font-size:.92em;color:var(--muted);margin:.8em 0 0">${d.note}</p>`;
+  ipvStage.classList.remove('fade');void ipvStage.offsetWidth;ipvStage.classList.add('fade');
+}
+document.querySelectorAll('#ipv [data-v]').forEach(b=>{
+  b.onclick=()=>{document.querySelectorAll('#ipv [data-v]').forEach(x=>x.className="ui ghost");b.className="ui";renderIPV(+b.dataset.v);};
+});
+renderIPV(4);
+
+/* ---------- TCP handshake ---------- */
+const hsStage=document.getElementById('hsStage');
+function hsSetup(){
+  hsStage.innerHTML=`
+   <div style="position:absolute;left:6%;top:0;font-weight:700;color:var(--accent-dark)">Client</div>
+   <div style="position:absolute;right:6%;top:0;font-weight:700;color:var(--accent-dark)">Server</div>
+   <div style="position:absolute;left:9%;top:26px;bottom:0;border-left:2px dashed #cdd6da"></div>
+   <div style="position:absolute;right:9%;top:26px;bottom:0;border-left:2px dashed #cdd6da"></div>
+   <div id="hsMsgs"></div>`;
+}
+const HS=[
+ {t:"SYN",sub:"\"I want to talk\"",dir:"r",top:40},
+ {t:"SYN-ACK",sub:"\"OK, let's talk\"",dir:"l",top:85},
+ {t:"ACK",sub:"\"We're talking\"",dir:"r",top:130},
+];
+function playHS(){
+  hsSetup();const box=document.getElementById('hsMsgs');let i=0;
+  const step=()=>{
+    if(i>=HS.length)return;
+    const m=HS[i];const right=m.dir==="r"; // r = client->server (left to right)
+    const el=document.createElement('div');
+    el.style.cssText=`position:absolute;top:${m.top}px;left:11%;
+      background:${right?'#0E7490':'#B45309'};color:#fff;border-radius:6px;padding:4px 12px;
+      font-family:monospace;font-weight:700;font-size:.85rem;transition:left .55s ease,opacity .3s;
+      opacity:0;white-space:nowrap`;
+    if(!right) el.style.left="auto", el.style.right="11%";
+    el.innerHTML=`${m.t} <span style="font-weight:400;font-size:.74rem;opacity:.9;font-family:Lato">${m.sub}</span>`;
+    box.appendChild(el);
+    requestAnimationFrame(()=>{
+      el.style.opacity=1;
+      if(right){el.style.left="auto";el.style.right="11%";}
+      else{el.style.right="auto";el.style.left="11%";}
+    });
+    i++;setTimeout(step,800);
+  };
+  step();
+}
+document.getElementById('hsPlay').onclick=playHS;
+document.getElementById('hsReset').onclick=hsSetup;
+hsSetup();
+
+/* ---------- Wireshark PCAP ---------- */
+const PKTS=[
+ {no:1,src:"192.168.1.165",dst:"8.8.8.8",proto:"DNS",info:"Standard query A example.com",c:"#5b7c8d"},
+ {no:2,src:"8.8.8.8",dst:"192.168.1.165",proto:"DNS",info:"Response A 93.184.216.34",c:"#5b7c8d"},
+ {no:3,src:"192.168.1.165",dst:"93.184.216.34",proto:"TCP",info:"SYN",c:"#0E7490"},
+ {no:4,src:"93.184.216.34",dst:"192.168.1.165",proto:"TCP",info:"SYN, ACK",c:"#0E7490"},
+ {no:5,src:"192.168.1.165",dst:"93.184.216.34",proto:"TCP",info:"ACK",c:"#0E7490"},
+ {no:6,src:"192.168.1.165",dst:"93.184.216.34",proto:"HTTP",info:"GET / → 301 redirect to HTTPS",c:"#9a7b3f"},
+ {no:7,src:"192.168.1.165",dst:"93.184.216.34",proto:"TLS",info:"GET / over HTTPS (port 443)",c:"#2e7d57"},
+];
+document.getElementById('pcapList').innerHTML=
+ `<div style="font-family:monospace;font-size:.8rem;border:1px solid var(--rule);border-radius:8px;overflow:hidden">
+   <div style="display:grid;grid-template-columns:32px 1.4fr 1.4fr 60px 2fr;background:#eef3f5;font-weight:700;color:var(--accent-dark);padding:6px 10px;gap:8px">
+     <span>#</span><span>Source</span><span>Destination</span><span>Proto</span><span>Info</span></div>
+   ${PKTS.map(p=>`<div style="display:grid;grid-template-columns:32px 1.4fr 1.4fr 60px 2fr;padding:6px 10px;gap:8px;border-top:1px solid #eef1f2">
+     <span style="color:var(--soft)">${p.no}</span><span>${p.src}</span><span>${p.dst}</span>
+     <span style="color:${p.c};font-weight:700">${p.proto}</span><span style="color:var(--muted)">${p.info}</span></div>`).join('')}
+ </div>`;
+
+/* ---------- CIDR calculator ---------- */
+const slide=document.getElementById('cidrSlide');
+function renderCIDR(){
+  const p=+slide.value;
+  document.getElementById('cidrVal').textContent=p;
+  const host=32-p, total=Math.pow(2,host);
+  const usable=host<=1?0:total-2;
+  document.getElementById('cNet').textContent=p+" bits";
+  document.getElementById('cHost').textContent=host+" bits";
+  document.getElementById('cTotal').innerHTML="2<sup>"+host+"</sup> = "+total.toLocaleString();
+  document.getElementById('cUsable').textContent=usable.toLocaleString();
+  // 32 bit cells
+  let cells="";
+  for(let i=0;i<32;i++){
+    const net=i<p;
+    cells+=`<span style="width:17px;height:22px;display:flex;align-items:center;justify-content:center;
+      font-family:monospace;font-size:.62rem;border-radius:3px;
+      background:${net?'#0E7490':'#e7d3cb'};color:${net?'#fff':'#a85a40'}">${net?'N':'H'}</span>`;
+    if(i===7||i===15||i===23)cells+=`<span style="width:5px"></span>`;
+  }
+  document.getElementById('cidrBits').innerHTML=cells;
+}
+slide.addEventListener('input',renderCIDR);
+renderCIDR();
+</script>
+</body></html>

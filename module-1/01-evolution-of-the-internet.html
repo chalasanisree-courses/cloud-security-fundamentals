@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Evolution of the Internet</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+* { box-sizing:border-box; margin:0; padding:0; }
+:root{
+  --slate-dark:#1A202C; --slate:#2D3748;
+  --accent:#0E7490; --accent-dark:#0B5567; --accent-soft:#CFF1F6;
+  --info:#1E40AF; --info-soft:#DBEAFE;
+  --text:#1a1a18; --text-muted:#5f5e5a; --text-light:#888780;
+  --border:rgba(0,0,0,0.09); --bg:#fafaf8; --bg-card:#fff; --bg-code:#f6f6f3; --tag-bg:#f1f0eb;
+  /* widget-compat tokens */
+  --rust:#B45309; --soft:#888780; --muted:#5f5e5a; --rule:rgba(0,0,0,0.09);
+  --ok:#2e7d57; --callout-bg:#f1f9fb; --code-bg:#f6f6f3;
+}
+body{ font-family:'Barlow',sans-serif; background:var(--bg); color:var(--text); line-height:1.65; min-height:100vh; }
+
+/* top nav */
+.top-nav{ background:var(--slate-dark); padding:12px 0; }
+.nav-inner{ max-width:920px; margin:0 auto; padding:0 32px; display:flex; justify-content:space-between; align-items:center; font-size:11px; }
+.nav-inner a{ color:rgba(255,255,255,0.5); text-decoration:none; font-weight:500; letter-spacing:0.03em; transition:color 0.15s; }
+.nav-inner a:hover{ color:#fff; }
+.nav-eyebrow{ color:rgba(255,255,255,0.4); font-weight:600; letter-spacing:0.1em; text-transform:uppercase; }
+
+/* header */
+.header{ background:#fff; padding:56px 0 44px; border-bottom:0.5px solid var(--border); }
+.header-inner{ max-width:920px; margin:0 auto; padding:0 32px; }
+.header-eyebrow{ font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:14px; display:flex; align-items:center; gap:12px; }
+.header-eyebrow::after{ content:''; flex:1; height:0.5px; background:var(--border); max-width:120px; }
+.header h1{ font-family:'Barlow Condensed',sans-serif; font-size:clamp(34px,4.5vw,52px); font-weight:900; letter-spacing:-0.01em; line-height:1.05; color:var(--text); margin-bottom:18px; }
+.header h1 em{ font-style:normal; color:var(--accent); }
+.header-meta-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+.module-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:var(--slate); color:#fff; }
+.topic-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:#F1F5F9; color:#475569; }
+.topic-pill.accent{ background:var(--accent-soft); color:var(--accent-dark); }
+
+/* page */
+.page{ max-width:920px; margin:0 auto; padding:0 32px 48px; }
+
+/* objectives */
+.objectives{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--accent); border-radius:6px; padding:22px 28px; margin:36px 0 14px; }
+.obj-label{ font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:14px; }
+.objectives ul{ list-style:none; }
+.objectives ul li{ font-size:14px; color:var(--text); padding:5px 0 5px 20px; position:relative; line-height:1.55; }
+.objectives ul li::before{ content:'◇'; position:absolute; left:0; color:var(--accent); font-size:10px; top:9px; }
+
+/* sections */
+section{ margin-top:44px; }
+section h2{ font-family:'Barlow Condensed',sans-serif; font-size:28px; font-weight:800; letter-spacing:0.005em; color:var(--text); margin-bottom:20px; display:flex; align-items:baseline; gap:20px; }
+section h2 .num{ font-family:'Barlow Condensed',sans-serif; font-size:56px; font-weight:900; color:var(--accent); letter-spacing:-0.02em; line-height:0.85; min-width:42px; }
+section h3{ font-family:'Barlow',sans-serif; font-size:17px; font-weight:700; color:var(--text); margin:28px 0 12px; }
+section p{ font-size:14.5px; color:var(--text); line-height:1.75; margin-bottom:14px; }
+section p strong{ font-weight:700; color:var(--text); }
+section ul{ font-size:14.5px; line-height:1.75; color:var(--text); padding-left:22px; margin:8px 0 16px; }
+section ul li{ margin:4px 0; }
+section a{ color:var(--accent-dark); text-decoration:underline; text-decoration-color:rgba(0,0,0,0.2); text-underline-offset:2px; }
+section a:hover{ text-decoration-color:var(--accent); }
+
+/* compare tables */
+.compare-table{ width:100%; border-collapse:collapse; margin:16px 0 20px; font-size:13.5px; background:var(--bg-card); border:0.5px solid var(--border); border-radius:6px; overflow:hidden; }
+.compare-table thead th{ font-size:10px; font-weight:700; color:var(--text-light); text-transform:uppercase; letter-spacing:0.06em; padding:11px 16px; text-align:left; border-bottom:0.5px solid var(--border); background:#fafaf8; }
+.compare-table tbody td{ padding:11px 16px; border-bottom:0.5px solid #f0efe8; vertical-align:top; color:var(--text); line-height:1.55; }
+.compare-table tbody td:first-child{ font-weight:600; background:#fafaf8; width:28%; }
+.compare-table tbody tr:last-child td{ border-bottom:none; }
+
+/* code */
+pre{ font-family:'JetBrains Mono',monospace; background:var(--bg-code); border:0.5px solid var(--border); border-radius:6px; padding:14px 18px; font-size:12px; line-height:1.7; color:var(--text); overflow-x:auto; margin:12px 0 18px; }
+pre code{ font-family:inherit; }
+.code-label{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-light); margin:14px 0 6px; }
+.code-comment{ color:#9a988f; }
+.code-cmd{ color:var(--accent); font-weight:600; }
+.code-key{ color:var(--info); font-weight:600; }
+code.inline{ font-family:'JetBrains Mono',monospace; font-size:12.5px; background:var(--tag-bg); padding:1px 6px; border-radius:3px; color:var(--text); }
+
+/* callout boxes */
+.keybox{ background:var(--accent-soft); border-left:3px solid var(--accent); border-radius:0 6px 6px 0; padding:14px 18px; margin:14px 0 18px; font-size:13.5px; line-height:1.65; color:var(--text); }
+.keybox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--accent-dark); margin-bottom:6px; }
+.keybox b{ color:var(--accent-dark); }
+.notebox{ background:#FBF3E8; border-left:3px solid var(--rust); border-radius:0 6px 6px 0; padding:14px 18px; margin:14px 0 18px; font-size:13.5px; line-height:1.65; }
+.notebox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--rust); margin-bottom:6px; }
+
+/* concept cards */
+.concept-grid{ display:flex; flex-direction:column; gap:10px; margin-top:14px; }
+.concept-card{ background:var(--bg-card); border:0.5px solid var(--border); border-radius:7px; overflow:hidden; }
+.concept-head{ display:flex; align-items:center; gap:14px; padding:14px 20px; cursor:pointer; user-select:none; transition:background 0.15s; }
+.concept-head:hover{ background:#fafaf8; }
+.concept-icon{ font-size:16px; flex-shrink:0; color:var(--accent); }
+.concept-title{ flex:1; font-size:14.5px; font-weight:700; color:var(--text); }
+.concept-sub{ font-size:12px; color:var(--text-muted); font-weight:400; margin-top:1px; }
+.concept-chev{ font-size:10px; color:var(--text-light); }
+.concept-body{ display:none; padding:0 20px 18px; border-top:0.5px solid #f0efe8; }
+.concept-body.open{ display:block; }
+.concept-body p{ font-size:13.5px; line-height:1.7; color:var(--text); margin-top:12px; }
+.concept-body ul{ font-size:13.5px; margin-top:8px; }
+
+/* assessment / summary box */
+.assessment-box{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--slate); border-radius:0 6px 6px 0; padding:20px 24px; margin:30px 0 0; }
+.assessment-box .assess-label{ font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); margin-bottom:10px; }
+.assessment-box p{ font-size:13.5px; line-height:1.7; margin-bottom:10px; }
+.assessment-box p:last-child{ margin-bottom:0; }
+
+/* ===== interactive widgets ===== */
+.widget{ border:0.5px solid var(--border); border-radius:8px; padding:20px; margin:16px 0; background:var(--bg-card); }
+.widget h4{ margin:0 0 14px; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); font-weight:700; }
+.controls{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:14px; }
+button.ui{ font-family:'Barlow',sans-serif; cursor:pointer; border:1px solid var(--accent); background:var(--accent); color:#fff; padding:7px 16px; border-radius:6px; font-size:12.5px; font-weight:600; transition:0.15s; }
+button.ui:hover{ background:var(--accent-dark); border-color:var(--accent-dark); }
+button.ui.ghost{ background:#fff; color:var(--accent); }
+button.ui.ghost:hover{ background:var(--accent-soft); }
+.fade{ animation:fade 0.35s ease; }
+@keyframes fade{ from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+input[type=range]{ accent-color:var(--accent); }
+.kbd{ display:inline-block; background:#fff; border:1px solid #d6dbde; border-bottom-width:2px; border-radius:5px; padding:.05em .45em; font-family:'JetBrains Mono',monospace; font-size:.82em; }
+</style>
+</head><body>
+<div class="top-nav"><div class="nav-inner">
+  <span class="nav-eyebrow">Cloud Security Fundamentals</span>
+  <a href="../index.html">&larr; Course Home</a>
+</div></div>
+
+<div class="header"><div class="header-inner">
+  <div class="header-eyebrow">Module 1 &nbsp;·&nbsp; Basics of Internet Communications</div>
+  <h1>Evolution of the <em>Internet</em></h1>
+  <div class="header-meta-row">
+    <span class="module-pill">Module 1</span>
+    <span class="topic-pill">Foundations</span>
+    <span class="topic-pill accent">Lecture 1</span>
+  </div>
+</div></div>
+
+<div class="page">
+
+  <div class="objectives">
+    <div class="obj-label">Learning Objectives</div>
+    <ul>
+      <li>Explain why pre&#8209;internet computing left organizations as isolated information islands</li>
+      <li>Trace the six eras of internet evolution and the problem each one solved</li>
+      <li>Identify the foundational protocols &mdash; TCP/IP, then HTTP, SMTP, FTP &mdash; and when they emerged</li>
+      <li>Connect each era's expansion to the steadily growing security surface this course must defend</li>
+    </ul>
+  </div>
+
+  <section>
+    <h2><span class="num">1</span> Where we are</h2>
+    <p>This is the first lecture of the course, and it deliberately starts before security. Everything we will defend &mdash; networks, hosts, data, identities &mdash; rides on the internet, so we begin by understanding <strong>how the internet came to be and why it looks the way it does today</strong>. We'll trace that story across <strong>six eras</strong>, and the key idea is that each era solved a problem the previous one created &mdash; while quietly enlarging the attack surface.</p>
+    <div class="keybox">
+      <div class="lbl">Pre&#8209;internet: islands of computing</div>
+      Computers were <b>mainframes</b> &mdash; massive machines filling entire rooms, owned by large institutions like universities and governments. Users connected through <b>dumb terminals</b>. Mainframes at different institutions were wired together only in proprietary ways, so there was <b>no standard way for them to talk to each other</b>. The result was information silos &mdash; islands of data that couldn't reach one another.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> The six eras</h2>
+    <p>From the rise of the personal computer to the age of AI, the internet grew in distinct waves. Click each era to expand what changed.</p>
+    <div class="widget" id="timeline">
+      <h4>Interactive timeline</h4>
+      <div id="eras"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> The protocols that built the Web</h2>
+    <p>Connecting computers only matters if they can <strong>exchange information</strong>. In the 1990s the World Wide Web brought together the protocols that made exchange possible:</p>
+    <table class="compare-table">
+      <thead><tr><th>Protocol</th><th>Stands for</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td><code class="inline">HTTP</code></td><td>HyperText Transfer Protocol</td><td>A client requests a web page (e.g., a course syllabus) from a web server, which returns it.</td></tr>
+        <tr><td><code class="inline">SMTP</code></td><td>Simple Mail Transfer Protocol</td><td>Sending email across the internet.</td></tr>
+        <tr><td><code class="inline">FTP</code></td><td>File Transfer Protocol</td><td>Uploading and transferring files.</td></tr>
+      </tbody>
+    </table>
+    <p>Once information was flowing, it had to be <strong>findable</strong> &mdash; which is why <strong>search engines</strong> mattered, and why Google rose to dominance. The 1990s "browser wars" between Microsoft and Netscape were a fight over the client end, because whoever owned the browser shaped the user's entire internet experience. Google ultimately controlled both ends: the client (Chrome's leading share) and the server (search).</p>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> The through-line &mdash; and why it matters for security</h2>
+    <p>Read top to bottom, the eras are a single argument: each layer was added onto the one before it.</p>
+    <div class="concept-grid">
+      <div class="concept-card">
+        <div class="concept-head" onclick="toggleConcept('c-stack')">
+          <span class="concept-icon">◈</span>
+          <span class="concept-title">Each era added surface area<span class="concept-sub">More connectivity, more to defend</span></span>
+          <span class="concept-chev" id="c-stack-chev">▶</span>
+        </div>
+        <div class="concept-body" id="c-stack">
+          <p><strong>Standard connections</strong> (TCP/IP) made the internet possible &rarr; <strong>standard information exchange</strong> (the Web) made it useful &rarr; <strong>mobility</strong> (networks + devices) made it everywhere &rarr; <strong>the cloud</strong> made applications location&#8209;independent &rarr; <strong>IoT</strong> connected everything &rarr; <strong>AI</strong> now sits on top, improving every experience.</p>
+          <p>Every one of those steps added more endpoints, more data in motion, and more things an attacker can reach. That expanding surface is exactly why the rest of this course exists.</p>
+        </div>
+      </div>
+    </div>
+    <div class="notebox">
+      <div class="lbl">Remember</div>
+      The internet is not one invention &mdash; it's a stack of standards, each layered on the one before. Pre&#8209;internet = isolated islands; the whole story is the progressive removal of barriers between machines. Convenience and exposure grew together.
+    </div>
+  </section>
+
+  <div class="assessment-box">
+    <div class="assess-label">Up next</div>
+    <p>Next we turn from the public internet to the <strong>enterprise</strong>: <a href="02-enterprise-trends.html">Enterprise Trends</a> &mdash; how virtualization and the cloud reshaped where computing happens, and who is responsible for securing it.</p>
+  </div>
+
+</div>
+
+<script>function toggleConcept(id){
+  const body=document.getElementById(id);
+  const chev=document.getElementById(id+'-chev');
+  const open=body.classList.contains('open');
+  body.classList.toggle('open',!open);
+  chev.textContent=open?'▶':'▼';
+}
+
+const ERAS = [
+  {tag:"1970s–80s", title:"Personal computers + the birth of TCP/IP",
+   pts:["Computers became affordable — people owned them at home, not just institutions.",
+        "Machines needed a <b>standard</b> way to connect. Proprietary mainframe links gave way to <b>TCP/IP</b> (Transmission Control Protocol / Internet Protocol).",
+        "TCP/IP became the backbone of the internet. This is the moment the internet truly begins."]},
+  {tag:"1990s", title:"The World Wide Web",
+   pts:["<b>HTTP, SMTP, FTP</b> let connected machines actually exchange information.",
+        "<b>Search engines</b> (Google) made the flood of new information findable.",
+        "<b>Browser wars</b> (Microsoft vs Netscape) — a fight to own the client end of the experience."]},
+  {tag:"2000s", title:"Mobile networks, mobile devices, and the cloud",
+   pts:["Landlines gave way to <b>mobile networks</b> — cellular (2G/3G/LTE) and Wi-Fi.",
+        "<b>Smartphones</b> (Apple, Android) made that mobility useful.",
+        "<b>Cloud applications</b> arrived: store files in Dropbox instead of your disk, use Gmail instead of a local mail app, Facebook, Amazon. The internet was reliable enough that apps no longer had to live on your device."]},
+  {tag:"2010s", title:"The Internet of Things (IoT)",
+   pts:["The things connected to the internet were no longer just PCs and phones.",
+        "TVs, thermostats, fans, appliances — all online, all backed by cloud apps.",
+        "Netflix streams to your TV; Google Nest controls your thermostat. Everyday objects became internet endpoints."]},
+  {tag:"2020s", title:"The age of AI",
+   pts:["AI now improves experiences across the whole internet.",
+        "Fraud prevention in banking, personalized shopping recommendations, chatbots.",
+        "AI sits as a new layer on top of everything the previous eras built."]}
+];
+const wrap = document.getElementById('eras');
+ERAS.forEach((e,i)=>{
+  const row=document.createElement('div');
+  row.style.cssText="border-top:1px solid var(--rule);";
+  if(i===ERAS.length-1) row.style.borderBottom="1px solid var(--rule)";
+  const head=document.createElement('button');
+  head.type="button";
+  head.style.cssText="all:unset;display:flex;gap:14px;align-items:baseline;width:100%;cursor:pointer;padding:13px 4px;";
+  head.innerHTML=`<span style="font-family:monospace;color:var(--rust);font-weight:700;min-width:78px">${e.tag}</span>
+    <span style="font-weight:700;color:var(--accent-dark);flex:1">${e.title}</span>
+    <span class="tw" style="color:var(--soft);font-size:1.2em;transition:.2s">+</span>`;
+  const body=document.createElement('div');
+  body.style.cssText="max-height:0;overflow:hidden;transition:max-height .28s ease;";
+  body.innerHTML=`<ul style="padding:0 4px 14px 1.4em;margin:0">${e.pts.map(p=>`<li>${p}</li>`).join('')}</ul>`;
+  head.onclick=()=>{
+    const open=body.style.maxHeight && body.style.maxHeight!=="0px";
+    document.querySelectorAll('#eras .tw').forEach(t=>t.textContent="+");
+    document.querySelectorAll('#eras div div').forEach(b=>{if(b!==body)b.style.maxHeight="0px";});
+    body.style.maxHeight = open ? "0px" : body.scrollHeight+"px";
+    head.querySelector('.tw').textContent = open ? "+" : "–";
+  };
+  row.appendChild(head); row.appendChild(body); wrap.appendChild(row);
+});
+// open first by default
+wrap.querySelector('button').click();
+</script>
+</body></html>
