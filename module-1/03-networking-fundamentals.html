@@ -203,7 +203,11 @@ input[type=range]{ accent-color:var(--accent); }
     <p>Every device on your home network shares the same network prefix and gets a different host number: your Mac <code class="inline">192.168.1.165</code>, your phone <code class="inline">192.168.1.250</code>, the router <code class="inline">192.168.1.254</code>.</p>
     <div class="keybox">
       <div class="lbl">IP routes across networks; MAC routes within one</div>
-      Leave home and join the Starbucks Wi&#8209;Fi: your <b>MAC stays the same</b> (it's the physical address of your network card), but you get a <b>new IP</b> from the Starbucks router. MAC = which device on this local network. IP = how to cross between networks.
+      Leave home and join the Starbucks Wi&#8209;Fi: your <b>MAC stays the same</b> (it's the physical address of your network card), but you get a <b>new IP</b> from the Starbucks router. MAC = which device on this local network. IP = how to cross between networks. (See it live: switch your laptop to a phone hotspot &mdash; the phone becomes the router and hands out a new IP, while your MAC is unchanged.)
+    </div>
+    <div class="notebox">
+      <div class="lbl">&ldquo;MAC&rdquo; here = Media Access Control</div>
+      A <b>MAC address</b> is the fixed physical address burned into a device's network card &mdash; <em>Media Access Control</em>. It has nothing to do with an Apple <em>Mac</em> computer, even though the demo happens to use one. MAC addresses operate at the Network Access layer (TCP/IP) / Data Link layer, Layer&nbsp;2 (OSI).
     </div>
   </section>
 
@@ -245,17 +249,38 @@ input[type=range]{ accent-color:var(--accent); }
     <table class="compare-table">
       <thead><tr><th>TCP/IP layer</th><th>What we saw</th><th>OSI equivalent</th></tr></thead>
       <tbody>
-        <tr><td>Application</td><td>HTTP <code class="inline">GET</code> request for the page</td><td>Application / Presentation / Session</td></tr>
-        <tr><td>Transport</td><td>TCP session &mdash; the SYN / SYN&#8209;ACK / ACK handshake</td><td>Transport</td></tr>
-        <tr><td>Internet</td><td>IP routing, hop by hop across networks</td><td>Network</td></tr>
-        <tr><td>Network Access</td><td>MAC / Ethernet &mdash; routing within the local network</td><td>Data Link / Physical</td></tr>
+        <tr><td>Application</td><td>HTTP <code class="inline">GET</code> request for the page</td><td>Application / Presentation / Session (Layers 5&ndash;7)</td></tr>
+        <tr><td>Transport</td><td>TCP session &mdash; the SYN / SYN&#8209;ACK / ACK handshake</td><td>Transport (Layer 4)</td></tr>
+        <tr><td>Internet</td><td>IP <strong>routing</strong>, hop by hop across networks</td><td>Network (Layer 3)</td></tr>
+        <tr><td>Network Access</td><td>MAC / Ethernet &mdash; <strong>switching</strong> within the local network</td><td>Data Link / Physical (Layer 2)</td></tr>
       </tbody>
     </table>
     <p>OSI is a 7&#8209;layer <em>theoretical</em> model; in practice we work with the 4&#8209;layer TCP/IP stack.</p>
   </section>
 
   <section>
-    <h2><span class="num">9</span> Subnets and CIDR</h2>
+    <h2><span class="num">9</span> Routing vs switching: Layer 3 and Layer 2</h2>
+    <p>The hop&#8209;by&#8209;hop journey earlier happens <strong>across networks</strong>, using IP addresses. That's <strong>routing</strong> &mdash; the IP protocol, at the <strong>Internet layer</strong> (TCP/IP) / <strong>Network layer, Layer&nbsp;3</strong> (OSI).</p>
+    <p>But two devices on the <strong>same</strong> local network &mdash; your computer and a smart TV on the same Wi&#8209;Fi &mdash; don't need to cross any network. Delivery is by MAC address using the Ethernet protocol. That's <strong>switching</strong>, at the <strong>Network Access layer</strong> (TCP/IP) / <strong>Data Link layer, Layer&nbsp;2</strong> (OSI).</p>
+    <table class="compare-table">
+      <thead><tr><th>Operation</th><th>Uses</th><th>Protocol</th><th>Layer</th></tr></thead>
+      <tbody>
+        <tr><td>Routing <span style="font-weight:400;color:var(--text-muted)">&mdash; across networks</span></td><td>IP address</td><td>IP</td><td>Layer 3 (Internet / Network)</td></tr>
+        <tr><td>Switching <span style="font-weight:400;color:var(--text-muted)">&mdash; within the local network</span></td><td>MAC address</td><td>Ethernet</td><td>Layer 2 (Network Access / Data Link)</td></tr>
+      </tbody>
+    </table>
+    <h3>How does a device learn a neighbor's MAC? ARP</h3>
+    <p>To switch a frame to the TV, your computer needs the TV's <strong>MAC</strong> &mdash; but it only knows the TV's <strong>IP</strong>. It discovers the MAC with <strong>ARP (Address Resolution Protocol)</strong>: it broadcasts to everyone on the subnet asking &ldquo;who has this IP?&rdquo;, and the matching device replies with its MAC. Step through it:</p>
+    <div class="widget" id="arp">
+      <h4>ARP &mdash; finding a neighbor's MAC</h4>
+      <div id="arpStage"></div>
+      <div class="controls"><button class="ui" id="arpNext">Next step &rarr;</button><button class="ui ghost" id="arpReset">Reset</button></div>
+      <p id="arpCaption" style="font-size:13px;color:var(--text-muted);margin:12px 0 0;line-height:1.6"></p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">10</span> Subnets and CIDR</h2>
     <p>A <strong>subnet mask</strong> says how many bits of an address are the <strong>network</strong> portion and how many are the <strong>host</strong> portion. A mask of <code class="inline">255.255.255.0</code> means the first 24 bits are network and the last 8 are host &mdash; written in CIDR as <code class="inline">/24</code>. That's why every device on the home network shares <code class="inline">192.168.1.</code> and only the last number changes.</p>
     <p>An IPv4 address is <strong>32 bits</strong> (four 8&#8209;bit octets). Host bits = <code class="inline">32 &minus; prefix</code>. Drag the slider to explore &mdash; this recreates the <code class="inline">cidr.xyz</code> demo:</p>
     <div class="widget" id="cidr">
@@ -438,5 +463,43 @@ function renderCIDR(){
 }
 slide.addEventListener('input',renderCIDR);
 renderCIDR();
+
+/* ---------- ARP (Address Resolution Protocol) ---------- */
+const ARP_DEVICES=[
+  {name:'Your computer', ip:'192.168.1.165', mac:'a4:83:e7:2b:6d:1f', self:true},
+  {name:'Smart TV',      ip:'192.168.1.250', mac:'b8:27:eb:14:aa:01', target:true},
+  {name:'Printer',       ip:'192.168.1.5',   mac:'00:1b:63:84:45:e6'},
+  {name:'Phone',         ip:'192.168.1.30',  mac:'3c:5a:b4:09:77:d2'},
+];
+const ARP_STEPS=[
+  {cap:"Your computer wants to send a frame to the <b>Smart TV (192.168.1.250)</b> on the same network &mdash; but it only knows the TV's <b>IP</b>, not its <b>MAC</b>."},
+  {cap:"<b>Broadcast.</b> Your computer asks <i>everyone</i> on the subnet: &ldquo;Who has 192.168.1.250? Tell me your MAC.&rdquo; Every device hears it.", mode:'broadcast'},
+  {cap:"<b>Reply.</b> Only the Smart TV answers: &ldquo;192.168.1.250 is at <b>b8:27:eb:14:aa:01</b>.&rdquo; Now your computer knows the MAC.", mode:'reply'},
+  {cap:"<b>Deliver.</b> Your computer builds the frame with the TV's MAC as the destination and switches it straight there &mdash; no router involved. This never leaves the local network.", mode:'deliver'},
+];
+let arpStep=0;
+const arpStage=document.getElementById('arpStage');
+const arpCap=document.getElementById('arpCaption');
+function renderARP(){
+  const s=ARP_STEPS[arpStep];
+  arpStage.innerHTML='<div style="display:flex;flex-direction:column;gap:7px;max-width:460px">'+
+    ARP_DEVICES.map(d=>{
+      let bg='#f3f5f6',fg='#5f5e5a',bd='#e4e7e9',tag=d.ip;
+      if(d.self){ bg='#1f2730'; fg='#fff'; bd='#1f2730'; tag=d.ip+' (you)'; }
+      if(s.mode==='broadcast' && !d.self){ bg='#cfe7ee'; fg='#234f68'; bd='#9fc7d4'; }
+      if((s.mode==='reply'||s.mode==='deliver') && d.target){ bg='#0E7490'; fg='#fff'; bd='#0E7490'; }
+      const showmac=(s.mode==='reply'||s.mode==='deliver') && (d.target||d.self);
+      return `<div style="display:flex;align-items:center;gap:12px;border-radius:8px;padding:11px 14px;background:${bg};color:${fg};border:1px solid ${bd};transition:.2s">
+        <span style="flex:1;font-weight:700;font-size:13.5px">${d.name}</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;opacity:.95">${tag}</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;opacity:${showmac?'.95':'.32'}">${d.mac}</span>
+      </div>`;
+    }).join('')+'</div>';
+  arpCap.innerHTML=s.cap;
+  arpStage.classList.remove('fade');void arpStage.offsetWidth;arpStage.classList.add('fade');
+}
+document.getElementById('arpNext').onclick=()=>{ if(arpStep<ARP_STEPS.length-1){arpStep++;renderARP();} };
+document.getElementById('arpReset').onclick=()=>{ arpStep=0;renderARP(); };
+renderARP();
 </script>
 </body></html>
