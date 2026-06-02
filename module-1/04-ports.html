@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>A Note on Ports</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+* { box-sizing:border-box; margin:0; padding:0; }
+:root{
+  --slate-dark:#1A202C; --slate:#2D3748;
+  --accent:#0E7490; --accent-dark:#0B5567; --accent-soft:#CFF1F6;
+  --info:#1E40AF; --info-soft:#DBEAFE;
+  --text:#1a1a18; --text-muted:#5f5e5a; --text-light:#888780;
+  --border:rgba(0,0,0,0.09); --bg:#fafaf8; --bg-card:#fff; --bg-code:#f6f6f3; --tag-bg:#f1f0eb;
+  /* widget-compat tokens */
+  --rust:#B45309; --soft:#888780; --muted:#5f5e5a; --rule:rgba(0,0,0,0.09);
+  --ok:#2e7d57; --callout-bg:#f1f9fb; --code-bg:#f6f6f3;
+}
+body{ font-family:'Barlow',sans-serif; background:var(--bg); color:var(--text); line-height:1.65; min-height:100vh; }
+
+/* page nav (header + footer) */
+.pagenav{ background:var(--slate-dark); }
+.pagenav.foot{ margin-top:48px; }
+.pagenav-inner{ max-width:920px; margin:0 auto; padding:11px 32px; display:flex; justify-content:space-between; align-items:center; gap:16px; }
+.pagenav .brand{ color:rgba(255,255,255,0.45); font-size:11px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; white-space:nowrap; }
+.navbtns{ display:flex; gap:8px; }
+.navbtn{ display:inline-flex; align-items:center; gap:6px; font-family:'Barlow',sans-serif; font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#fff; background:rgba(255,255,255,0.10); border:1px solid rgba(255,255,255,0.22); border-radius:6px; padding:7px 13px; text-decoration:none; transition:0.15s; white-space:nowrap; }
+.navbtn:hover{ background:var(--accent); border-color:var(--accent); }
+.navbtn.disabled{ opacity:0.28; pointer-events:none; }
+@media(max-width:560px){ .pagenav .brand{ display:none } .pagenav-inner{ justify-content:center } }
+
+/* header */
+.header{ background:#fff; padding:56px 0 44px; border-bottom:0.5px solid var(--border); }
+.header-inner{ max-width:920px; margin:0 auto; padding:0 32px; }
+.header-eyebrow{ font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:14px; display:flex; align-items:center; gap:12px; }
+.header-eyebrow::after{ content:''; flex:1; height:0.5px; background:var(--border); max-width:120px; }
+.header h1{ font-family:'Barlow Condensed',sans-serif; font-size:clamp(34px,4.5vw,52px); font-weight:900; letter-spacing:-0.01em; line-height:1.05; color:var(--text); margin-bottom:18px; }
+.header h1 em{ font-style:normal; color:var(--accent); }
+.header-meta-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+.module-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:var(--slate); color:#fff; }
+.topic-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:#F1F5F9; color:#475569; }
+.topic-pill.accent{ background:var(--accent-soft); color:var(--accent-dark); }
+
+/* page */
+.page{ max-width:920px; margin:0 auto; padding:0 32px 48px; }
+
+/* objectives */
+.objectives{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--accent); border-radius:6px; padding:22px 28px; margin:36px 0 14px; }
+.obj-label{ font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:14px; }
+.objectives ul{ list-style:none; }
+.objectives ul li{ font-size:14px; color:var(--text); padding:5px 0 5px 20px; position:relative; line-height:1.55; }
+.objectives ul li::before{ content:'◇'; position:absolute; left:0; color:var(--accent); font-size:10px; top:9px; }
+
+/* sections */
+section{ margin-top:44px; }
+section h2{ font-family:'Barlow Condensed',sans-serif; font-size:28px; font-weight:800; letter-spacing:0.005em; color:var(--text); margin-bottom:20px; display:flex; align-items:baseline; gap:20px; }
+section h2 .num{ font-family:'Barlow Condensed',sans-serif; font-size:56px; font-weight:900; color:var(--accent); letter-spacing:-0.02em; line-height:0.85; min-width:42px; }
+section h3{ font-family:'Barlow',sans-serif; font-size:17px; font-weight:700; color:var(--text); margin:28px 0 12px; }
+section p{ font-size:14.5px; color:var(--text); line-height:1.75; margin-bottom:14px; }
+section p strong{ font-weight:700; color:var(--text); }
+section ul{ font-size:14.5px; line-height:1.75; color:var(--text); padding-left:22px; margin:8px 0 16px; }
+section ul li{ margin:4px 0; }
+section a{ color:var(--accent-dark); text-decoration:underline; text-decoration-color:rgba(0,0,0,0.2); text-underline-offset:2px; }
+section a:hover{ text-decoration-color:var(--accent); }
+
+/* compare tables */
+.compare-table{ width:100%; border-collapse:collapse; margin:16px 0 20px; font-size:13.5px; background:var(--bg-card); border:0.5px solid var(--border); border-radius:6px; overflow:hidden; }
+.compare-table thead th{ font-size:10px; font-weight:700; color:var(--text-light); text-transform:uppercase; letter-spacing:0.06em; padding:11px 16px; text-align:left; border-bottom:0.5px solid var(--border); background:#fafaf8; }
+.compare-table tbody td{ padding:11px 16px; border-bottom:0.5px solid #f0efe8; vertical-align:top; color:var(--text); line-height:1.55; }
+.compare-table tbody td:first-child{ font-weight:600; background:#fafaf8; width:28%; }
+.compare-table tbody tr:last-child td{ border-bottom:none; }
+
+/* code */
+pre{ font-family:'JetBrains Mono',monospace; background:var(--bg-code); border:0.5px solid var(--border); border-radius:6px; padding:14px 18px; font-size:12px; line-height:1.7; color:var(--text); overflow-x:auto; margin:12px 0 18px; }
+pre code{ font-family:inherit; }
+.code-label{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-light); margin:14px 0 6px; }
+.code-comment{ color:#9a988f; }
+.code-cmd{ color:var(--accent); font-weight:600; }
+.code-key{ color:var(--info); font-weight:600; }
+code.inline{ font-family:'JetBrains Mono',monospace; font-size:12.5px; background:var(--tag-bg); padding:1px 6px; border-radius:3px; color:var(--text); }
+
+/* callout boxes */
+.keybox{ background:var(--accent-soft); border-left:3px solid var(--accent); border-radius:0 6px 6px 0; padding:14px 18px; margin:14px 0 18px; font-size:13.5px; line-height:1.65; color:var(--text); }
+.keybox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--accent-dark); margin-bottom:6px; }
+.keybox b{ color:var(--accent-dark); }
+.notebox{ background:#FBF3E8; border-left:3px solid var(--rust); border-radius:0 6px 6px 0; padding:14px 18px; margin:14px 0 18px; font-size:13.5px; line-height:1.65; }
+.notebox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--rust); margin-bottom:6px; }
+
+/* concept cards */
+.concept-grid{ display:flex; flex-direction:column; gap:10px; margin-top:14px; }
+.concept-card{ background:var(--bg-card); border:0.5px solid var(--border); border-radius:7px; overflow:hidden; }
+.concept-head{ display:flex; align-items:center; gap:14px; padding:14px 20px; cursor:pointer; user-select:none; transition:background 0.15s; }
+.concept-head:hover{ background:#fafaf8; }
+.concept-icon{ font-size:16px; flex-shrink:0; color:var(--accent); }
+.concept-title{ flex:1; font-size:14.5px; font-weight:700; color:var(--text); }
+.concept-sub{ font-size:12px; color:var(--text-muted); font-weight:400; margin-top:1px; }
+.concept-chev{ font-size:10px; color:var(--text-light); }
+.concept-body{ display:none; padding:0 20px 18px; border-top:0.5px solid #f0efe8; }
+.concept-body.open{ display:block; }
+.concept-body p{ font-size:13.5px; line-height:1.7; color:var(--text); margin-top:12px; }
+.concept-body ul{ font-size:13.5px; margin-top:8px; }
+
+/* assessment / summary box */
+.assessment-box{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--slate); border-radius:0 6px 6px 0; padding:20px 24px; margin:30px 0 0; }
+.assessment-box .assess-label{ font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); margin-bottom:10px; }
+.assessment-box p{ font-size:13.5px; line-height:1.7; margin-bottom:10px; }
+.assessment-box p:last-child{ margin-bottom:0; }
+
+/* ===== interactive widgets ===== */
+.widget{ border:0.5px solid var(--border); border-radius:8px; padding:20px; margin:16px 0; background:var(--bg-card); }
+.widget h4{ margin:0 0 14px; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); font-weight:700; }
+.controls{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:14px; }
+button.ui{ font-family:'Barlow',sans-serif; cursor:pointer; border:1px solid var(--accent); background:var(--accent); color:#fff; padding:7px 16px; border-radius:6px; font-size:12.5px; font-weight:600; transition:0.15s; }
+button.ui:hover{ background:var(--accent-dark); border-color:var(--accent-dark); }
+button.ui.ghost{ background:#fff; color:var(--accent); }
+button.ui.ghost:hover{ background:var(--accent-soft); }
+.fade{ animation:fade 0.35s ease; }
+@keyframes fade{ from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+input[type=range]{ accent-color:var(--accent); }
+.kbd{ display:inline-block; background:#fff; border:1px solid #d6dbde; border-bottom-width:2px; border-radius:5px; padding:.05em .45em; font-family:'JetBrains Mono',monospace; font-size:.82em; }
+</style>
+</head><body>
+<header class="pagenav"><div class="pagenav-inner">
+  <span class="brand">Cloud Security Fundamentals</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn" href="03-networking-fundamentals.html">&larr; Prev</a>
+    <span class="navbtn disabled">Next &rarr;</span>
+  </nav>
+</div></header>
+
+<div class="header"><div class="header-inner">
+  <div class="header-eyebrow">Module 1 &nbsp;·&nbsp; Basics of Internet Communications</div>
+  <h1>A Note on <em>Ports</em></h1>
+  <div class="header-meta-row">
+    <span class="module-pill">Module 1</span>
+    <span class="topic-pill">Foundations</span>
+    <span class="topic-pill accent">Quick reference</span>
+  </div>
+</div></div>
+
+<div class="page">
+
+  <div class="objectives">
+    <div class="obj-label">Learning Objectives</div>
+    <ul>
+      <li>Define a port and explain how it differs from an IP address</li>
+      <li>Explain why a single machine needs ports to run many services at once</li>
+      <li>Recognize the common ports and the services that listen on them</li>
+      <li>Understand that a port is a logical number, not physical hardware</li>
+    </ul>
+  </div>
+
+  <section>
+    <h2><span class="num">1</span> What is a port?</h2>
+    <p>A <strong>port</strong> is a number the operating system uses to decide <strong>which application</strong> should receive incoming network traffic. In the Networking lecture you saw an IP address get a packet to the right <em>machine</em>; the port gets it to the right <em>program</em> on that machine.</p>
+    <ul>
+      <li>An <strong>IP address</strong> identifies the <strong>computer</strong>.</li>
+      <li>A <strong>port number</strong> identifies the <strong>application</strong> on that computer.</li>
+    </ul>
+    <p>You always need <strong>both</strong>.</p>
+    <div class="keybox">
+      <div class="lbl">The one-line version</div>
+      <b>IP address = which machine.</b> &nbsp; <b>Port number = which program on that machine.</b>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> Why ports exist</h2>
+    <p>A single computer often runs <strong>many network services at the same time</strong> &mdash; for example a web server, a remote-login service, and an email service, all on one machine. Without ports, the operating system would have no way to know <strong>which program should receive</strong> a given piece of incoming data.</p>
+    <p>Ports solve this by acting as <strong>logical doorways</strong> into different applications. A packet arrives at the device's IP address; the OS reads the <strong>destination port number</strong> and hands the data to whichever application is listening on that port.</p>
+  <div class="widget"><h4>How a packet finds the right application</h4>
+  <svg viewBox="0 0 760 360" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">
+    <defs><marker id="ah" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa3a8"/></marker></defs>
+    <!-- servers -->
+    <rect x="30"  y="20" width="130" height="46" rx="8" fill="#0E7490"/><text x="95"  y="48" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">FTP server</text>
+    <rect x="190" y="20" width="130" height="46" rx="8" fill="#0E7490"/><text x="255" y="48" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">HTTP server</text>
+    <rect x="350" y="20" width="130" height="46" rx="8" fill="#0E7490"/><text x="415" y="48" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">HTTPS server</text>
+    <!-- arrows with port numbers -->
+    <line x1="95"  y1="66" x2="95"  y2="146" stroke="#9aa3a8" stroke-width="2" marker-end="url(#ah)"/>
+    <line x1="255" y1="66" x2="255" y2="146" stroke="#9aa3a8" stroke-width="2" marker-end="url(#ah)"/>
+    <line x1="415" y1="66" x2="415" y2="146" stroke="#9aa3a8" stroke-width="2" marker-end="url(#ah)"/>
+    <rect x="79"  y="98" width="32" height="20" rx="4" fill="#fff" stroke="#e4e7e9"/><text x="95"  y="112" text-anchor="middle" fill="#1a1a18" font-size="12" font-weight="700" font-family="'JetBrains Mono',monospace">21</text>
+    <rect x="239" y="98" width="32" height="20" rx="4" fill="#fff" stroke="#e4e7e9"/><text x="255" y="112" text-anchor="middle" fill="#1a1a18" font-size="12" font-weight="700" font-family="'JetBrains Mono',monospace">80</text>
+    <rect x="395" y="98" width="40" height="20" rx="4" fill="#fff" stroke="#e4e7e9"/><text x="415" y="112" text-anchor="middle" fill="#1a1a18" font-size="12" font-weight="700" font-family="'JetBrains Mono',monospace">443</text>
+    <!-- OS + Device -->
+    <rect x="30" y="150" width="450" height="42" rx="6" fill="#2D3748"/><text x="255" y="177" text-anchor="middle" fill="#fff" font-size="14" font-weight="700" letter-spacing="2">OS</text>
+    <rect x="30" y="206" width="450" height="58" rx="6" fill="#1f2730"/><text x="255" y="241" text-anchor="middle" fill="#fff" font-size="14" font-weight="700" letter-spacing="2">DEVICE</text>
+    <!-- incoming IP arrow -->
+    <line x1="255" y1="330" x2="255" y2="268" stroke="#9aa3a8" stroke-width="2" marker-end="url(#ah)"/>
+    <text x="272" y="305" fill="#5f5e5a" font-size="12" font-weight="700" font-family="'JetBrains Mono',monospace">IP</text>
+    <!-- brace + annotation for servers -->
+    <path d="M494,20 C502,20 502,41 510,43 C502,45 502,66 494,66" fill="none" stroke="#cdd6da" stroke-width="2"/>
+    <text x="520" y="40" fill="#5f5e5a" font-size="12.5" font-weight="600">Applications listen</text>
+    <text x="520" y="58" fill="#5f5e5a" font-size="12.5" font-weight="600">on various ports</text>
+    <!-- routing note -->
+    <rect x="510" y="150" width="232" height="114" rx="8" fill="#f1f9fb" stroke="#cfe7ee"/>
+    <text x="524" y="176" fill="#1a1a18" font-size="12">Packets arrive at the device's</text>
+    <text x="524" y="194" fill="#1a1a18" font-size="12">IP address. The OS reads the</text>
+    <text x="524" y="212" fill="#1a1a18" font-size="12">destination <tspan font-weight="700">port number</tspan> and</text>
+    <text x="524" y="230" fill="#1a1a18" font-size="12">hands the data to the app</text>
+    <text x="524" y="248" fill="#1a1a18" font-size="12">listening on that port.</text>
+  </svg>
+  </div>
+
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> The building analogy</h2>
+    <p>Think of it this way:</p>
+    <ul>
+      <li><strong>IP address</strong> &rarr; the building's street address</li>
+      <li><strong>Port number</strong> &rarr; the apartment number inside that building</li>
+    </ul>
+    <p>So <code class="inline">203.0.113.10:443</code> means <code class="inline">203.0.113.10</code> = which building (the server), and <code class="inline">443</code> = which apartment (the HTTPS service). Click an incoming port below to watch the OS hand it to the right application:</p>
+    <div class="widget" id="router">
+      <h4>Where does the packet go?</h4>
+      <div class="controls" style="margin-top:0;margin-bottom:16px" id="portBtns"></div>
+      <div id="routerStage"></div>
+      <p id="routerCaption" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6"></p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> Common ports</h2>
+    <p>A handful of port numbers are reserved by convention for well-known services. These are worth memorizing &mdash; they show up constantly in firewall rules, security groups, and packet captures.</p>
+    <table class="compare-table">
+      <thead><tr><th>Port</th><th>Service</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td><code class="inline">21</code></td><td>FTP</td><td>File transfer (unencrypted)</td></tr>
+        <tr><td><code class="inline">22</code></td><td>SSH</td><td>Remote login</td></tr>
+        <tr><td><code class="inline">25</code></td><td>SMTP</td><td>Email sending</td></tr>
+        <tr><td><code class="inline">53</code></td><td>DNS</td><td>Name resolution</td></tr>
+        <tr><td><code class="inline">80</code></td><td>HTTP</td><td>Web traffic (unencrypted)</td></tr>
+        <tr><td><code class="inline">443</code></td><td>HTTPS</td><td>Web traffic (encrypted)</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <div class="assessment-box">
+    <div class="assess-label">Remember</div>
+    <p>A port is <strong>not hardware</strong>. It is <strong>not a cable</strong>. A port is a <strong>logical number used by the operating system</strong> to route incoming traffic to the right application. IP gets you to the machine; the port gets you to the program.</p>
+  </div>
+
+</div>
+
+<footer class="pagenav foot"><div class="pagenav-inner">
+  <span class="brand">Module 1 &middot; Basics of Internet Communications</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn" href="03-networking-fundamentals.html">&larr; Prev</a>
+    <span class="navbtn disabled">Next &rarr;</span>
+  </nav>
+</div></footer>
+
+<script>function toggleConcept(id){
+  const body=document.getElementById(id);
+  const chev=document.getElementById(id+'-chev');
+  const open=body.classList.contains('open');
+  body.classList.toggle('open',!open);
+  chev.textContent=open?'▶':'▼';
+}
+
+/* Port router: click an incoming port, watch the OS hand it to the listening app */
+const APPS=[
+  {port:'21', name:'FTP server', sub:'File transfer'},
+  {port:'22', name:'SSH service', sub:'Remote login'},
+  {port:'80', name:'Web server', sub:'HTTP'},
+  {port:'443',name:'Secure web server', sub:'HTTPS'},
+];
+const PORTS=['21','22','80','443'];
+const btns=document.getElementById('portBtns');
+const stage=document.getElementById('routerStage');
+const cap=document.getElementById('routerCaption');
+
+PORTS.forEach((p,i)=>{
+  const b=document.createElement('button');
+  b.className='ui'+(i===0?'':' ghost');
+  b.textContent='Packet \u2192 port '+p;
+  b.dataset.port=p;
+  b.onclick=()=>route(p,b);
+  btns.appendChild(b);
+});
+
+function render(active){
+  stage.innerHTML='<div style="display:flex;flex-direction:column;gap:7px;max-width:420px">'+
+    APPS.map(a=>{
+      const on=a.port===active;
+      return `<div style="display:flex;align-items:center;gap:12px;border-radius:8px;padding:11px 14px;
+        background:${on?'#0E7490':'#f3f5f6'};color:${on?'#fff':'#5f5e5a'};
+        border:1px solid ${on?'#0E7490':'#e4e7e9'};transition:.2s">
+        <span style="font-family:'JetBrains Mono',monospace;font-weight:700;min-width:42px;
+          background:${on?'rgba(255,255,255,.18)':'#e7ecee'};color:${on?'#fff':'#5f5e5a'};
+          border-radius:5px;padding:2px 0;text-align:center;font-size:12px">:${a.port}</span>
+        <span style="flex:1;font-weight:700;font-size:13.5px">${a.name}</span>
+        <span style="font-size:11px;opacity:.85">${on?'\u25c0 delivered here':a.sub}</span>
+      </div>`;
+    }).join('')+'</div>';
+}
+function route(port,btn){
+  document.querySelectorAll('#portBtns .ui').forEach(x=>x.className='ui ghost');
+  btn.className='ui';
+  render(port);
+  const app=APPS.find(a=>a.port===port);
+  cap.innerHTML=`A packet arrives at the device's IP address with destination port <b>${port}</b>. `+
+    `The OS reads the port and hands the data to the <b>${app.name}</b> listening on <code class="inline">:${port}</code> &mdash; `+
+    `every other application is left untouched.`;
+  stage.classList.remove('fade');void stage.offsetWidth;stage.classList.add('fade');
+}
+route('443', btns.querySelector('[data-port="443"]'));
+</script>
+</body></html>
