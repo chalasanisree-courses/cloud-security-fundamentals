@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The CIA Triad</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+* { box-sizing:border-box; margin:0; padding:0; }
+:root{
+  --slate-dark:#1A202C; --slate:#2D3748;
+  --accent:#0E7490; --accent-dark:#0B5567; --accent-soft:#CFF1F6;
+  --info:#1E40AF; --info-soft:#DBEAFE;
+  --text:#1a1a18; --text-muted:#5f5e5a; --text-light:#888780;
+  --border:rgba(0,0,0,0.09); --bg:#fafaf8; --bg-card:#fff; --bg-code:#f6f6f3; --tag-bg:#f1f0eb;
+  /* widget-compat tokens */
+  --rust:#B45309; --soft:#888780; --muted:#5f5e5a; --rule:rgba(0,0,0,0.09);
+  --ok:#2e7d57; --callout-bg:#f1f9fb; --code-bg:#f6f6f3;
+}
+body{ font-family:'Barlow',sans-serif; background:var(--bg); color:var(--text); line-height:1.65; min-height:100vh; }
+
+/* page nav (header + footer) */
+.pagenav{ background:var(--slate-dark); }
+.pagenav.foot{ margin-top:48px; }
+.pagenav-inner{ max-width:920px; margin:0 auto; padding:11px 32px; display:flex; justify-content:space-between; align-items:center; gap:16px; }
+.pagenav .brand{ color:rgba(255,255,255,0.45); font-size:11px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; white-space:nowrap; }
+.navbtns{ display:flex; gap:8px; }
+.navbtn{ display:inline-flex; align-items:center; gap:6px; font-family:'Barlow',sans-serif; font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#fff; background:rgba(255,255,255,0.10); border:1px solid rgba(255,255,255,0.22); border-radius:6px; padding:7px 13px; text-decoration:none; transition:0.15s; white-space:nowrap; }
+.navbtn:hover{ background:var(--accent); border-color:var(--accent); }
+.navbtn.disabled{ opacity:0.28; pointer-events:none; }
+@media(max-width:560px){ .pagenav .brand{ display:none } .pagenav-inner{ justify-content:center } }
+
+/* header */
+.header{ background:#fff; padding:56px 0 44px; border-bottom:0.5px solid var(--border); }
+.header-inner{ max-width:920px; margin:0 auto; padding:0 32px; }
+.header-eyebrow{ font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:14px; display:flex; align-items:center; gap:12px; }
+.header-eyebrow::after{ content:''; flex:1; height:0.5px; background:var(--border); max-width:120px; }
+.header h1{ font-family:'Barlow Condensed',sans-serif; font-size:clamp(34px,4.5vw,52px); font-weight:900; letter-spacing:-0.01em; line-height:1.05; color:var(--text); margin-bottom:18px; }
+.header h1 em{ font-style:normal; color:var(--accent); }
+.header-meta-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+.module-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:var(--slate); color:#fff; }
+.topic-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:#F1F5F9; color:#475569; }
+.topic-pill.accent{ background:var(--accent-soft); color:var(--accent-dark); }
+
+/* page */
+.page{ max-width:920px; margin:0 auto; padding:0 32px 48px; }
+
+/* objectives */
+.objectives{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--accent); border-radius:6px; padding:22px 28px; margin:36px 0 14px; }
+.obj-label{ font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:14px; }
+.objectives ul{ list-style:none; }
+.objectives ul li{ font-size:14px; color:var(--text); padding:5px 0 5px 20px; position:relative; line-height:1.55; }
+.objectives ul li::before{ content:'◇'; position:absolute; left:0; color:var(--accent); font-size:10px; top:9px; }
+
+/* sections */
+section{ margin-top:44px; }
+section h2{ font-family:'Barlow Condensed',sans-serif; font-size:28px; font-weight:800; letter-spacing:0.005em; color:var(--text); margin-bottom:20px; display:flex; align-items:baseline; gap:20px; }
+section h2 .num{ font-family:'Barlow Condensed',sans-serif; font-size:56px; font-weight:900; color:var(--accent); letter-spacing:-0.02em; line-height:0.85; min-width:42px; }
+section h3{ font-family:'Barlow',sans-serif; font-size:17px; font-weight:700; color:var(--text); margin:28px 0 12px; }
+section p{ font-size:14.5px; color:var(--text); line-height:1.75; margin-bottom:14px; }
+section p strong{ font-weight:700; color:var(--text); }
+section ul{ font-size:14.5px; line-height:1.75; color:var(--text); padding-left:22px; margin:8px 0 16px; }
+section ul li{ margin:4px 0; }
+section a{ color:var(--accent-dark); text-decoration:underline; text-decoration-color:rgba(0,0,0,0.2); text-underline-offset:2px; }
+section a:hover{ text-decoration-color:var(--accent); }
+
+/* compare tables */
+.compare-table{ width:100%; border-collapse:collapse; margin:16px 0 20px; font-size:13.5px; background:var(--bg-card); border:0.5px solid var(--border); border-radius:6px; overflow:hidden; }
+.compare-table thead th{ font-size:10px; font-weight:700; color:var(--text-light); text-transform:uppercase; letter-spacing:0.06em; padding:11px 16px; text-align:left; border-bottom:0.5px solid var(--border); background:#fafaf8; }
+.compare-table tbody td{ padding:11px 16px; border-bottom:0.5px solid #f0efe8; vertical-align:top; color:var(--text); line-height:1.55; }
+.compare-table tbody td:first-child{ font-weight:600; background:#fafaf8; width:28%; }
+.compare-table tbody tr:last-child td{ border-bottom:none; }
+
+/* code */
+pre{ font-family:'JetBrains Mono',monospace; background:var(--bg-code); border:0.5px solid var(--border); border-radius:6px; padding:14px 18px; font-size:12px; line-height:1.7; color:var(--text); overflow-x:auto; margin:12px 0 18px; }
+pre code{ font-family:inherit; }
+.code-label{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-light); margin:14px 0 6px; }
+.code-comment{ color:#9a988f; }
+.code-cmd{ color:var(--accent); font-weight:600; }
+.code-key{ color:var(--info); font-weight:600; }
+code.inline{ font-family:'JetBrains Mono',monospace; font-size:12.5px; background:var(--tag-bg); padding:1px 6px; border-radius:3px; color:var(--text); }
+
+/* callout boxes */
+.keybox{ background:var(--accent-soft); border-left:3px solid var(--accent); border-radius:0 6px 6px 0; padding:14px 18px; margin:14px 0 18px; font-size:13.5px; line-height:1.65; color:var(--text); }
+.keybox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--accent-dark); margin-bottom:6px; }
+.keybox b{ color:var(--accent-dark); }
+.notebox{ background:#FBF3E8; border-left:3px solid var(--rust); border-radius:0 6px 6px 0; padding:14px 18px; margin:14px 0 18px; font-size:13.5px; line-height:1.65; }
+.notebox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--rust); margin-bottom:6px; }
+
+/* concept cards */
+.concept-grid{ display:flex; flex-direction:column; gap:10px; margin-top:14px; }
+.concept-card{ background:var(--bg-card); border:0.5px solid var(--border); border-radius:7px; overflow:hidden; }
+.concept-head{ display:flex; align-items:center; gap:14px; padding:14px 20px; cursor:pointer; user-select:none; transition:background 0.15s; }
+.concept-head:hover{ background:#fafaf8; }
+.concept-icon{ font-size:16px; flex-shrink:0; color:var(--accent); }
+.concept-title{ flex:1; font-size:14.5px; font-weight:700; color:var(--text); }
+.concept-sub{ font-size:12px; color:var(--text-muted); font-weight:400; margin-top:1px; }
+.concept-chev{ font-size:10px; color:var(--text-light); }
+.concept-body{ display:none; padding:0 20px 18px; border-top:0.5px solid #f0efe8; }
+.concept-body.open{ display:block; }
+.concept-body p{ font-size:13.5px; line-height:1.7; color:var(--text); margin-top:12px; }
+.concept-body ul{ font-size:13.5px; margin-top:8px; }
+
+/* assessment / summary box */
+.assessment-box{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--slate); border-radius:0 6px 6px 0; padding:20px 24px; margin:30px 0 0; }
+.assessment-box .assess-label{ font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); margin-bottom:10px; }
+.assessment-box p{ font-size:13.5px; line-height:1.7; margin-bottom:10px; }
+.assessment-box p:last-child{ margin-bottom:0; }
+
+/* ===== interactive widgets ===== */
+.widget{ border:0.5px solid var(--border); border-radius:8px; padding:20px; margin:16px 0; background:var(--bg-card); }
+.widget h4{ margin:0 0 14px; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); font-weight:700; }
+.controls{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:14px; }
+button.ui{ font-family:'Barlow',sans-serif; cursor:pointer; border:1px solid var(--accent); background:var(--accent); color:#fff; padding:7px 16px; border-radius:6px; font-size:12.5px; font-weight:600; transition:0.15s; }
+button.ui:hover{ background:var(--accent-dark); border-color:var(--accent-dark); }
+button.ui.ghost{ background:#fff; color:var(--accent); }
+button.ui.ghost:hover{ background:var(--accent-soft); }
+.fade{ animation:fade 0.35s ease; }
+@keyframes fade{ from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+input[type=range]{ accent-color:var(--accent); }
+.kbd{ display:inline-block; background:#fff; border:1px solid #d6dbde; border-bottom-width:2px; border-radius:5px; padding:.05em .45em; font-family:'JetBrains Mono',monospace; font-size:.82em; }
+</style>
+</head><body>
+<header class="pagenav"><div class="pagenav-inner">
+  <span class="brand">Cloud Security Fundamentals</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn" href="01-securing-internet-communications.html">&larr; Prev</a>
+    <span class="navbtn disabled">Next &rarr;</span>
+  </nav>
+</div></header>
+
+<div class="header"><div class="header-inner">
+  <div class="header-eyebrow">Module 2 &nbsp;·&nbsp; Securing Internet Communications</div>
+  <h1>The <em>CIA</em> Triad</h1>
+  <div class="header-meta-row">
+    <span class="module-pill">Module 2</span>
+    <span class="topic-pill">Security goals</span>
+    <span class="topic-pill accent">C &middot; I &middot; A</span>
+  </div>
+</div></div>
+
+<div class="page">
+
+  <div class="objectives">
+    <div class="obj-label">Learning Objectives</div>
+    <ul>
+      <li>State the three security goals of the CIA triad and the question each one answers</li>
+      <li>Explain confidentiality through encryption, authentication, and authorization</li>
+      <li>Explain integrity through hashing, digital signatures, and audit trails</li>
+      <li>Explain availability through DDoS mitigation, redundancy, and backup</li>
+      <li>Understand that the three goals trade off against each other, so security is risk-based</li>
+    </ul>
+  </div>
+
+  <section>
+    <h2><span class="num">1</span> Why we need information security</h2>
+    <p>Modern systems communicate over networks we don't fully control &mdash; above all, the internet. Whenever data is stored or moved, three risks arise naturally:</p>
+    <ul>
+      <li>Someone may <strong>see</strong> information they shouldn't.</li>
+      <li>Someone may <strong>change</strong> information without authorization.</li>
+      <li>Someone may <strong>disrupt</strong> access to systems or data.</li>
+    </ul>
+    <p>Security exists to <strong>reduce</strong> these risks, not eliminate them entirely. Because risks differ by system and context, security decisions are always <strong>risk-based</strong>.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> The three goals</h2>
+    <p>The <strong>CIA triad</strong> names three fundamental security goals. They are <strong>objectives, not tools</strong> &mdash; every security mechanism earns its place by serving one or more of them.</p>
+    <div class="widget"><h4>The CIA triad</h4>
+    <svg viewBox="0 0 700 378" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">
+      <!-- triangle -->
+      <polygon points="350,70 120,300 580,300" fill="none" stroke="#cdd6da" stroke-width="2"/>
+      <text x="350" y="200" text-anchor="middle" fill="#9aa3a8" font-size="13" font-weight="700" letter-spacing="0.14em">CIA</text>
+      <!-- Confidentiality (top) -->
+      <rect x="230" y="22" width="240" height="62" rx="10" fill="#0E7490"/>
+      <text x="350" y="47" text-anchor="middle" fill="#fff" font-size="15" font-weight="800">Confidentiality</text>
+      <text x="350" y="68" text-anchor="middle" fill="#d4eef4" font-size="11.5">Who can see the data?</text>
+      <!-- Integrity (bottom-left) -->
+      <rect x="8" y="300" width="234" height="62" rx="10" fill="#2D3748"/>
+      <text x="125" y="325" text-anchor="middle" fill="#fff" font-size="15" font-weight="800">Integrity</text>
+      <text x="125" y="346" text-anchor="middle" fill="#cbd5e0" font-size="11.5">Can we trust the data?</text>
+      <!-- Availability (bottom-right) -->
+      <rect x="458" y="300" width="234" height="62" rx="10" fill="#2D3748"/>
+      <text x="575" y="325" text-anchor="middle" fill="#fff" font-size="15" font-weight="800">Availability</text>
+      <text x="575" y="346" text-anchor="middle" fill="#cbd5e0" font-size="11.5">Can users reach it?</text>
+    </svg>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> Confidentiality &mdash; who can see the data?</h2>
+    <p>Confidentiality ensures that <strong>only authorized parties can view information</strong>. Three mechanisms work together:</p>
+    <ul>
+      <li><strong>Encryption</strong> &mdash; hides the meaning of data. We saw it secure data <em>in transit</em> (the TLS session); it equally protects data <em>at rest</em> (the account balances sitting in the bank's database should be encrypted too).</li>
+      <li><strong>Authentication</strong> &mdash; verifies <em>who</em> a user is. A username and password alone is <strong>weak authentication</strong> (credentials can be stolen); adding a second factor like an SMS code makes it <strong>robust</strong> &mdash; multi-factor authentication (MFA).</li>
+      <li><strong>Authorization</strong> &mdash; determines what an authenticated user is allowed to access. You should see <em>your</em> account, not another customer's, and never the password database. Controlling access by identity is often done with <strong>RBAC (Role-Based Access Control)</strong>.</li>
+    </ul>
+    <div class="keybox">
+      <div class="lbl">Encryption isn't the whole story</div>
+      Encryption protects the data, but <b>authentication and authorization decide who gets access in the first place</b>. Confidentiality depends on identity and access control as much as on encryption.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> Integrity &mdash; can we trust the data?</h2>
+    <p>Integrity ensures that data has <strong>not been altered without detection</strong>. It's about the <strong>trustworthiness and correctness</strong> of data, not secrecy. (&ldquo;Send $1,000&rdquo; must not silently become &ldquo;Send $100,000.&rdquo;)</p>
+    <ul>
+      <li><strong>Hashing</strong> &mdash; produces a fixed fingerprint of the data; <em>any</em> change yields a different hash, so tampering is detectable.</li>
+      <li><strong>Digital signatures</strong> &mdash; detect unauthorized modification <em>and</em> bind the data to a specific sender.</li>
+      <li><strong>Audit trails &amp; logging</strong> &mdash; track changes over time, helping detect unexpected or unauthorized modifications.</li>
+    </ul>
+    <div class="notebox">
+      <div class="lbl">Where certificates fit</div>
+      Integrity is about trusting the <em>data</em> &mdash; but that often requires trusting <em>who</em> created or sent it. <b>Digital certificates</b> establish trust in identities. They don't protect data integrity by themselves; they <b>enable trusted integrity checks</b>.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">5</span> Availability &mdash; can users reach it?</h2>
+    <p>Availability ensures that systems and data are <strong>accessible when legitimate users need them</strong>. It's often the most <em>visible</em> security failure &mdash; when a site is down, everyone notices.</p>
+    <ul>
+      <li><strong>DDoS mitigation</strong> &mdash; prevents attackers from overwhelming systems with traffic (distributed denial-of-service). Ransomware is a related availability threat.</li>
+      <li><strong>Redundancy</strong> &mdash; multiple components so there's no single point of failure.</li>
+      <li><strong>Backup &amp; disaster recovery</strong> &mdash; restore systems and data after a failure or attack.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="num">6</span> Mechanisms map to goals</h2>
+    <p>A single mechanism can serve <strong>more than one</strong> goal. Click a mechanism to see which goal(s) it supports:</p>
+    <div class="widget" id="mapper">
+      <h4>Which goal does each mechanism serve?</h4>
+      <div id="goalRow" style="display:flex;gap:8px;margin-bottom:14px"></div>
+      <div id="chipRow" style="display:flex;flex-wrap:wrap;gap:7px"></div>
+      <p id="mapNote" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:34px"></p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">7</span> Balance and trade-offs</h2>
+    <p>The three goals frequently <strong>conflict</strong>:</p>
+    <ul>
+      <li>Strong <strong>confidentiality</strong> controls can reduce <strong>availability</strong> (more checks, more friction).</li>
+      <li>Strict <strong>integrity</strong> checks can hurt <strong>performance</strong>.</li>
+      <li>Maximizing <strong>availability</strong> may require relaxing certain controls.</li>
+    </ul>
+    <p>There is <strong>no perfect configuration</strong>. Security is about choosing the right balance based on <strong>risk</strong>, the <strong>system's purpose</strong>, and <strong>business and user needs</strong> &mdash; which is exactly what makes it risk-based.</p>
+  </section>
+
+  <div class="assessment-box">
+    <div class="assess-label">Remember</div>
+    <p>The CIA triad defines security <strong>goals</strong>; mechanisms exist to serve them (sometimes more than one). <strong>Confidentiality</strong> &rarr; who can see the data. <strong>Integrity</strong> &rarr; whether the data can be trusted. <strong>Availability</strong> &rarr; whether the system can be used. Every layer in the rest of this course maps back to one or more of these three.</p>
+  </div>
+
+</div>
+
+<footer class="pagenav foot"><div class="pagenav-inner">
+  <span class="brand">Module 2 &middot; Securing Internet Communications</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn" href="01-securing-internet-communications.html">&larr; Prev</a>
+    <span class="navbtn disabled">Next &rarr;</span>
+  </nav>
+</div></footer>
+
+<script>function toggleConcept(id){
+  const body=document.getElementById(id);
+  const chev=document.getElementById(id+'-chev');
+  const open=body.classList.contains('open');
+  body.classList.toggle('open',!open);
+  chev.textContent=open?'▶':'▼';
+}
+
+/* ---------- CIA mechanism -> goal mapper ---------- */
+(function(){
+  const GOALS=[{k:'C',name:'Confidentiality'},{k:'I',name:'Integrity'},{k:'A',name:'Availability'}];
+  const MECH=[
+    {n:'Encryption', g:['C'], note:'scrambles data so only authorized parties can read it \u2014 in transit and at rest.'},
+    {n:'Authentication (MFA)', g:['C'], note:'verifies who a user is before granting access; a second factor makes it robust.'},
+    {n:'Authorization (RBAC)', g:['C'], note:'limits what an authenticated user is allowed to see and do.'},
+    {n:'Hashing', g:['I'], note:'any change to the data produces a different fingerprint, so tampering is detectable.'},
+    {n:'Digital signatures', g:['I'], note:'detect modification and bind the data to a specific sender.'},
+    {n:'Audit trails & logging', g:['I'], note:'track changes over time to reveal unauthorized modification.'},
+    {n:'DDoS mitigation', g:['A'], note:'stops attackers from overwhelming the system with traffic.'},
+    {n:'Redundancy', g:['A'], note:'multiple components mean no single point of failure.'},
+    {n:'Backup & DR', g:['A'], note:'restore systems and data after a failure or attack.'},
+    {n:'Digital certificates', g:['C','I'], note:'serve more than one goal \u2014 they establish trust in identity (integrity) and enable the public-key exchange that secures the channel (confidentiality).'}
+  ];
+  const COLOR={C:'#0E7490', I:'#2D3748', A:'#2D3748'};
+  const goalRow=document.getElementById('goalRow'), chipRow=document.getElementById('chipRow'), note=document.getElementById('mapNote');
+
+  function renderGoals(active){
+    goalRow.innerHTML=GOALS.map(go=>{
+      const on=active && active.includes(go.k);
+      return `<div data-g="${go.k}" style="flex:1;text-align:center;border-radius:8px;padding:12px 8px;font-weight:800;font-size:13.5px;transition:.2s;
+        background:${on?COLOR[go.k]:'#f3f5f6'};color:${on?'#fff':'#9aa3a8'};border:1px solid ${on?COLOR[go.k]:'#e4e7e9'}">${go.name}</div>`;
+    }).join('');
+  }
+  function renderChips(sel){
+    chipRow.innerHTML=MECH.map((m,idx)=>{
+      const on=idx===sel;
+      return `<button class="ui ${on?'':'ghost'}" data-i="${idx}" style="font-size:12px">${m.n}</button>`;
+    }).join('');
+    chipRow.querySelectorAll('button').forEach(b=>b.onclick=()=>pick(+b.dataset.i));
+  }
+  function pick(idx){
+    const m=MECH[idx];
+    renderGoals(m.g); renderChips(idx);
+    const label=m.g.map(k=>GOALS.find(x=>x.k===k).name).join(' + ');
+    note.innerHTML=`<b>${m.n}</b> &rarr; <b>${label}</b>. ${m.note}`;
+  }
+  renderGoals(null); renderChips(-1);
+  note.innerHTML='Pick a mechanism above to see which CIA goal it serves.';
+})();
+</script>
+</body></html>
