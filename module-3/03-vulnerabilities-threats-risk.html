@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vulnerabilities, Threats &amp; Risk &mdash; Module 3</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+* { box-sizing:border-box; margin:0; padding:0; }
+:root{
+  --slate-dark:#1A202C; --slate:#2D3748;
+  --accent:#0E7490; --accent-dark:#0B5567; --accent-soft:#CFF1F6;
+  --info:#1E40AF; --info-soft:#DBEAFE;
+  --text:#1a1a18; --text-muted:#5f5e5a; --text-light:#888780;
+  --border:rgba(0,0,0,0.09); --bg:#fafaf8; --bg-card:#fff; --bg-code:#f6f6f3; --tag-bg:#f1f0eb;
+  /* widget-compat tokens */
+  --rust:#B45309; --soft:#888780; --muted:#5f5e5a; --rule:rgba(0,0,0,0.09);
+  --ok:#2e7d57; --callout-bg:#f1f9fb; --code-bg:#f6f6f3;
+}
+body{ font-family:'Barlow',sans-serif; background:var(--bg); color:var(--text); line-height:1.65; min-height:100vh; }
+
+/* page nav (header + footer) */
+.pagenav{ background:var(--slate-dark); }
+.pagenav.foot{ margin-top:48px; }
+.pagenav-inner{ max-width:920px; margin:0 auto; padding:11px 32px; display:flex; justify-content:space-between; align-items:center; gap:16px; }
+.pagenav .brand{ color:rgba(255,255,255,0.45); font-size:11px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; white-space:nowrap; }
+.navbtns{ display:flex; gap:8px; }
+.navbtn{ display:inline-flex; align-items:center; gap:6px; font-family:'Barlow',sans-serif; font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#fff; background:rgba(255,255,255,0.10); border:1px solid rgba(255,255,255,0.22); border-radius:6px; padding:7px 13px; text-decoration:none; transition:0.15s; white-space:nowrap; }
+.navbtn:hover{ background:var(--accent); border-color:var(--accent); }
+.navbtn.disabled{ opacity:0.28; pointer-events:none; }
+@media(max-width:560px){ .pagenav .brand{ display:none } .pagenav-inner{ justify-content:center } }
+
+/* header */
+.header{ background:#fff; padding:56px 0 44px; border-bottom:0.5px solid var(--border); }
+.header-inner{ max-width:920px; margin:0 auto; padding:0 32px; }
+.header-eyebrow{ font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:14px; display:flex; align-items:center; gap:12px; }
+.header-eyebrow::after{ content:''; flex:1; height:0.5px; background:var(--border); max-width:120px; }
+.header h1{ font-family:'Barlow Condensed',sans-serif; font-size:clamp(34px,4.5vw,52px); font-weight:900; letter-spacing:-0.01em; line-height:1.05; color:var(--text); margin-bottom:18px; }
+.header h1 em{ font-style:normal; color:var(--accent); }
+.header-meta-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+.module-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:var(--slate); color:#fff; }
+.topic-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:#F1F5F9; color:#475569; }
+.topic-pill.accent{ background:var(--accent-soft); color:var(--accent-dark); }
+
+/* page */
+.page{ max-width:920px; margin:0 auto; padding:0 32px 48px; }
+
+/* objectives */
+.objectives{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--accent); border-radius:6px; padding:22px 28px; margin:36px 0 14px; }
+.obj-label{ font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:14px; }
+.objectives ul{ list-style:none; }
+.objectives ul li{ font-size:14px; color:var(--text); padding:5px 0 5px 20px; position:relative; line-height:1.55; }
+.objectives ul li::before{ content:'◇'; position:absolute; left:0; color:var(--accent); font-size:10px; top:9px; }
+
+/* sections */
+section{ margin-top:44px; }
+section h2{ font-family:'Barlow Condensed',sans-serif; font-size:28px; font-weight:800; letter-spacing:0.005em; color:var(--text); margin-bottom:20px; display:flex; align-items:baseline; gap:20px; }
+section h2 .num{ font-family:'Barlow Condensed',sans-serif; font-size:56px; font-weight:900; color:var(--accent); letter-spacing:-0.02em; line-height:0.85; min-width:42px; }
+section h3{ font-family:'Barlow',sans-serif; font-size:17px; font-weight:700; color:var(--text); margin:28px 0 12px; }
+section p{ font-size:14.5px; color:var(--text); line-height:1.75; margin-bottom:14px; }
+section p strong{ font-weight:700; color:var(--text); }
+section ul{ font-size:14.5px; line-height:1.75; color:var(--text); padding-left:22px; margin:8px 0 16px; }
+section ul li{ margin:4px 0; }
+section a{ color:var(--accent-dark); text-decoration:underline; text-decoration-color:rgba(0,0,0,0.2); text-underline-offset:2px; }
+section a:hover{ text-decoration-color:var(--accent); }
+
+/* compare tables */
+.compare-table{ width:100%; border-collapse:collapse; margin:16px 0 20px; font-size:13.5px; background:var(--bg-card); border:0.5px solid var(--border); border-radius:6px; overflow:hidden; }
+.compare-table thead th{ font-size:10px; font-weight:700; color:var(--text-light); text-transform:uppercase; letter-spacing:0.06em; padding:11px 16px; text-align:left; border-bottom:0.5px solid var(--border); background:#fafaf8; }
+.compare-table tbody td{ padding:11px 16px; border-bottom:0.5px solid #f0efe8; vertical-align:top; color:var(--text); line-height:1.55; }
+.compare-table tbody td:first-child{ font-weight:600; background:#fafaf8; width:28%; }
+.compare-table tbody tr:last-child td{ border-bottom:none; }
+
+/* code */
+pre{ font-family:'JetBrains Mono',monospace; background:var(--bg-code); border:0.5px solid var(--border); border-radius:6px; padding:14px 18px; font-size:12px; line-height:1.7; color:var(--text); overflow-x:auto; margin:12px 0 18px; }
+pre code{ font-family:inherit; }
+.code-label{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-light); margin:14px 0 6px; }
+.code-comment{ color:#9a988f; }
+.code-cmd{ color:var(--accent); font-weight:600; }
+.code-key{ color:var(--info); font-weight:600; }
+code.inline{ font-family:'JetBrains Mono',monospace; font-size:12.5px; background:var(--tag-bg); padding:1px 6px; border-radius:3px; color:var(--text); }
+
+/* callout boxes */
+.keybox{ background:var(--accent-soft); border-left:3px solid var(--accent); border-radius:0 6px 6px 0; padding:14px 18px; margin:14px 0 18px; font-size:13.5px; line-height:1.65; color:var(--text); }
+.keybox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--accent-dark); margin-bottom:6px; }
+.keybox b{ color:var(--accent-dark); }
+.notebox{ background:#FBF3E8; border-left:3px solid var(--rust); border-radius:0 6px 6px 0; padding:14px 18px; margin:14px 0 18px; font-size:13.5px; line-height:1.65; }
+.notebox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--rust); margin-bottom:6px; }
+
+/* concept cards */
+.concept-grid{ display:flex; flex-direction:column; gap:10px; margin-top:14px; }
+.concept-card{ background:var(--bg-card); border:0.5px solid var(--border); border-radius:7px; overflow:hidden; }
+.concept-head{ display:flex; align-items:center; gap:14px; padding:14px 20px; cursor:pointer; user-select:none; transition:background 0.15s; }
+.concept-head:hover{ background:#fafaf8; }
+.concept-icon{ font-size:16px; flex-shrink:0; color:var(--accent); }
+.concept-title{ flex:1; font-size:14.5px; font-weight:700; color:var(--text); }
+.concept-sub{ font-size:12px; color:var(--text-muted); font-weight:400; margin-top:1px; }
+.concept-chev{ font-size:10px; color:var(--text-light); }
+.concept-body{ display:none; padding:0 20px 18px; border-top:0.5px solid #f0efe8; }
+.concept-body.open{ display:block; }
+.concept-body p{ font-size:13.5px; line-height:1.7; color:var(--text); margin-top:12px; }
+.concept-body ul{ font-size:13.5px; margin-top:8px; }
+
+/* assessment / summary box */
+.assessment-box{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--slate); border-radius:0 6px 6px 0; padding:20px 24px; margin:30px 0 0; }
+.assessment-box .assess-label{ font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); margin-bottom:10px; }
+.assessment-box p{ font-size:13.5px; line-height:1.7; margin-bottom:10px; }
+.assessment-box p:last-child{ margin-bottom:0; }
+
+/* ===== interactive widgets ===== */
+.widget{ border:0.5px solid var(--border); border-radius:8px; padding:20px; margin:16px 0; background:var(--bg-card); }
+.widget h4{ margin:0 0 14px; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); font-weight:700; }
+.controls{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:14px; }
+button.ui{ font-family:'Barlow',sans-serif; cursor:pointer; border:1px solid var(--accent); background:var(--accent); color:#fff; padding:7px 16px; border-radius:6px; font-size:12.5px; font-weight:600; transition:0.15s; }
+button.ui:hover{ background:var(--accent-dark); border-color:var(--accent-dark); }
+button.ui.ghost{ background:#fff; color:var(--accent); }
+button.ui.ghost:hover{ background:var(--accent-soft); }
+.fade{ animation:fade 0.35s ease; }
+@keyframes fade{ from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+input[type=range]{ accent-color:var(--accent); }
+.kbd{ display:inline-block; background:#fff; border:1px solid #d6dbde; border-bottom-width:2px; border-radius:5px; padding:.05em .45em; font-family:'JetBrains Mono',monospace; font-size:.82em; }
+</style>
+</head><body>
+<header class="pagenav"><div class="pagenav-inner">
+  <span class="brand">Cloud Security Fundamentals</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn" href="02-defense-in-depth.html">&larr; Prev</a>
+    <span class="navbtn disabled">Next &rarr;</span>
+  </nav>
+</div></header>
+
+<div class="header"><div class="header-inner">
+  <div class="header-eyebrow">Module 3 &nbsp;·&nbsp; Enterprise Security Architecture</div>
+  <h1><em>Vulnerabilities</em>, Threats &amp; Risk</h1>
+  <div class="header-meta-row">
+    <span class="module-pill">Module 3</span>
+    <span class="topic-pill">Vulnerabilities</span>
+    <span class="topic-pill accent">CVE &middot; CVSS</span>
+  </div>
+</div></div>
+
+<div class="page">
+
+  <div class="objectives">
+    <div class="obj-label">Learning Objectives</div>
+    <ul>
+      <li>Restate the relationship between threat, vulnerability, and risk</li>
+      <li>Classify a weakness as a configuration, software, or design/architectural vulnerability</li>
+      <li>Read a CVE entry &mdash; its identifier and its CVSS severity score</li>
+      <li>Explain the Shellshock vulnerability and why remote code execution is so dangerous</li>
+      <li>Trace the vulnerability lifecycle from introduction to patch, and the window of exposure</li>
+      <li>Contrast attacker reconnaissance with defender scanning</li>
+    </ul>
+  </div>
+
+  <section>
+    <h2><span class="num">1</span> Nothing bad happens until a vulnerability is exploited</h2>
+    <p>Recall the relationship from the last note. A <strong>vulnerability</strong> is <em>how</em> harm becomes possible &mdash; a weakness in the system. A <strong>threat</strong> is <em>what</em> causes the harm &mdash; an actor exploiting that weakness. A vulnerability sitting alone causes nothing. <strong>Risk is the point where a real threat can reach a real weakness.</strong> Everything in this note is about finding and closing weaknesses before a threat finds them first.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> Three types of vulnerability</h2>
+    <p>Weaknesses fall into three broad families. Click each to see what it looks like in a real enterprise:</p>
+    <div class="widget" id="vtypes">
+      <h4>Where weaknesses come from</h4>
+      <div id="vtRow" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px"></div>
+      <div id="vtDetail" style="background:var(--bg);border-radius:8px;padding:16px 18px;min-height:130px"></div>
+    </div>
+    <div class="notebox">
+      <div class="lbl">Case study &mdash; Target, 2013</div>
+      Target was an <b>architectural</b> failure. The network that faced HVAC <b>vendors</b> was reachable from the <b>point-of-sale</b> systems &mdash; a flat network with no real segmentation, and vendors holding far more access than they needed. That's the castle-and-moat trap: once inside the walls, attackers had free range. Proper segmentation and least privilege would have contained the breach.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> How do you even know a vulnerability exists?</h2>
+    <p>You don't discover most weaknesses yourself &mdash; you look them up. <strong>NIST</strong> publishes the <strong>National Vulnerability Database (NVD)</strong>, where disclosed vulnerabilities are catalogued. Each gets a <strong>CVE identifier</strong> (Common Vulnerabilities and Exposures) &mdash; a year plus a number, like <code class="inline">CVE-2014-6271</code> &mdash; and a <strong>CVSS score</strong> from 0 to 10 that tells you how urgently to act. Drag the score to see the severity bands:</p>
+    <div class="widget" id="cvss">
+      <h4>CVSS severity</h4>
+      <input type="range" id="cvssSlide" min="0" max="100" value="98" style="width:100%">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:10px">
+        <span id="cvssVal" style="font-family:'Barlow Condensed';font-weight:900;font-size:42px;line-height:1"></span>
+        <span id="cvssBand" style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:5px 14px;border-radius:6px"></span>
+      </div>
+      <div id="cvssBar" style="height:10px;border-radius:5px;margin-top:12px;background:linear-gradient(90deg,#2EA65A 0%,#2EA65A 10%,#C9991A 40%,#E67E22 70%,#c0392b 90%,#7a1f16 100%)"></div>
+      <p id="cvssNote" style="font-size:13px;color:var(--text-muted);margin:12px 0 0;line-height:1.6;min-height:34px"></p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> Case study: Shellshock (CVE-2014-6271, CVSS 9.8)</h2>
+    <p>Shellshock scored <strong>9.8 &mdash; critical</strong>. Why so high? Because it lived in <strong>bash</strong> (the Bourne-again shell) and could be reached through the <strong>Apache HTTP servers</strong> that nearly every enterprise runs. To see how it worked, first: what <em>is</em> a shell?</p>
+    <p>A <strong>shell</strong> is the command-line interface to the operating system. Applications normally talk to the OS kernel on your behalf, but an administrator can issue commands directly &mdash; type <code class="inline">ls</code> and the shell asks the OS to list files. Shellshock let an attacker smuggle commands into that shell from the outside, by crafting malicious <strong>environment variables</strong> in a web request. The result is <strong>remote code execution (RCE)</strong> &mdash; a stranger running commands on your server. Step through it:</p>
+    <div class="widget" id="shell">
+      <h4>How Shellshock dumps your password file</h4>
+      <div id="shellStage"></div>
+      <p id="shellCaption" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:42px"></p>
+      <div class="controls">
+        <button class="ui" id="shellStep">Step &rarr;</button>
+        <button class="ui ghost" id="shellReset">Reset</button>
+      </div>
+    </div>
+    <div class="code-label">The injected request, in effect, runs:</div>
+    <pre><code><span class="code-comment"># attacker smuggles this through a crafted HTTP header</span>
+<span class="code-cmd">cat</span> /etc/passwd   <span class="code-comment"># read the password file...</span>
+<span class="code-comment"># ...and the web server returns it in the HTTP response</span></code></pre>
+    <div class="notebox">
+      <div class="lbl">A modern echo &mdash; Log4Shell</div>
+      Shellshock's pattern returned in 2021 as <b>Log4Shell</b> (<code class="inline">CVE-2021-44228</code>) in the <b>Log4j</b> logging library: another tiny, ubiquitous component, another path to remote code execution, present in countless applications at once. The lesson repeats &mdash; a flaw in something <em>everywhere</em> is catastrophic. <em>(Covered on the slides; expand here when you record the Log4j segment.)</em>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">5</span> The vulnerability lifecycle</h2>
+    <p>Every vulnerability moves through stages. The dangerous stretch is the <strong>window of exposure</strong> &mdash; the time a weakness is known to attackers but not yet patched on your systems. Step through it:</p>
+    <div class="widget" id="life">
+      <h4>From introduced to patched</h4>
+      <div id="lifeStage"></div>
+      <p id="lifeCaption" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:44px"></p>
+      <div class="controls">
+        <button class="ui" id="lifeStep">Advance &rarr;</button>
+        <button class="ui ghost" id="lifeReset">Reset</button>
+      </div>
+    </div>
+    <div class="keybox">
+      <div class="lbl">Responsible disclosure</div>
+      Good-guy researchers (Google's teams, for example) tell the vendor <b>privately</b>. The vendor builds a patch, and the vulnerability is usually <b>disclosed at the same moment the patch ships</b> &mdash; never before, or every attacker would race to exploit it. After that, the clock is on <b>you</b> to patch.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">6</span> Attacker recon vs defender scanning</h2>
+    <p>Your enterprise is a <strong>black box</strong> to an attacker on the outside &mdash; so they probe it, the way a burglar cases a house by checking which doors are unlocked. The defender does the very same probing, first, to themselves. Same tools, opposite intent:</p>
+    <table class="compare-table">
+      <thead><tr><th>Activity</th><th>Attacker (recon)</th><th>Defender (assurance)</th></tr></thead>
+      <tbody>
+        <tr><td>Port scanning</td><td>Find which ports and services were left open to the world.</td><td>Confirm no extra ports are exposed; close what shouldn't be open.</td></tr>
+        <tr><td>Reconnaissance</td><td>Fingerprint web-server versions and internal structure.</td><td>Know your own attack surface before someone else maps it.</td></tr>
+        <tr><td>Vulnerability scanning</td><td>&mdash;</td><td>Inventory all software; compare versions against the NVD for known CVEs.</td></tr>
+        <tr><td>Penetration testing</td><td>Exploit a found weakness for real gain.</td><td>Safely exploit it yourself to prove the gap and fix it first.</td></tr>
+      </tbody>
+    </table>
+    <p>The economics matter: cybersecurity is a business on <em>both</em> sides. Whoever finds a vulnerability first &mdash; attacker or defender &mdash; captures the value, which is exactly why defenders scan relentlessly.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">7</span> Where to look it up</h2>
+    <p>Two public sources put this at your fingertips. The <strong>NVD</strong> (nvd.nist.gov) is the authoritative catalog. <strong>CVE Details</strong> (cvedetails.com) is a friendlier front end &mdash; browse by year (every disclosure in 2026), filter by <strong>vendor</strong> (say, all VMware CVEs), and sort by CVSS to surface the 9s and 10s first. Make checking these a habit for any software you run.</p>
+  </section>
+
+  <div class="assessment-box">
+    <div class="assess-label">Remember</div>
+    <p>A <strong>vulnerability</strong> is a weakness; a <strong>threat</strong> exploits it; <strong>risk</strong> is the overlap. Weaknesses are <strong>configuration</strong>, <strong>software</strong>, or <strong>design/architectural</strong> (Target was architectural). Disclosed vulnerabilities get a <strong>CVE</strong> id and a <strong>CVSS</strong> score (0&ndash;10) in the <strong>NVD</strong>. <strong>Shellshock</strong> reached bash through Apache to achieve <strong>remote code execution</strong> &mdash; the same shape as Log4Shell years later. Vulnerabilities have a <strong>lifecycle</strong>, and the gap before you patch is your <strong>window of exposure</strong>. Attackers and defenders use the same probes; the defender's job is to find the weakness first.</p>
+  </div>
+
+</div>
+
+<footer class="pagenav foot"><div class="pagenav-inner">
+  <span class="brand">Module 3 &middot; Enterprise Security Architecture</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn" href="02-defense-in-depth.html">&larr; Prev</a>
+    <span class="navbtn disabled">Next &rarr;</span>
+  </nav>
+</div></footer>
+
+<script>
+/* ---------- 2. Vulnerability types ---------- */
+(function(){
+  const row=document.getElementById('vtRow'),det=document.getElementById('vtDetail');
+  const V=[
+    {k:'Configuration',c:'#0E7490',sum:'You own the right tools but set them up wrong. Essentially user error.',ex:['A firewall installed but never configured to block traffic','Weak or default passwords (\u201cpassword123\u201d) open to brute force','Open ports and over-broad permissions left in place']},
+    {k:'Software',c:'#8E5CA8',sum:'The code itself is flawed. No software is ever perfect.',ex:['Logic flaws in vendor or in-house code','Memory and buffer-overflow bugs','Defects in dependencies you didn\u2019t write but run']},
+    {k:'Design / Architectural',c:'#B45309',sum:'The shape of the system is wrong \u2014 the deepest and hardest to fix.',ex:['Flat networks with no segmentation','Implicit trust once \u201cinside\u201d (castle-and-moat)','Excessive permissions \u2014 the Target breach']}
+  ];
+  let sel=0;
+  function render(){
+    row.innerHTML=V.map((v,i)=>{const on=i===sel;return `<button class="ui ${on?'':'ghost'}" data-i="${i}" style="font-size:12px;${on?`background:${v.c};border-color:${v.c}`:`color:${v.c};border-color:${v.c}`}">${v.k}</button>`;}).join('');
+    row.querySelectorAll('button').forEach(b=>b.onclick=()=>{sel=+b.dataset.i;render();});
+    const v=V[sel]; det.className='fade';
+    det.innerHTML=`<div style="font-family:'Barlow Condensed';font-weight:800;font-size:22px;color:${v.c};margin-bottom:6px">${v.k}</div>
+      <p style="font-size:13.5px;line-height:1.6;margin:0 0 10px">${v.sum}</p>
+      <ul style="font-size:13px;line-height:1.6;margin:0;padding-left:20px">${v.ex.map(e=>`<li>${e}</li>`).join('')}</ul>`;
+    setTimeout(()=>det.classList.remove('fade'),360);
+  }
+  render();
+})();
+
+/* ---------- 3. CVSS meter ---------- */
+(function(){
+  const slide=document.getElementById('cvssSlide'),val=document.getElementById('cvssVal'),band=document.getElementById('cvssBand'),note=document.getElementById('cvssNote');
+  function bandFor(x){
+    if(x===0) return {n:'None',c:'#5f5e5a',bg:'#eceae3'};
+    if(x<4) return {n:'Low',c:'#2e7d57',bg:'#e3f3ea'};
+    if(x<7) return {n:'Medium',c:'#9a7d12',bg:'#faf3da'};
+    if(x<9) return {n:'High',c:'#b65416',bg:'#fbe9d8'};
+    return {n:'Critical',c:'#c0392b',bg:'#fbe2dd'};
+  }
+  function render(){
+    const x=(+slide.value)/10;
+    const b=bandFor(x);
+    val.textContent=x.toFixed(1); val.style.color=b.c;
+    band.textContent=b.n; band.style.color=b.c; band.style.background=b.bg;
+    note.innerHTML = x>=9 ? 'Patch <b>immediately</b>. Shellshock sat here at <b>9.8</b> \u2014 remotely exploitable, on software everywhere.'
+      : x>=7 ? 'Serious \u2014 schedule remediation urgently.'
+      : x>=4 ? 'Moderate \u2014 fix in your normal patch cycle, sooner if exposed.'
+      : x>0 ? 'Low priority, but still tracked.'
+      : 'No measurable severity.';
+  }
+  render(); slide.oninput=render;
+})();
+
+/* ---------- 4. Shellshock RCE ---------- */
+(function(){
+  const stage=document.getElementById('shellStage'),cap=document.getElementById('shellCaption');
+  const HW='#2D3748',OS='#0E7490',SH='#B45309',APP='#2E86C8',R='#c0392b',mute='#9aa3a8';
+  const steps=[
+    {hi:[],flow:0,cap:'The stack: hardware at the base, the OS kernel above it, the bash shell as the command interface, and the Apache web application on top.'},
+    {hi:['app'],flow:1,cap:'A normal-looking HTTP request arrives at the Apache web server \u2014 exactly what it\u2019s built to accept.'},
+    {hi:['app','sh'],flow:2,cap:'But the request carries a crafted environment variable. Apache hands it to bash, which mis-parses it as a command \u2014 the Shellshock flaw.'},
+    {hi:['sh','os'],flow:3,cap:'Bash executes the smuggled command against the OS: cat /etc/passwd \u2014 read the password file. This is remote code execution.'},
+    {hi:['app'],flow:4,cap:'The output is folded into the HTTP response. The attacker receives your password file in their browser. Game over.'}
+  ];
+  let step=0;
+  function layer(id,y,label,fill,hi){
+    const on=hi.includes(id);
+    return `<rect x="60" y="${y}" width="440" height="44" rx="7" fill="${on?fill:'#eef0f1'}" stroke="${on?fill:'#dfe3e5'}" stroke-width="${on?2.5:1.3}"/>`+
+      `<text x="280" y="${y+27}" text-anchor="middle" font-size="12.5" font-weight="800" fill="${on?'#fff':'#8b9398'}">${label}</text>`;
+  }
+  function render(){
+    const st=steps[step],hi=st.hi;
+    let s=`<svg viewBox="0 0 560 280" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    s+=layer('app',24,'Apache web application',APP,hi);
+    s+=layer('sh',82,'bash shell  (command interface)',SH,hi);
+    s+=layer('os',140,'Operating system kernel',OS,hi);
+    s+=layer('hw',198,'Hardware',HW,hi);
+    // attacker
+    s+=`<text x="280" y="262" text-anchor="middle" font-size="10" font-weight="700" fill="${mute}">\u{1F310} attacker on the internet</text>`;
+    // flow arrows depending on step
+    if(st.flow===1){ s+=`<line x1="540" y1="46" x2="500" y2="46" stroke="${OS}" stroke-width="2.5" marker-end="url(#sh)"/><text x="545" y="38" font-size="9" fill="${OS}" text-anchor="end">request</text>`; }
+    if(st.flow===2){ s+=`<line x1="280" y1="68" x2="280" y2="82" stroke="${R}" stroke-width="2.5" marker-end="url(#sh)"/>`; }
+    if(st.flow===3){ s+=`<line x1="280" y1="126" x2="280" y2="140" stroke="${R}" stroke-width="2.5" marker-end="url(#sh)"/>`; }
+    if(st.flow===4){ s+=`<line x1="500" y1="46" x2="540" y2="46" stroke="${R}" stroke-width="2.5" marker-end="url(#sh)"/><text x="545" y="38" font-size="9" fill="${R}" text-anchor="end">passwords!</text>`; }
+    s+=`<defs><marker id="sh" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="${R}"/></marker></defs>`;
+    s+=`</svg>`;
+    stage.innerHTML=s; cap.textContent=st.cap;
+  }
+  render();
+  document.getElementById('shellStep').onclick=()=>{step=(step+1)%steps.length;render();};
+  document.getElementById('shellReset').onclick=()=>{step=0;render();};
+})();
+
+/* ---------- 5. Vulnerability lifecycle ---------- */
+(function(){
+  const stage=document.getElementById('lifeStage'),cap=document.getElementById('lifeCaption');
+  const STAGES=[
+    {k:'Introduced',c:'#2D3748',cap:'The weakness enters the system \u2014 someone deploys flawed code or misconfigures a service. Nobody knows yet.'},
+    {k:'Discovered',c:'#8E5CA8',cap:'Someone finds it \u2014 a researcher, or an attacker. Whoever finds it first holds the advantage.'},
+    {k:'Disclosed + Patched',c:'#0E7490',cap:'Responsible disclosure: the vendor is told privately, builds a fix, and the flaw is announced as the patch ships.'},
+    {k:'You patch',c:'#2EA65A',cap:'The clock is now on you. Until you apply the patch, you are knowingly exposed.'}
+  ];
+  let step=0;
+  function render(){
+    let s=`<svg viewBox="0 0 560 150" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    const xs=[70,210,350,490];
+    // window of exposure band: between Discovered (x=210) and You patch (x=490), shown once step>=1
+    if(step>=1){
+      const x2 = step>=3 ? 490 : (step>=2?420:350);
+      s+=`<rect x="210" y="20" width="${x2-210}" height="60" rx="6" fill="#fbe2dd" stroke="#c0392b" stroke-width="1.2" stroke-dasharray="5 4"/><text x="${(210+x2)/2}" y="15" text-anchor="middle" font-size="9" font-weight="800" fill="#c0392b">WINDOW OF EXPOSURE</text>`;
+    }
+    // baseline
+    s+=`<line x1="70" y1="50" x2="490" y2="50" stroke="#dfe3e5" stroke-width="2"/>`;
+    STAGES.forEach((st,i)=>{
+      const on=i<=step, cur=i===step;
+      s+=`<circle cx="${xs[i]}" cy="50" r="${cur?13:10}" fill="${on?st.c:'#eef0f1'}" stroke="${on?st.c:'#dfe3e5'}" stroke-width="2"/>`;
+      s+=`<text x="${xs[i]}" y="54" text-anchor="middle" font-size="10" font-weight="800" fill="${on?'#fff':'#aab1b5'}">${i+1}</text>`;
+      s+=`<text x="${xs[i]}" y="104" text-anchor="middle" font-size="10.5" font-weight="${cur?800:600}" fill="${on?st.c:'#aab1b5'}">${st.k}</text>`;
+    });
+    s+=`</svg>`;
+    stage.innerHTML=s; cap.textContent=STAGES[step].cap;
+  }
+  render();
+  document.getElementById('lifeStep').onclick=()=>{step=(step+1)%STAGES.length;render();};
+  document.getElementById('lifeReset').onclick=()=>{step=0;render();};
+})();
+</script>
+</body></html>

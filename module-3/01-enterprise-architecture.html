@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Enterprise Security Architecture &mdash; Module 3</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+* { box-sizing:border-box; margin:0; padding:0; }
+:root{
+  --slate-dark:#1A202C; --slate:#2D3748;
+  --accent:#0E7490; --accent-dark:#0B5567; --accent-soft:#CFF1F6;
+  --info:#1E40AF; --info-soft:#DBEAFE;
+  --text:#1a1a18; --text-muted:#5f5e5a; --text-light:#888780;
+  --border:rgba(0,0,0,0.09); --bg:#fafaf8; --bg-card:#fff; --bg-code:#f6f6f3; --tag-bg:#f1f0eb;
+  /* widget-compat tokens */
+  --rust:#B45309; --soft:#888780; --muted:#5f5e5a; --rule:rgba(0,0,0,0.09);
+  --ok:#2e7d57; --callout-bg:#f1f9fb; --code-bg:#f6f6f3;
+}
+body{ font-family:'Barlow',sans-serif; background:var(--bg); color:var(--text); line-height:1.65; min-height:100vh; }
+
+/* page nav (header + footer) */
+.pagenav{ background:var(--slate-dark); }
+.pagenav.foot{ margin-top:48px; }
+.pagenav-inner{ max-width:920px; margin:0 auto; padding:11px 32px; display:flex; justify-content:space-between; align-items:center; gap:16px; }
+.pagenav .brand{ color:rgba(255,255,255,0.45); font-size:11px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; white-space:nowrap; }
+.navbtns{ display:flex; gap:8px; }
+.navbtn{ display:inline-flex; align-items:center; gap:6px; font-family:'Barlow',sans-serif; font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#fff; background:rgba(255,255,255,0.10); border:1px solid rgba(255,255,255,0.22); border-radius:6px; padding:7px 13px; text-decoration:none; transition:0.15s; white-space:nowrap; }
+.navbtn:hover{ background:var(--accent); border-color:var(--accent); }
+.navbtn.disabled{ opacity:0.28; pointer-events:none; }
+@media(max-width:560px){ .pagenav .brand{ display:none } .pagenav-inner{ justify-content:center } }
+
+/* header */
+.header{ background:#fff; padding:56px 0 44px; border-bottom:0.5px solid var(--border); }
+.header-inner{ max-width:920px; margin:0 auto; padding:0 32px; }
+.header-eyebrow{ font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:14px; display:flex; align-items:center; gap:12px; }
+.header-eyebrow::after{ content:''; flex:1; height:0.5px; background:var(--border); max-width:120px; }
+.header h1{ font-family:'Barlow Condensed',sans-serif; font-size:clamp(34px,4.5vw,52px); font-weight:900; letter-spacing:-0.01em; line-height:1.05; color:var(--text); margin-bottom:18px; }
+.header h1 em{ font-style:normal; color:var(--accent); }
+.header-meta-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+.module-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:var(--slate); color:#fff; }
+.topic-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:#F1F5F9; color:#475569; }
+.topic-pill.accent{ background:var(--accent-soft); color:var(--accent-dark); }
+
+/* page */
+.page{ max-width:920px; margin:0 auto; padding:0 32px 48px; }
+
+/* objectives */
+.objectives{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--accent); border-radius:6px; padding:22px 28px; margin:36px 0 14px; }
+.obj-label{ font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:14px; }
+.objectives ul{ list-style:none; }
+.objectives ul li{ font-size:14px; color:var(--text); padding:5px 0 5px 20px; position:relative; line-height:1.55; }
+.objectives ul li::before{ content:'◇'; position:absolute; left:0; color:var(--accent); font-size:10px; top:9px; }
+
+/* sections */
+section{ margin-top:44px; }
+section h2{ font-family:'Barlow Condensed',sans-serif; font-size:28px; font-weight:800; letter-spacing:0.005em; color:var(--text); margin-bottom:20px; display:flex; align-items:baseline; gap:20px; }
+section h2 .num{ font-family:'Barlow Condensed',sans-serif; font-size:56px; font-weight:900; color:var(--accent); letter-spacing:-0.02em; line-height:0.85; min-width:42px; }
+section h3{ font-family:'Barlow',sans-serif; font-size:17px; font-weight:700; color:var(--text); margin:28px 0 12px; }
+section p{ font-size:14.5px; color:var(--text); line-height:1.75; margin-bottom:14px; }
+section p strong{ font-weight:700; color:var(--text); }
+section ul{ font-size:14.5px; line-height:1.75; color:var(--text); padding-left:22px; margin:8px 0 16px; }
+section ul li{ margin:4px 0; }
+section a{ color:var(--accent-dark); text-decoration:underline; text-decoration-color:rgba(0,0,0,0.2); text-underline-offset:2px; }
+section a:hover{ text-decoration-color:var(--accent); }
+
+/* compare tables */
+.compare-table{ width:100%; border-collapse:collapse; margin:16px 0 20px; font-size:13.5px; background:var(--bg-card); border:0.5px solid var(--border); border-radius:6px; overflow:hidden; }
+.compare-table thead th{ font-size:10px; font-weight:700; color:var(--text-light); text-transform:uppercase; letter-spacing:0.06em; padding:11px 16px; text-align:left; border-bottom:0.5px solid var(--border); background:#fafaf8; }
+.compare-table tbody td{ padding:11px 16px; border-bottom:0.5px solid #f0efe8; vertical-align:top; color:var(--text); line-height:1.55; }
+.compare-table tbody td:first-child{ font-weight:600; background:#fafaf8; width:28%; }
+.compare-table tbody tr:last-child td{ border-bottom:none; }
+
+/* code */
+pre{ font-family:'JetBrains Mono',monospace; background:var(--bg-code); border:0.5px solid var(--border); border-radius:6px; padding:14px 18px; font-size:12px; line-height:1.7; color:var(--text); overflow-x:auto; margin:12px 0 18px; }
+pre code{ font-family:inherit; }
+.code-label{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-light); margin:14px 0 6px; }
+.code-comment{ color:#9a988f; }
+.code-cmd{ color:var(--accent); font-weight:600; }
+.code-key{ color:var(--info); font-weight:600; }
+code.inline{ font-family:'JetBrains Mono',monospace; font-size:12.5px; background:var(--tag-bg); padding:1px 6px; border-radius:3px; color:var(--text); }
+
+/* callout boxes */
+.keybox{ background:var(--accent-soft); border-left:3px solid var(--accent); border-radius:0 6px 6px 0; padding:14px 18px; margin:14px 0 18px; font-size:13.5px; line-height:1.65; color:var(--text); }
+.keybox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--accent-dark); margin-bottom:6px; }
+.keybox b{ color:var(--accent-dark); }
+.notebox{ background:#FBF3E8; border-left:3px solid var(--rust); border-radius:0 6px 6px 0; padding:14px 18px; margin:14px 0 18px; font-size:13.5px; line-height:1.65; }
+.notebox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--rust); margin-bottom:6px; }
+
+/* concept cards */
+.concept-grid{ display:flex; flex-direction:column; gap:10px; margin-top:14px; }
+.concept-card{ background:var(--bg-card); border:0.5px solid var(--border); border-radius:7px; overflow:hidden; }
+.concept-head{ display:flex; align-items:center; gap:14px; padding:14px 20px; cursor:pointer; user-select:none; transition:background 0.15s; }
+.concept-head:hover{ background:#fafaf8; }
+.concept-icon{ font-size:16px; flex-shrink:0; color:var(--accent); }
+.concept-title{ flex:1; font-size:14.5px; font-weight:700; color:var(--text); }
+.concept-sub{ font-size:12px; color:var(--text-muted); font-weight:400; margin-top:1px; }
+.concept-chev{ font-size:10px; color:var(--text-light); }
+.concept-body{ display:none; padding:0 20px 18px; border-top:0.5px solid #f0efe8; }
+.concept-body.open{ display:block; }
+.concept-body p{ font-size:13.5px; line-height:1.7; color:var(--text); margin-top:12px; }
+.concept-body ul{ font-size:13.5px; margin-top:8px; }
+
+/* assessment / summary box */
+.assessment-box{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--slate); border-radius:0 6px 6px 0; padding:20px 24px; margin:30px 0 0; }
+.assessment-box .assess-label{ font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); margin-bottom:10px; }
+.assessment-box p{ font-size:13.5px; line-height:1.7; margin-bottom:10px; }
+.assessment-box p:last-child{ margin-bottom:0; }
+
+/* ===== interactive widgets ===== */
+.widget{ border:0.5px solid var(--border); border-radius:8px; padding:20px; margin:16px 0; background:var(--bg-card); }
+.widget h4{ margin:0 0 14px; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); font-weight:700; }
+.controls{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:14px; }
+button.ui{ font-family:'Barlow',sans-serif; cursor:pointer; border:1px solid var(--accent); background:var(--accent); color:#fff; padding:7px 16px; border-radius:6px; font-size:12.5px; font-weight:600; transition:0.15s; }
+button.ui:hover{ background:var(--accent-dark); border-color:var(--accent-dark); }
+button.ui.ghost{ background:#fff; color:var(--accent); }
+button.ui.ghost:hover{ background:var(--accent-soft); }
+.fade{ animation:fade 0.35s ease; }
+@keyframes fade{ from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+input[type=range]{ accent-color:var(--accent); }
+.kbd{ display:inline-block; background:#fff; border:1px solid #d6dbde; border-bottom-width:2px; border-radius:5px; padding:.05em .45em; font-family:'JetBrains Mono',monospace; font-size:.82em; }
+</style>
+</head><body>
+<header class="pagenav"><div class="pagenav-inner">
+  <span class="brand">Cloud Security Fundamentals</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <span class="navbtn disabled">&larr; Prev</span>
+    <a class="navbtn" href="02-defense-in-depth.html">Next &rarr;</a>
+  </nav>
+</div></header>
+
+<div class="header"><div class="header-inner">
+  <div class="header-eyebrow">Module 3 &nbsp;·&nbsp; Enterprise Security Architecture</div>
+  <h1>The <em>Castle</em> and the Moat</h1>
+  <div class="header-meta-row">
+    <span class="module-pill">Module 3</span>
+    <span class="topic-pill">Enterprise architecture</span>
+    <span class="topic-pill accent">Defense in depth</span>
+  </div>
+</div></div>
+
+<div class="page">
+
+  <div class="objectives">
+    <div class="obj-label">Learning Objectives</div>
+    <ul>
+      <li>Describe the three-tier enterprise architecture: client machines, servers, and the networking that connects them</li>
+      <li>Identify the security equipment that forms a network perimeter &mdash; firewalls, IDS/IPS, and endpoint protection</li>
+      <li>Explain the castle-and-moat model and why enterprises separate the internet from the internal network</li>
+      <li>Trace how inbound and outbound traffic is inspected in a DMZ</li>
+      <li>Map the five phases of the NIST framework onto a real-world response</li>
+      <li>Recognize that moving to the cloud preserves &mdash; not replaces &mdash; this architecture</li>
+    </ul>
+  </div>
+
+  <section>
+    <h2><span class="num">1</span> From one connection to the whole bank</h2>
+    <p>In the previous module we secured a <strong>single connection</strong> &mdash; a customer reaching a bank's web server, protected with encryption and a digital certificate that verifies the bank is really the bank. That solved confidentiality on the wire.</p>
+    <p>But now let's peek <em>inside</em> the bank. Behind that one web server is an entire <strong>enterprise architecture</strong> &mdash; many machines, many networks, and a whole class of equipment whose only job is to keep attackers out. That architecture is what this module is about.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> The three-tier application</h2>
+    <p>A primitive enterprise looks simple: employees have <strong>client machines</strong> (laptops, desktops) which they use to reach <strong>applications running on servers</strong>. Picture a bank:</p>
+    <ul>
+      <li>A bank manager's laptop is used to take <strong>mortgage applications</strong>.</li>
+      <li>Those applications are processed by an <strong>application server</strong>.</li>
+      <li>Your mortgage data is stored on a <strong>database server</strong>.</li>
+      <li>You, the customer, check your status by reaching the <strong>web server</strong>.</li>
+    </ul>
+    <p>This is the classic <strong>three-tier architecture</strong>: a <em>web</em> tier, an <em>application</em> tier, and a <em>database</em> tier. It's the backbone of almost every enterprise application &mdash; but it's only the bones. Let's add flesh.</p>
+    <div class="keybox">
+      <div class="lbl">The three tiers</div>
+      <b>Web server</b> takes requests from the outside &rarr; <b>application server</b> runs the business logic &rarr; <b>database server</b> stores the data. Each tier has a different job, and &mdash; as we'll see in the next note &mdash; lives on its own network for good reason.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> Add the plumbing &mdash; and the guards</h2>
+    <p>Clients and servers don't connect by magic. <strong>Networking equipment</strong> &mdash; switches and routers &mdash; interconnects everything and provides the path to the internet. And once you're connected to the internet, you need a new class of equipment whose entire purpose is protection: <strong>security equipment</strong> like firewalls and IDS/IPS.</p>
+    <p>Click through to watch a bare three-tier app grow into a defended enterprise:</p>
+    <div class="widget" id="buildup">
+      <h4>Building up the enterprise</h4>
+      <div id="buStage"></div>
+      <p id="buCaption" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:40px"></p>
+      <div class="controls">
+        <button class="ui" id="buNext">Next layer &rarr;</button>
+        <button class="ui ghost" id="buReset">Reset</button>
+      </div>
+    </div>
+    <div class="notebox">
+      <div class="lbl">Two kinds of infrastructure, two kinds of security</div>
+      An enterprise has <b>computing hardware</b> (clients and servers) and <b>networking hardware</b> (switches, routers). Security mirrors that split: <b>network security</b> (firewall, IDS, IPS) guards the wires, and <b>endpoint security</b> (antivirus on clients and servers) guards the machines.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> The castle-and-moat model</h2>
+    <p>Stack all that security equipment together and it does one thing: it establishes a strong <strong>network perimeter</strong> that separates the dangerous internet from the trusted enterprise network. The internet is full of malware, viruses, and attackers probing to get in; the perimeter is what gates who gets through.</p>
+    <p>This is the <strong>castle-and-moat architecture</strong>. The parallel is exact &mdash; click to map it:</p>
+    <div class="widget" id="castle">
+      <h4>Castle &harr; Enterprise</h4>
+      <div id="castleRows"></div>
+      <div class="controls">
+        <button class="ui" id="castleFlip">Show the enterprise equivalent &rarr;</button>
+      </div>
+    </div>
+    <p>The point of the walls is to protect the <strong>crown jewels</strong> &mdash; in an enterprise, that's the corporate data: credit card numbers, financial records, health information. Everything inside the perimeter exists to keep that data out of the wrong hands.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">5</span> The DMZ &mdash; a guarded landing zone</h2>
+    <p>You can't just build walls and seal yourself off &mdash; an enterprise has to talk to the outside world. Legitimate customers need to reach the bank's website. So how do you let good traffic in without trusting it blindly? You give it a <strong>landing zone</strong>: the <strong>DMZ (demilitarized zone)</strong>.</p>
+    <p>External-facing traffic lands in the DMZ first, gets <strong>inspected</strong>, and only the good traffic is forwarded to the internal servers. Step through three common flows:</p>
+    <div class="widget" id="dmz">
+      <h4>Traffic through the DMZ</h4>
+      <div class="controls" style="margin:0 0 14px">
+        <button class="ui" data-flow="0">Customer &rarr; website</button>
+        <button class="ui ghost" data-flow="1">Employee &rarr; internet</button>
+        <button class="ui ghost" data-flow="2">Inbound email</button>
+      </div>
+      <div id="dmzStage"></div>
+      <p id="dmzCaption" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:38px"></p>
+      <div class="controls">
+        <button class="ui" id="dmzStep">Step &rarr;</button>
+        <button class="ui ghost" id="dmzReset">Reset</button>
+      </div>
+    </div>
+    <div class="keybox">
+      <div class="lbl">What lives in the DMZ</div>
+      The <b>web server</b> (for inbound customer traffic), the <b>secure web gateway / SWG</b> (inspects employees' outbound web traffic on the way back), and the <b>email gateway</b> (scans inbound email before it reaches the mail server). The DMZ is inside the perimeter, but it's the only place external traffic is allowed to touch first.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">6</span> Your house is a castle too</h2>
+    <p>Forget the castle for a moment &mdash; think of your house. You have <strong>locks and window bars</strong> to keep intruders out (that's your firewall and antivirus). But you also have <strong>cameras</strong>, because even with locks you want to know if something's wrong (that's intrusion detection). If a camera catches a burglar, you <strong>call the security company</strong> (response), and afterward you <strong>replace what was stolen</strong> (recovery).</p>
+    <p>That sequence &mdash; figure out what to protect, protect it, watch for trouble, respond, recover &mdash; is exactly how professionals structure security. It has a name.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">7</span> The NIST framework</h2>
+    <p>The <strong>NIST</strong> (National Institute of Standards and Technology) Cybersecurity Framework organizes security into <strong>five phases</strong>. Most security products on the market are built to serve one or more of them. Click each phase:</p>
+    <div class="widget" id="nist">
+      <h4>The five NIST phases</h4>
+      <div id="nistRow" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px"></div>
+      <div id="nistDetail" style="background:var(--bg);border-radius:8px;padding:16px 18px;min-height:96px"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">8</span> Moving to the cloud changes the address, not the architecture</h2>
+    <p>Here's the punchline of the whole module. When you move to the cloud, your servers might move to AWS, or you might drop some servers entirely and adopt SaaS. Either way, <strong>the architecture stays the same</strong>: you still create an isolated environment, you still separate your infrastructure from the outside world, and you still protect what's inside.</p>
+    <p>The walls become security groups and VPCs, the moat becomes cloud networking, but the <em>shape</em> &mdash; perimeter, layers, identify-protect-detect-respond-recover &mdash; carries over. That's why this model is worth learning once and reusing everywhere, which is exactly what the rest of this course does.</p>
+  </section>
+
+  <div class="assessment-box">
+    <div class="assess-label">Remember</div>
+    <p>An enterprise is a <strong>three-tier app</strong> (web &rarr; application &rarr; database) wrapped in <strong>security equipment</strong> that forms a <strong>network perimeter</strong> &mdash; the <strong>castle-and-moat</strong> model. External traffic lands in the <strong>DMZ</strong> to be inspected before it's trusted. <strong>Network security</strong> guards the wires; <strong>endpoint security</strong> guards the machines. The <strong>NIST framework</strong> &mdash; Identify, Protect, Detect, Respond, Recover &mdash; names the full lifecycle. And moving to the cloud keeps this architecture intact.</p>
+  </div>
+
+</div>
+
+<footer class="pagenav foot"><div class="pagenav-inner">
+  <span class="brand">Module 3 &middot; Enterprise Security Architecture</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <span class="navbtn disabled">&larr; Prev</span>
+    <a class="navbtn" href="02-defense-in-depth.html">Next &rarr;</a>
+  </nav>
+</div></footer>
+
+<script>
+/* ---------- 3. Build-up diagram ---------- */
+(function(){
+  const stage=document.getElementById('buStage'),cap=document.getElementById('buCaption');
+  const T='#0E7490', S='#2D3748', G='#2EA65A', R='#B45309', mute='#9aa3a8';
+  const caps=[
+    'A bare three-tier application: client machines reach a web server, which talks to an application server, which reads from a database.',
+    'Networking equipment \u2014 switches and routers \u2014 interconnects the machines and provides a path to the internet.',
+    'Security equipment is added: a firewall and IDS/IPS guard the network; endpoint protection (antivirus) runs on every client and server.',
+    'Together the security equipment forms a single network perimeter \u2014 the wall that separates the trusted enterprise from the open internet.'
+  ];
+  function box(x,y,w,h,fill,label,sub,stroke){
+    return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="7" fill="${fill}" stroke="${stroke||'none'}" stroke-width="1.5"/>`+
+      `<text x="${x+w/2}" y="${y+(sub?h/2-2:h/2+4)}" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">${label}</text>`+
+      (sub?`<text x="${x+w/2}" y="${y+h/2+13}" text-anchor="middle" font-size="8.5" font-weight="600" fill="rgba(255,255,255,.85)">${sub}</text>`:'');
+  }
+  function line(x1,y1,x2,y2,c){return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c||'#c4c9cc'}" stroke-width="2"/>`;}
+  function render(step){
+    let s=`<svg viewBox="0 0 560 270" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    if(step>=3){ s+=`<rect x="14" y="14" width="532" height="242" rx="12" fill="none" stroke="${T}" stroke-width="2.5" stroke-dasharray="9 6"/><text x="280" y="32" text-anchor="middle" font-size="10.5" font-weight="800" fill="${T}" letter-spacing="1.5">NETWORK PERIMETER</text>`; }
+    // tier boxes
+    s+=box(40,128,78,44,S,'Clients','workstations');
+    s+=box(196,128,90,44,T,'Web','server');
+    s+=box(330,128,90,44,T,'App','server');
+    s+=box(452,128,80,44,S,'Database','server');
+    s+=line(118,150,196,150);s+=line(286,150,330,150);s+=line(420,150,452,150);
+    if(step>=2){
+      s+=box(150,205,120,34,mute,'Switches / Routers','');
+      s+=line(210,172,210,205,mute);
+      s+=`<text x="455" y="226" text-anchor="middle" font-size="10" font-weight="700" fill="${mute}">\u2191 to the internet</text>`;
+    }
+    if(step>=3){
+      s+=box(312,205,96,34,R,'Firewall + IDS/IPS','');
+      s+=line(360,172,360,205,R);
+      s+=`<circle cx="79" cy="118" r="6" fill="${G}"/><circle cx="241" cy="118" r="6" fill="${G}"/><circle cx="375" cy="118" r="6" fill="${G}"/><circle cx="492" cy="118" r="6" fill="${G}"/>`;
+      s+=`<text x="280" y="252" text-anchor="middle" font-size="8.5" font-weight="700" fill="${G}">\u25cf endpoint protection on every machine</text>`;
+    }
+    s+=`</svg>`;
+    stage.innerHTML=s; cap.textContent=caps[step];
+  }
+  let step=0; render(0);
+  document.getElementById('buNext').onclick=()=>{ step=Math.min(step+1,3); render(step); };
+  document.getElementById('buReset').onclick=()=>{ step=0; render(0); };
+})();
+
+/* ---------- 4. Castle <-> Enterprise mapping ---------- */
+(function(){
+  const rows=document.getElementById('castleRows'),btn=document.getElementById('castleFlip');
+  const MAP=[
+    {icon:'\u{1F3F0}',castle:'Fortress walls',ent:'Firewalls'},
+    {icon:'\u{1F30A}',castle:'The moat',ent:'Network perimeter'},
+    {icon:'\u{1F6AA}',castle:'The gatehouse',ent:'DMZ \u2014 controlled, inspected entry'},
+    {icon:'\u{1F451}',castle:'The crown jewels',ent:'Corporate data (financial, health, PII)'},
+    {icon:'\u{1F441}',castle:'Watchmen on the walls',ent:'IDS / IPS'}
+  ];
+  let flipped=false;
+  function render(){
+    rows.innerHTML=MAP.map(m=>{
+      const right=flipped?m.ent:'<span style="color:var(--text-light)">?</span>';
+      return `<div style="display:flex;align-items:center;gap:14px;padding:11px 14px;border-bottom:0.5px solid var(--border)">
+        <span style="font-size:20px;width:26px;text-align:center">${m.icon}</span>
+        <span style="flex:1;font-weight:700;font-size:13.5px;color:var(--text)">${m.castle}</span>
+        <span style="color:var(--text-light);font-size:14px">&rarr;</span>
+        <span style="flex:1.2;font-size:13.5px;font-weight:${flipped?700:400};color:${flipped?'var(--accent-dark)':'var(--text-light)'}">${right}</span>
+      </div>`;
+    }).join('');
+    btn.textContent=flipped?'\u21ba Hide':'Show the enterprise equivalent \u2192';
+  }
+  render();
+  btn.onclick=()=>{ flipped=!flipped; render(); rows.classList.add('fade'); setTimeout(()=>rows.classList.remove('fade'),360); };
+})();
+
+/* ---------- 5. DMZ traffic flow ---------- */
+(function(){
+  const stage=document.getElementById('dmzStage'),cap=document.getElementById('dmzCaption');
+  const T='#0E7490',S='#2D3748',R='#B45309',G='#2EA65A',mute='#9aa3a8';
+  const FLOWS=[
+    {name:'Customer \u2192 website',steps:[
+      {hi:['net'],cap:'A customer on the internet requests the bank\u2019s website.'},
+      {hi:['net','web'],cap:'The request lands on the web server in the DMZ \u2014 not directly on internal systems.'},
+      {hi:['web'],cap:'The web server authenticates the request (username, password) and confirms it\u2019s valid.'},
+      {hi:['web','app'],cap:'Only then is the request forwarded to the application server inside the enterprise network.'}
+    ]},
+    {name:'Employee \u2192 internet',steps:[
+      {hi:['app'],cap:'An employee\u2019s client requests a website out on the internet.'},
+      {hi:['app','net'],cap:'The request goes out \u2014 but the response coming back is the dangerous part.'},
+      {hi:['web','net'],cap:'The returning traffic first hits the Secure Web Gateway (SWG) in the DMZ.'},
+      {hi:['web','app'],cap:'The SWG inspects it; only clean traffic is passed back to the client.'}
+    ]},
+    {name:'Inbound email',steps:[
+      {hi:['net'],cap:'Email arrives from the internet \u2014 it may carry malware or phishing.'},
+      {hi:['net','web'],cap:'It lands first on the email gateway in the DMZ.'},
+      {hi:['web'],cap:'The email gateway scans every message for malicious content.'},
+      {hi:['web','app'],cap:'Only clean mail is delivered to the internal mail server.'}
+    ]}
+  ];
+  let flow=0,step=0;
+  function comp(id,x,y,w,label,sub,hi,color){
+    const on=hi.includes(id);
+    const fill=on?color:'#eef0f1', tc=on?'#fff':'#8b9398';
+    return `<rect x="${x}" y="${y}" width="${w}" height="46" rx="7" fill="${fill}" stroke="${on?color:'#dfe3e5'}" stroke-width="1.5"/>`+
+      `<text x="${x+w/2}" y="${y+20}" text-anchor="middle" font-size="11" font-weight="800" fill="${tc}">${label}</text>`+
+      `<text x="${x+w/2}" y="${y+34}" text-anchor="middle" font-size="8" font-weight="600" fill="${on?'rgba(255,255,255,.85)':'#aab1b5'}">${sub}</text>`;
+  }
+  function render(){
+    const f=FLOWS[flow], hi=f.steps[step].hi;
+    let s=`<svg viewBox="0 0 560 210" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    // DMZ band
+    s+=`<rect x="168" y="20" width="150" height="170" rx="10" fill="#FBF3E8" stroke="${R}" stroke-width="1.5" stroke-dasharray="6 5"/><text x="243" y="38" text-anchor="middle" font-size="9.5" font-weight="800" fill="${R}" letter-spacing="1">DMZ</text>`;
+    // enterprise band
+    s+=`<rect x="338" y="20" width="208" height="170" rx="10" fill="#f1f9fb" stroke="${T}" stroke-width="1.5"/><text x="442" y="38" text-anchor="middle" font-size="9.5" font-weight="800" fill="${T}" letter-spacing="1">ENTERPRISE NETWORK</text>`;
+    s+=comp('net','20',92,120,'Internet','outside','net',S).replace('width="120"','width="120"');
+    s+=comp('web','183',92,120,(flow===2?'Email gateway':(flow===1?'Secure Web GW':'Web server')),'in DMZ','web',R);
+    s+=comp('app','360',92,164,(flow===2?'Mail server':'App / internal'),'inside','app',T);
+    // arrows
+    s+=`<line x1="140" y1="115" x2="183" y2="115" stroke="#c4c9cc" stroke-width="2" marker-end="url(#ah)"/>`;
+    s+=`<line x1="303" y1="115" x2="360" y2="115" stroke="#c4c9cc" stroke-width="2" marker-end="url(#ah)"/>`;
+    s+=`<defs><marker id="ah" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa3a8"/></marker></defs>`;
+    s+=`</svg>`;
+    stage.innerHTML=s; cap.textContent=f.steps[step].cap;
+    document.querySelectorAll('#dmz [data-flow]').forEach(b=>{const a=+b.dataset.flow===flow;b.className='ui'+(a?'':' ghost');});
+  }
+  render();
+  document.querySelectorAll('#dmz [data-flow]').forEach(b=>b.onclick=()=>{flow=+b.dataset.flow;step=0;render();});
+  document.getElementById('dmzStep').onclick=()=>{const f=FLOWS[flow];step=(step+1)%f.steps.length;render();};
+  document.getElementById('dmzReset').onclick=()=>{step=0;render();};
+})();
+
+/* ---------- 7. NIST phases ---------- */
+(function(){
+  const row=document.getElementById('nistRow'),det=document.getElementById('nistDetail');
+  const P=[
+    {k:'Identify',c:'#2D3748',house:'Know which jewels and cash are worth protecting.',sec:'Asset inventory, risk assessment, data classification.'},
+    {k:'Protect',c:'#0E7490',house:'Fit locks on the doors and bars on the windows.',sec:'Firewalls, antivirus/EPP, encryption, access control.'},
+    {k:'Detect',c:'#8E5CA8',house:'Install cameras that flag anything unusual.',sec:'IDS/IPS, logging, monitoring, anomaly detection.'},
+    {k:'Respond',c:'#B45309',house:'Call the security company to stop the burglar.',sec:'Incident response, containment, mitigation.'},
+    {k:'Recover',c:'#2EA65A',house:'Replace what was stolen; get back to normal.',sec:'Backups, disaster recovery, restoring operations.'}
+  ];
+  let sel=1;
+  function render(){
+    row.innerHTML=P.map((p,i)=>{
+      const on=i===sel;
+      return `<button class="ui ${on?'':'ghost'}" data-i="${i}" style="font-size:12px;${on?`background:${p.c};border-color:${p.c}`:`color:${p.c};border-color:${p.c}`}">${i+1}. ${p.k}</button>`;
+    }).join('');
+    row.querySelectorAll('button').forEach(b=>b.onclick=()=>{sel=+b.dataset.i;render();});
+    const p=P[sel];
+    det.className='fade';
+    det.innerHTML=`<div style="font-family:'Barlow Condensed';font-weight:800;font-size:22px;color:${p.c};margin-bottom:8px">${p.k}</div>
+      <p style="font-size:13.5px;line-height:1.6;margin:0 0 8px"><b>At home:</b> ${p.house}</p>
+      <p style="font-size:13.5px;line-height:1.6;margin:0"><b>In the enterprise:</b> ${p.sec}</p>`;
+    setTimeout(()=>det.classList.remove('fade'),360);
+  }
+  render();
+})();
+</script>
+</body></html>

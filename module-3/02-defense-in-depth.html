@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Defense in Depth &mdash; Module 3</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+* { box-sizing:border-box; margin:0; padding:0; }
+:root{
+  --slate-dark:#1A202C; --slate:#2D3748;
+  --accent:#0E7490; --accent-dark:#0B5567; --accent-soft:#CFF1F6;
+  --info:#1E40AF; --info-soft:#DBEAFE;
+  --text:#1a1a18; --text-muted:#5f5e5a; --text-light:#888780;
+  --border:rgba(0,0,0,0.09); --bg:#fafaf8; --bg-card:#fff; --bg-code:#f6f6f3; --tag-bg:#f1f0eb;
+  /* widget-compat tokens */
+  --rust:#B45309; --soft:#888780; --muted:#5f5e5a; --rule:rgba(0,0,0,0.09);
+  --ok:#2e7d57; --callout-bg:#f1f9fb; --code-bg:#f6f6f3;
+}
+body{ font-family:'Barlow',sans-serif; background:var(--bg); color:var(--text); line-height:1.65; min-height:100vh; }
+
+/* page nav (header + footer) */
+.pagenav{ background:var(--slate-dark); }
+.pagenav.foot{ margin-top:48px; }
+.pagenav-inner{ max-width:920px; margin:0 auto; padding:11px 32px; display:flex; justify-content:space-between; align-items:center; gap:16px; }
+.pagenav .brand{ color:rgba(255,255,255,0.45); font-size:11px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; white-space:nowrap; }
+.navbtns{ display:flex; gap:8px; }
+.navbtn{ display:inline-flex; align-items:center; gap:6px; font-family:'Barlow',sans-serif; font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#fff; background:rgba(255,255,255,0.10); border:1px solid rgba(255,255,255,0.22); border-radius:6px; padding:7px 13px; text-decoration:none; transition:0.15s; white-space:nowrap; }
+.navbtn:hover{ background:var(--accent); border-color:var(--accent); }
+.navbtn.disabled{ opacity:0.28; pointer-events:none; }
+@media(max-width:560px){ .pagenav .brand{ display:none } .pagenav-inner{ justify-content:center } }
+
+/* header */
+.header{ background:#fff; padding:56px 0 44px; border-bottom:0.5px solid var(--border); }
+.header-inner{ max-width:920px; margin:0 auto; padding:0 32px; }
+.header-eyebrow{ font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:14px; display:flex; align-items:center; gap:12px; }
+.header-eyebrow::after{ content:''; flex:1; height:0.5px; background:var(--border); max-width:120px; }
+.header h1{ font-family:'Barlow Condensed',sans-serif; font-size:clamp(34px,4.5vw,52px); font-weight:900; letter-spacing:-0.01em; line-height:1.05; color:var(--text); margin-bottom:18px; }
+.header h1 em{ font-style:normal; color:var(--accent); }
+.header-meta-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+.module-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:var(--slate); color:#fff; }
+.topic-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:#F1F5F9; color:#475569; }
+.topic-pill.accent{ background:var(--accent-soft); color:var(--accent-dark); }
+
+/* page */
+.page{ max-width:920px; margin:0 auto; padding:0 32px 48px; }
+
+/* objectives */
+.objectives{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--accent); border-radius:6px; padding:22px 28px; margin:36px 0 14px; }
+.obj-label{ font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:14px; }
+.objectives ul{ list-style:none; }
+.objectives ul li{ font-size:14px; color:var(--text); padding:5px 0 5px 20px; position:relative; line-height:1.55; }
+.objectives ul li::before{ content:'◇'; position:absolute; left:0; color:var(--accent); font-size:10px; top:9px; }
+
+/* sections */
+section{ margin-top:44px; }
+section h2{ font-family:'Barlow Condensed',sans-serif; font-size:28px; font-weight:800; letter-spacing:0.005em; color:var(--text); margin-bottom:20px; display:flex; align-items:baseline; gap:20px; }
+section h2 .num{ font-family:'Barlow Condensed',sans-serif; font-size:56px; font-weight:900; color:var(--accent); letter-spacing:-0.02em; line-height:0.85; min-width:42px; }
+section h3{ font-family:'Barlow',sans-serif; font-size:17px; font-weight:700; color:var(--text); margin:28px 0 12px; }
+section p{ font-size:14.5px; color:var(--text); line-height:1.75; margin-bottom:14px; }
+section p strong{ font-weight:700; color:var(--text); }
+section ul{ font-size:14.5px; line-height:1.75; color:var(--text); padding-left:22px; margin:8px 0 16px; }
+section ul li{ margin:4px 0; }
+section a{ color:var(--accent-dark); text-decoration:underline; text-decoration-color:rgba(0,0,0,0.2); text-underline-offset:2px; }
+section a:hover{ text-decoration-color:var(--accent); }
+
+/* compare tables */
+.compare-table{ width:100%; border-collapse:collapse; margin:16px 0 20px; font-size:13.5px; background:var(--bg-card); border:0.5px solid var(--border); border-radius:6px; overflow:hidden; }
+.compare-table thead th{ font-size:10px; font-weight:700; color:var(--text-light); text-transform:uppercase; letter-spacing:0.06em; padding:11px 16px; text-align:left; border-bottom:0.5px solid var(--border); background:#fafaf8; }
+.compare-table tbody td{ padding:11px 16px; border-bottom:0.5px solid #f0efe8; vertical-align:top; color:var(--text); line-height:1.55; }
+.compare-table tbody td:first-child{ font-weight:600; background:#fafaf8; width:28%; }
+.compare-table tbody tr:last-child td{ border-bottom:none; }
+
+/* code */
+pre{ font-family:'JetBrains Mono',monospace; background:var(--bg-code); border:0.5px solid var(--border); border-radius:6px; padding:14px 18px; font-size:12px; line-height:1.7; color:var(--text); overflow-x:auto; margin:12px 0 18px; }
+pre code{ font-family:inherit; }
+.code-label{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-light); margin:14px 0 6px; }
+.code-comment{ color:#9a988f; }
+.code-cmd{ color:var(--accent); font-weight:600; }
+.code-key{ color:var(--info); font-weight:600; }
+code.inline{ font-family:'JetBrains Mono',monospace; font-size:12.5px; background:var(--tag-bg); padding:1px 6px; border-radius:3px; color:var(--text); }
+
+/* callout boxes */
+.keybox{ background:var(--accent-soft); border-left:3px solid var(--accent); border-radius:0 6px 6px 0; padding:14px 18px; margin:14px 0 18px; font-size:13.5px; line-height:1.65; color:var(--text); }
+.keybox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--accent-dark); margin-bottom:6px; }
+.keybox b{ color:var(--accent-dark); }
+.notebox{ background:#FBF3E8; border-left:3px solid var(--rust); border-radius:0 6px 6px 0; padding:14px 18px; margin:14px 0 18px; font-size:13.5px; line-height:1.65; }
+.notebox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--rust); margin-bottom:6px; }
+
+/* concept cards */
+.concept-grid{ display:flex; flex-direction:column; gap:10px; margin-top:14px; }
+.concept-card{ background:var(--bg-card); border:0.5px solid var(--border); border-radius:7px; overflow:hidden; }
+.concept-head{ display:flex; align-items:center; gap:14px; padding:14px 20px; cursor:pointer; user-select:none; transition:background 0.15s; }
+.concept-head:hover{ background:#fafaf8; }
+.concept-icon{ font-size:16px; flex-shrink:0; color:var(--accent); }
+.concept-title{ flex:1; font-size:14.5px; font-weight:700; color:var(--text); }
+.concept-sub{ font-size:12px; color:var(--text-muted); font-weight:400; margin-top:1px; }
+.concept-chev{ font-size:10px; color:var(--text-light); }
+.concept-body{ display:none; padding:0 20px 18px; border-top:0.5px solid #f0efe8; }
+.concept-body.open{ display:block; }
+.concept-body p{ font-size:13.5px; line-height:1.7; color:var(--text); margin-top:12px; }
+.concept-body ul{ font-size:13.5px; margin-top:8px; }
+
+/* assessment / summary box */
+.assessment-box{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--slate); border-radius:0 6px 6px 0; padding:20px 24px; margin:30px 0 0; }
+.assessment-box .assess-label{ font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); margin-bottom:10px; }
+.assessment-box p{ font-size:13.5px; line-height:1.7; margin-bottom:10px; }
+.assessment-box p:last-child{ margin-bottom:0; }
+
+/* ===== interactive widgets ===== */
+.widget{ border:0.5px solid var(--border); border-radius:8px; padding:20px; margin:16px 0; background:var(--bg-card); }
+.widget h4{ margin:0 0 14px; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); font-weight:700; }
+.controls{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:14px; }
+button.ui{ font-family:'Barlow',sans-serif; cursor:pointer; border:1px solid var(--accent); background:var(--accent); color:#fff; padding:7px 16px; border-radius:6px; font-size:12.5px; font-weight:600; transition:0.15s; }
+button.ui:hover{ background:var(--accent-dark); border-color:var(--accent-dark); }
+button.ui.ghost{ background:#fff; color:var(--accent); }
+button.ui.ghost:hover{ background:var(--accent-soft); }
+.fade{ animation:fade 0.35s ease; }
+@keyframes fade{ from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+input[type=range]{ accent-color:var(--accent); }
+.kbd{ display:inline-block; background:#fff; border:1px solid #d6dbde; border-bottom-width:2px; border-radius:5px; padding:.05em .45em; font-family:'JetBrains Mono',monospace; font-size:.82em; }
+</style>
+</head><body>
+<header class="pagenav"><div class="pagenav-inner">
+  <span class="brand">Cloud Security Fundamentals</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn" href="01-enterprise-architecture.html">&larr; Prev</a>
+    <a class="navbtn" href="03-vulnerabilities-threats-risk.html">Next &rarr;</a>
+  </nav>
+</div></header>
+
+<div class="header"><div class="header-inner">
+  <div class="header-eyebrow">Module 3 &nbsp;·&nbsp; Enterprise Security Architecture</div>
+  <h1><em>Defense</em> in Depth</h1>
+  <div class="header-meta-row">
+    <span class="module-pill">Module 3</span>
+    <span class="topic-pill">Layered security</span>
+    <span class="topic-pill accent">Segmentation</span>
+  </div>
+</div></div>
+
+<div class="page">
+
+  <div class="objectives">
+    <div class="obj-label">Learning Objectives</div>
+    <ul>
+      <li>Explain why the web, application, and database tiers live on separate subnets</li>
+      <li>Distinguish network-level firewalls from host-level firewalls (AWS security groups)</li>
+      <li>Break a server down into its hardware (CPU, memory, disk, GPU) and its infrastructure &rarr; OS &rarr; application stack</li>
+      <li>Name a security control at each of the four layers: network, device, application, data</li>
+      <li>Define threat, vulnerability, and risk, and state how they relate</li>
+    </ul>
+  </div>
+
+  <section>
+    <h2><span class="num">1</span> A second, closer look</h2>
+    <p>In the previous note we drew the enterprise as a castle: a three-tier app behind a perimeter. That model has one dangerous assumption baked in &mdash; that <strong>once you're inside the walls, you can roam freely</strong>. Real defense doesn't work that way. The fix is <strong>defense in depth</strong>: not one wall, but many, so that breaching one doesn't hand over everything. Let's zoom in.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> Split the tiers into subnets</h2>
+    <p>The web, application, and database servers are <strong>not on the same network</strong>. You separate them into different <strong>subnets</strong> &mdash; for two reasons.</p>
+    <h3>Reason 1: they're different kinds of machines</h3>
+    <p>Take the bank. Every credit-card swipe sends a request that an <strong>application server</strong> must approve &mdash; a flood of small, fast requests. To approve it, the app server fetches your credit profile from a <strong>database server</strong> &mdash; enormous volumes of stored data. One tier is request-heavy; the other is storage-heavy. They're built differently and belong apart.</p>
+    <h3>Reason 2: security</h3>
+    <p>The web server takes requests from the outside and hands valid ones to the app server. The app server &mdash; and <em>only</em> the app server &mdash; should reach the database. You never want the internet-facing web server touching the database directly.</p>
+    <div class="keybox">
+      <div class="lbl">The rule</div>
+      Outside &rarr; <b>web server</b> (DMZ) &rarr; <b>application server</b> &rarr; <b>database server</b>. Each hop crosses a subnet boundary, and each boundary is a place to enforce &ldquo;who may talk to whom.&rdquo;
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> Two firewalls: network-level and host-level</h2>
+    <p>To enforce those boundaries you use <strong>internal firewalls</strong>, not just the external one at the perimeter. But there's a subtlety: not every application should reach every database. A <strong>network-level firewall</strong> controls what travels on the network; a <strong>host-level firewall</strong> controls what is allowed to reach one specific host or virtual server.</p>
+    <p>Think of a neighborhood: <strong>gates on the streets</strong> control which traffic enters the area (network-level), while <strong>gates on each house</strong> control who reaches that particular door (host-level). Flip the host-level firewall on below and watch the unwanted path get cut:</p>
+    <div class="widget" id="seg">
+      <h4>Network-level vs host-level control</h4>
+      <div class="controls" style="margin:0 0 14px">
+        <button class="ui" data-mode="net">Network firewall only</button>
+        <button class="ui ghost" data-mode="host">+ Host firewall</button>
+      </div>
+      <div id="segStage"></div>
+      <p id="segCaption" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:38px"></p>
+    </div>
+    <div class="notebox">
+      <div class="lbl">On AWS</div>
+      The host-level firewall &mdash; the gate on each individual virtual server &mdash; is called a <b>security group</b>. We'll use security groups constantly once we reach the EC2 and VPC modules.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> What <em>is</em> a server, really?</h2>
+    <p>We keep saying &ldquo;server.&rdquo; A server is just a computer &mdash; like the one at home, but far more powerful, and built to answer <strong>millions of requests from other machines</strong> rather than serve one human at a keyboard. Open one up:</p>
+    <div class="widget" id="anatomy">
+      <h4>Anatomy of a server</h4>
+      <div id="anatBoard" style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start"></div>
+      <div id="anatDetail" style="background:var(--bg);border-radius:8px;padding:14px 16px;margin-top:14px;min-height:70px"></div>
+      <div class="controls">
+        <span style="font-size:12px;color:var(--text-muted)">Operating system:</span>
+        <button class="ui" id="patchBtn">Patched</button>
+      </div>
+      <p id="patchNote" style="font-size:12.5px;margin:10px 0 0;line-height:1.55"></p>
+    </div>
+    <div class="keybox">
+      <div class="lbl">Physical or virtual</div>
+      The hardware doesn't have to be a physical box. In the cloud it's <b>virtual hardware</b> &mdash; on AWS, a virtual server is an <b>EC2 instance</b> (Elastic Compute Cloud). Note the rise of the <b>GPU</b>: as AI workloads grow, the CPU offloads heavy processing to the GPU &mdash; the shift that took NVIDIA from graphics to the center of computing.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">5</span> The stack: infrastructure &rarr; OS &rarr; application</h2>
+    <p>On top of the hardware (physical or virtual) sits an <strong>operating system</strong> &mdash; a Linux or Windows server. On top of that run your <strong>applications</strong>. Security has a job at every level of this stack:</p>
+    <ul>
+      <li><strong>Infrastructure / OS</strong> &mdash; keep the operating system <em>patched</em> and hardened; run antivirus / EDR to watch device and application behavior.</li>
+      <li><strong>Application</strong> &mdash; the code itself must be written securely, or attackers will exploit its bugs.</li>
+      <li><strong>Communication</strong> &mdash; the host firewall (security group) ensures the server only talks to the machines it's supposed to.</li>
+      <li><strong>Data</strong> &mdash; what the application stores must be encrypted (disk encryption), backed up, and access-controlled.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="num">6</span> Security is multi-tiered</h2>
+    <p>Put it together and security wraps the enterprise in <strong>four concentric layers</strong>. This is the spine of the entire course &mdash; every later module is one of these rings. Click each:</p>
+    <div class="widget" id="layers">
+      <h4>The four layers of defense</h4>
+      <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center">
+        <div id="layerSvg" style="flex:1;min-width:240px"></div>
+        <div id="layerDetail" style="flex:1.1;min-width:240px;background:var(--bg);border-radius:8px;padding:16px 18px;min-height:150px"></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">7</span> Threat vs vulnerability vs risk</h2>
+    <p>One last idea sets up the next note. A <strong>vulnerability</strong> is a weakness in your system. A <strong>threat</strong> is an actor trying to exploit it. Neither alone is dangerous &mdash; <strong>risk lives in the overlap</strong>. A perfectly patched system facing a determined attacker has no risk; an unpatched system with no attacker has no risk <em>yet</em>. Toggle both:</p>
+    <div class="widget" id="risk">
+      <h4>Risk = Threat &cap; Vulnerability</h4>
+      <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center">
+        <div id="riskSvg" style="flex:1;min-width:220px"></div>
+        <div style="flex:1;min-width:220px">
+          <div class="controls" style="margin:0 0 12px">
+            <button class="ui" id="tThreat">Threat: on</button>
+            <button class="ui" id="tVuln">Vulnerability: on</button>
+          </div>
+          <p id="riskNote" style="font-size:13px;line-height:1.6;margin:0"></p>
+        </div>
+      </div>
+    </div>
+    <div class="notebox">
+      <div class="lbl">Two worked examples</div>
+      <b>Misconfigured firewall.</b> You own a firewall but never configured it (vulnerability); an attacker notices and walks through (threat) &rarr; risk. &nbsp; <b>Ransomware.</b> No ransomware protection (vulnerability); an employee clicks a malicious email (threat) &rarr; risk: every file in the enterprise is encrypted.
+    </div>
+  </section>
+
+  <div class="assessment-box">
+    <div class="assess-label">Remember</div>
+    <p>Defense in depth means <strong>layers, not a single wall</strong>. Tiers live on separate <strong>subnets</strong>; <strong>network-level</strong> firewalls guard the wires while <strong>host-level</strong> firewalls (AWS <strong>security groups</strong>) guard each machine. A server is hardware (CPU/memory/disk/<strong>GPU</strong>) running an <strong>OS</strong> that must stay patched, running <strong>applications</strong> that must be coded securely, storing <strong>data</strong> that must be encrypted. The four rings &mdash; <strong>network, device, application, data</strong> &mdash; are the rest of this course. And <strong>risk = threat &cap; vulnerability</strong>.</p>
+  </div>
+
+</div>
+
+<footer class="pagenav foot"><div class="pagenav-inner">
+  <span class="brand">Module 3 &middot; Enterprise Security Architecture</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn" href="01-enterprise-architecture.html">&larr; Prev</a>
+    <a class="navbtn" href="03-vulnerabilities-threats-risk.html">Next &rarr;</a>
+  </nav>
+</div></footer>
+
+<script>
+/* ---------- 3. Subnet segmentation ---------- */
+(function(){
+  const stage=document.getElementById('segStage'),cap=document.getElementById('segCaption');
+  const T='#0E7490',G='#2EA65A',R='#c0392b',mute='#9aa3a8';
+  let mode='net';
+  // apps A,B (blue group) should reach DB1; app C (yellow) should reach DB2.
+  function render(){
+    const host=mode==='host';
+    let s=`<svg viewBox="0 0 560 240" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    // subnet bands
+    s+=`<rect x="14" y="14" width="250" height="212" rx="10" fill="#f1f9fb" stroke="${T}" stroke-width="1.3"/><text x="139" y="32" text-anchor="middle" font-size="9.5" font-weight="800" fill="${T}" letter-spacing="1">APPLICATION SUBNET</text>`;
+    s+=`<rect x="300" y="14" width="246" height="212" rx="10" fill="#f5f3f9" stroke="#8E5CA8" stroke-width="1.3"/><text x="423" y="32" text-anchor="middle" font-size="9.5" font-weight="800" fill="#8E5CA8" letter-spacing="1">DATABASE SUBNET</text>`;
+    function node(x,y,w,h,label,sub,fill){return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="7" fill="${fill}"/><text x="${x+w/2}" y="${y+h/2-1}" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">${label}</text><text x="${x+w/2}" y="${y+h/2+12}" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.85)">${sub}</text>`;}
+    // app nodes
+    s+=node(40,56,90,40,'App A','blue group','#2E86C8');
+    s+=node(40,108,90,40,'App B','blue group','#2E86C8');
+    s+=node(40,168,90,40,'App C','yellow group','#C9991A');
+    // db nodes
+    s+=node(412,80,110,40,'DB 1','blue data',T);
+    s+=node(412,150,110,40,'DB 2','yellow data','#8E5CA8');
+    function arrow(x1,y1,x2,y2,c,dash){return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c}" stroke-width="2.4" ${dash?'stroke-dasharray="6 5"':''} marker-end="url(#sa)"/>`;}
+    // intended links (always allowed/green)
+    s+=arrow(130,76,412,100,G);    // A->DB1
+    s+=arrow(130,128,412,104,G);   // B->DB1
+    s+=arrow(130,188,412,170,G);   // C->DB2
+    // the cross link A->DB2: allowed in net-only mode (bad), blocked with host fw
+    if(host){
+      s+=arrow(130,80,412,158,R,true); // dashed red, will overlay a block
+      // block X near DB2 entry
+      s+=`<circle cx="395" cy="166" r="13" fill="#fff" stroke="${R}" stroke-width="2.4"/><text x="395" y="171" text-anchor="middle" font-size="15" font-weight="900" fill="${R}">&#215;</text>`;
+    } else {
+      s+=arrow(130,80,412,158,'#C9991A'); // open path (problem!)
+    }
+    s+=`<defs><marker id="sa" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#7a8589"/></marker></defs>`;
+    s+=`</svg>`;
+    stage.innerHTML=s;
+    cap.innerHTML=host
+      ? 'With <b>host-level firewalls</b> (security groups), each database only accepts traffic from its own group. App A\u2019s stray path to DB 2 is blocked at the host \u2014 even though the network would carry it.'
+      : 'With only a <b>network-level firewall</b>, any app on the subnet can reach any database on the network. Nothing stops App A from touching DB 2 \u2014 a path it should never have.';
+    document.querySelectorAll('#seg [data-mode]').forEach(b=>{const a=b.dataset.mode===mode;b.className='ui'+(a?'':' ghost');});
+  }
+  render();
+  document.querySelectorAll('#seg [data-mode]').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;render();});
+})();
+
+/* ---------- 4. Server anatomy ---------- */
+(function(){
+  const board=document.getElementById('anatBoard'),det=document.getElementById('anatDetail');
+  const patchBtn=document.getElementById('patchBtn'),patchNote=document.getElementById('patchNote');
+  const PARTS=[
+    {k:'CPU',d:'The central processor \u2014 runs the operating system and general workloads. Powerful, but increasingly offloads heavy work elsewhere.'},
+    {k:'Memory',d:'RAM holding active data and running programs. Servers carry far more than a home PC to juggle millions of requests.'},
+    {k:'Disk',d:'Persistent storage. Database servers often need external disks \u2014 the internal disk alone can\u2019t hold the data.'},
+    {k:'GPU',d:'The graphics processor. The CPU offloads parallel work to it. AI made the GPU central \u2014 the rise of NVIDIA.'}
+  ];
+  let sel=0;
+  function render(){
+    board.innerHTML=`<div style="flex:1;min-width:200px;display:flex;flex-direction:column;gap:8px">`+
+      PARTS.map((p,i)=>`<button class="ui ${i===sel?'':'ghost'}" data-i="${i}" style="text-align:left;font-size:13px">${p.k}</button>`).join('')+`</div>`;
+    board.querySelectorAll('button').forEach(b=>b.onclick=()=>{sel=+b.dataset.i;render();});
+    det.className='fade';
+    det.innerHTML=`<b style="font-size:14px">${PARTS[sel].k}</b><p style="font-size:13px;line-height:1.6;margin:6px 0 0">${PARTS[sel].d}</p>`;
+    setTimeout(()=>det.classList.remove('fade'),360);
+  }
+  render();
+  let patched=true;
+  function renderPatch(){
+    patchBtn.textContent=patched?'Patched':'Unpatched';
+    patchBtn.className='ui'+(patched?'':' ghost');
+    patchBtn.style.borderColor=patched?'':'#c0392b'; patchBtn.style.color=patched?'':'#c0392b';
+    patchNote.innerHTML=patched
+      ? '<span style="color:#2e7d57;font-weight:700">\u2713 Hardened.</span> The OS has its vendor patches; known vulnerabilities are closed.'
+      : '<span style="color:#c0392b;font-weight:700">\u26a0 Exposed.</span> An unpatched OS carries known vulnerabilities. When an attacker gets past the firewall, this is what they exploit.';
+  }
+  renderPatch();
+  patchBtn.onclick=()=>{patched=!patched;renderPatch();};
+})();
+
+/* ---------- 6. Four layers ---------- */
+(function(){
+  const svg=document.getElementById('layerSvg'),det=document.getElementById('layerDetail');
+  const L=[
+    {k:'Network',c:'#0E7490',r:118,ctrl:'Only authorized data is allowed onto the network.',how:'Firewalls, IDS, IPS, network segmentation.',aws:'VPC, Security Groups, NACLs'},
+    {k:'Device',c:'#2E86C8',r:92,ctrl:'The host/server itself is hardened and watched.',how:'OS patching, disk encryption, antivirus / EDR.',aws:'EC2, Systems Manager, Inspector'},
+    {k:'Application',c:'#8E5CA8',r:66,ctrl:'The code is written so it can\u2019t be exploited.',how:'Secure coding, input validation, dependency hygiene.',aws:'Lambda, API Gateway, WAF'},
+    {k:'Data',c:'#B45309',r:40,ctrl:'The information itself is protected at rest.',how:'Encryption, backups, access control.',aws:'S3 + KMS, RDS encryption'}
+  ];
+  let sel=0;
+  function render(){
+    let s=`<svg viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-width:280px;font-family:Barlow,Arial,sans-serif">`;
+    L.forEach((l,i)=>{
+      const on=i===sel;
+      s+=`<circle cx="140" cy="140" r="${l.r}" fill="${l.c}" fill-opacity="${on?0.95:0.5}" stroke="${l.c}" stroke-width="${on?3.5:1.5}" data-i="${i}" style="cursor:pointer"/>`;
+    });
+    // labels at top of each ring
+    L.forEach((l,i)=>{ s+=`<text x="140" y="${140-l.r+15}" text-anchor="middle" font-size="10.5" font-weight="800" fill="#fff" stroke="rgba(0,0,0,.4)" stroke-width="2.4" paint-order="stroke" style="pointer-events:none">${l.k}</text>`; });
+    s+=`</svg>`;
+    svg.innerHTML=s;
+    svg.querySelectorAll('circle').forEach(c=>c.onclick=()=>{sel=+c.dataset.i;render();});
+    const l=L[sel];
+    det.className='fade';
+    det.innerHTML=`<div style="font-family:'Barlow Condensed';font-weight:800;font-size:24px;color:${l.c};margin-bottom:8px">${l.k} layer</div>
+      <p style="font-size:13.5px;line-height:1.6;margin:0 0 8px"><b>Goal:</b> ${l.ctrl}</p>
+      <p style="font-size:13.5px;line-height:1.6;margin:0 0 8px"><b>How:</b> ${l.how}</p>
+      <p style="font-size:12px;line-height:1.5;margin:0;color:var(--text-muted)"><b>AWS:</b> ${l.aws}</p>`;
+    setTimeout(()=>det.classList.remove('fade'),360);
+  }
+  render();
+})();
+
+/* ---------- 7. Risk Venn ---------- */
+(function(){
+  const svg=document.getElementById('riskSvg'),note=document.getElementById('riskNote');
+  const bT=document.getElementById('tThreat'),bV=document.getElementById('tVuln');
+  let threat=true,vuln=true;
+  function render(){
+    const risk=threat&&vuln;
+    const T='#c0392b',V='#0E7490';
+    let s=`<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    s+=`<circle cx="118" cy="100" r="72" fill="${T}" fill-opacity="${threat?0.42:0.1}" stroke="${T}" stroke-width="2" stroke-opacity="${threat?1:0.35}"/>`;
+    s+=`<circle cx="182" cy="100" r="72" fill="${V}" fill-opacity="${vuln?0.42:0.1}" stroke="${V}" stroke-width="2" stroke-opacity="${vuln?1:0.35}"/>`;
+    s+=`<text x="86" y="62" text-anchor="middle" font-size="12" font-weight="800" fill="${T}">THREAT</text>`;
+    s+=`<text x="214" y="62" text-anchor="middle" font-size="12" font-weight="800" fill="${V}">VULN.</text>`;
+    if(risk){ s+=`<text x="150" y="98" text-anchor="middle" font-size="13" font-weight="900" fill="#7a1f16">RISK</text><text x="150" y="114" text-anchor="middle" font-size="8.5" font-weight="700" fill="#7a1f16">harm possible</text>`; }
+    else { s+=`<text x="150" y="105" text-anchor="middle" font-size="11" font-weight="700" fill="#9aa3a8">no risk</text>`; }
+    s+=`</svg>`;
+    svg.innerHTML=s;
+    bT.textContent='Threat: '+(threat?'on':'off'); bT.className='ui'+(threat?'':' ghost');
+    bV.textContent='Vulnerability: '+(vuln?'on':'off'); bV.className='ui'+(vuln?'':' ghost');
+    note.innerHTML = risk
+      ? '<b>Both present \u2192 risk.</b> A weakness exists <em>and</em> someone is trying to exploit it. This is the only quadrant where harm can actually happen.'
+      : (!threat&&!vuln) ? 'No threat and no weakness \u2014 nothing to worry about (for now).'
+      : threat ? 'A threat exists, but the system has no matching weakness. The attacker has nothing to exploit \u2014 no risk.'
+      : 'A weakness exists, but no one is exploiting it. Still, don\u2019t relax \u2014 attackers are always looking.';
+  }
+  render();
+  bT.onclick=()=>{threat=!threat;render();};
+  bV.onclick=()=>{vuln=!vuln;render();};
+})();
+</script>
+</body></html>
