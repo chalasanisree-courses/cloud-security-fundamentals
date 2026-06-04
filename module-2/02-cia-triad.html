@@ -164,25 +164,7 @@ input[type=range]{ accent-color:var(--accent); }
   <section>
     <h2><span class="num">2</span> The three goals</h2>
     <p>The <strong>CIA triad</strong> names three fundamental security goals. They are <strong>objectives, not tools</strong> &mdash; every security mechanism earns its place by serving one or more of them.</p>
-    <div class="widget"><h4>The CIA triad</h4>
-    <svg viewBox="0 0 700 378" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">
-      <!-- triangle -->
-      <polygon points="350,70 120,300 580,300" fill="none" stroke="#cdd6da" stroke-width="2"/>
-      <text x="350" y="200" text-anchor="middle" fill="#9aa3a8" font-size="13" font-weight="700" letter-spacing="0.14em">CIA</text>
-      <!-- Confidentiality (top) -->
-      <rect x="230" y="22" width="240" height="62" rx="10" fill="#0E7490"/>
-      <text x="350" y="47" text-anchor="middle" fill="#fff" font-size="15" font-weight="800">Confidentiality</text>
-      <text x="350" y="68" text-anchor="middle" fill="#d4eef4" font-size="11.5">Who can see the data?</text>
-      <!-- Integrity (bottom-left) -->
-      <rect x="8" y="300" width="234" height="62" rx="10" fill="#2D3748"/>
-      <text x="125" y="325" text-anchor="middle" fill="#fff" font-size="15" font-weight="800">Integrity</text>
-      <text x="125" y="346" text-anchor="middle" fill="#cbd5e0" font-size="11.5">Can we trust the data?</text>
-      <!-- Availability (bottom-right) -->
-      <rect x="458" y="300" width="234" height="62" rx="10" fill="#2D3748"/>
-      <text x="575" y="325" text-anchor="middle" fill="#fff" font-size="15" font-weight="800">Availability</text>
-      <text x="575" y="346" text-anchor="middle" fill="#cbd5e0" font-size="11.5">Can users reach it?</text>
-    </svg>
-    </div>
+    <div class="widget"><h4>The CIA triad</h4><svg viewBox="0 0 560 360" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif"><polygon points="280,234 175,186 280,42 385,186" fill="#2E86C8"/><polygon points="280,234 175,186 70,330 280,330" fill="#8E5CA8"/><polygon points="280,234 385,186 490,330 280,330" fill="#2EA65A"/><text x="280" y="118" fill="#ffffff" font-size="22" font-weight="800" text-anchor="middle" font-family="Barlow,Arial,sans-serif">1</text><text x="280" y="150" fill="#ffffff" font-size="12" font-weight="800" text-anchor="middle" font-family="Barlow,Arial,sans-serif">CONFIDENTIALITY</text><text x="178" y="258" fill="#ffffff" font-size="22" font-weight="800" text-anchor="middle" font-family="Barlow,Arial,sans-serif">2</text><text x="170" y="300" fill="#ffffff" font-size="12" font-weight="800" text-anchor="middle" font-family="Barlow,Arial,sans-serif">INTEGRITY</text><text x="382" y="258" fill="#ffffff" font-size="22" font-weight="800" text-anchor="middle" font-family="Barlow,Arial,sans-serif">3</text><text x="390" y="300" fill="#ffffff" font-size="12" font-weight="800" text-anchor="middle" font-family="Barlow,Arial,sans-serif">AVAILABILITY</text><circle cx="280" cy="234" r="48" fill="none" stroke="#ffffff" stroke-width="2" stroke-dasharray="3 4"/><circle cx="280" cy="234" r="42" fill="#16263c"/><text x="280" y="228" fill="#ffffff" font-size="8.5" font-weight="800" text-anchor="middle" font-family="Barlow,Arial,sans-serif">INFORMATION</text><text x="280" y="240" fill="#ffffff" font-size="8.5" font-weight="800" text-anchor="middle" font-family="Barlow,Arial,sans-serif">SECURITY</text><path d="M280 246 l7 3 v5 a7 9 0 0 1 -7 8 a7 9 0 0 1 -7 -8 v-5 z" fill="#2E86C8"/></svg></div>
   </section>
 
   <section>
@@ -284,7 +266,7 @@ input[type=range]{ accent-color:var(--accent); }
     {n:'Backup & DR', g:['A'], note:'restore systems and data after a failure or attack.'},
     {n:'Digital certificates', g:['C','I'], note:'serve more than one goal \u2014 they establish trust in identity (integrity) and enable the public-key exchange that secures the channel (confidentiality).'}
   ];
-  const COLOR={C:'#0E7490', I:'#2D3748', A:'#2D3748'};
+  const COLOR={C:'#2E86C8', I:'#8E5CA8', A:'#2EA65A'};
   const goalRow=document.getElementById('goalRow'), chipRow=document.getElementById('chipRow'), note=document.getElementById('mapNote');
 
   function renderGoals(active){
