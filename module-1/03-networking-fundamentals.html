@@ -149,7 +149,7 @@ input[type=range]{ accent-color:var(--accent); }
 
   <section>
     <h2><span class="num">1</span> Where we are</h2>
-    <p>The previous two notes covered <em>why</em> the internet matters &mdash; its history, and the shift to enterprise and cloud computing. This note is the gear&#8209;change into <em>how</em> data actually moves &mdash; the mechanics every later security topic builds on.</p>
+    <p>The previous two notes covered <em>why</em> the internet matters &mdash; its history, and the shift to enterprise and cloud computing. This note is about <em>how</em> the internet actually works, and how data moves over the internet &mdash; the mechanics every later security topic builds on.</p>
     <p>The internet took off because of two standard protocols: <strong>TCP</strong> (Transmission Control Protocol) and <strong>IP</strong> (Internet Protocol). This lecture follows one ordinary action &mdash; typing <code class="inline">example.com</code> into a browser &mdash; all the way down the <strong>TCP/IP stack</strong> and across the internet to a server, then back. Understanding this path is the prerequisite for everything we secure later: firewalls, VPCs, TLS, and more all operate on the mechanics below.</p>
     <div class="keybox">
       <div class="lbl">The client&#8209;server model</div>
@@ -158,8 +158,18 @@ input[type=range]{ accent-color:var(--accent); }
   </section>
 
   <section>
-    <h2><span class="num">2</span> IP routing is like the postal service</h2>
-    <p>IP routing works hop by hop. No single point knows the whole path &mdash; each stop only knows its <strong>next hop</strong>. Sending a letter from San Jose to Sofia, Bulgaria, every facility that doesn't know how to reach the destination simply forwards it to the next stop up the chain, until one does. Step through it:</p>
+    <h2><span class="num">2</span> Resolving the name &amp; building the packet</h2>
+    <p>Say you open <code class="inline">example.com</code> &mdash; a site whose server lives in <strong>Bulgaria</strong>. The internet finds machines by <strong>IP number</strong>, not by name, so your browser's very first step is a <strong>DNS resolution</strong> (Domain Name Service) to turn <code class="inline">example.com</code> into an IP address:</p>
+    <div class="widget"><h4>DNS resolution: name → IP</h4><svg viewBox="0 0 690 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif"><defs><marker id="dnsA" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa3a8"/></marker></defs><rect x="30" y="52" width="160" height="52" rx="8" fill="#2D3748"/><text x="110" y="75" fill="#fff" font-size="12.5" font-weight="700" text-anchor="middle">Your browser</text><text x="110" y="93" fill="#cbd5e0" font-size="9.5" font-weight="500" text-anchor="middle">wants example.com</text><rect x="290" y="52" width="150" height="52" rx="8" fill="#0E7490"/><text x="365" y="75" fill="#fff" font-size="12.5" font-weight="700" text-anchor="middle">DNS resolver</text><text x="365" y="93" fill="#d4eef4" font-size="9.5" font-weight="500" text-anchor="middle">name → number</text><rect x="540" y="52" width="120" height="52" rx="8" fill="#fff" stroke="#cfd6da" stroke-width="1"/><text x="600" y="72" fill="#5f5e5a" font-size="10" font-weight="600" text-anchor="middle">IP address</text><text x="600" y="92" fill="#1a1a18" font-size="11" font-weight="700" text-anchor="middle" font-family="'JetBrains Mono',monospace">203.0.113.10</text><line x1="192" y1="78" x2="288" y2="78" stroke="#9aa3a8" stroke-width="2" marker-end="url(#dnsA)"/><text x="240" y="68" fill="#5f5e5a" font-size="10" font-weight="600" text-anchor="middle">example.com ?</text><line x1="442" y1="78" x2="538" y2="78" stroke="#9aa3a8" stroke-width="2" marker-end="url(#dnsA)"/><text x="491" y="68" fill="#5f5e5a" font-size="10" font-weight="600" text-anchor="middle">here it is</text></svg></div>
+    <div class="notebox"><div class="lbl">Why this matters for security</div>Everything downstream trusts this name&rarr;IP answer. Poison it and users are silently sent to an attacker &mdash; a <b>DNS spoofing</b> attack, where the lookup returns a bad IP address. We cover it in Module 2.</div>
+    <p>Now your client builds a packet &mdash; notice how the addresses pair up, and the one field it can't fill yet:</p>
+    <div class="widget" id="pkt"><h4>Anatomy of a packet</h4><svg viewBox="0 0 700 122" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif"><g class="pkt-seg" data-seg="msg" tabindex="0" role="button" style="cursor:pointer"><rect x="30" y="48" width="90" height="46" rx="5" fill="#1a1a18" stroke="#ffffff" stroke-width="1"/><text x="75" y="76" fill="#fff" font-size="12" font-weight="800" text-anchor="middle" pointer-events="none">MSG</text></g><g class="pkt-seg" data-seg="src-ip" tabindex="0" role="button" style="cursor:pointer"><rect x="120" y="48" width="110" height="46" rx="5" fill="#4FA82E" stroke="#ffffff" stroke-width="1"/><text x="175" y="76" fill="#fff" font-size="12" font-weight="800" text-anchor="middle" pointer-events="none">SRC IP</text></g><g class="pkt-seg" data-seg="src-mac" tabindex="0" role="button" style="cursor:pointer"><rect x="230" y="48" width="115" height="46" rx="5" fill="#4FA82E" stroke="#ffffff" stroke-width="1"/><text x="287.5" y="76" fill="#fff" font-size="12" font-weight="800" text-anchor="middle" pointer-events="none">SRC MAC</text></g><g class="pkt-seg" data-seg="dest-ip" tabindex="0" role="button" style="cursor:pointer"><rect x="345" y="48" width="110" height="46" rx="5" fill="#9B2FAE" stroke="#ffffff" stroke-width="1"/><text x="400" y="76" fill="#fff" font-size="12" font-weight="800" text-anchor="middle" pointer-events="none">DEST IP</text></g><g class="pkt-seg" data-seg="dest-mac" tabindex="0" role="button" style="cursor:pointer"><rect x="455" y="48" width="130" height="46" rx="5" fill="#E8731C" stroke="#ffffff" stroke-width="1"/><text x="520" y="76" fill="#fff" font-size="12" font-weight="800" text-anchor="middle" pointer-events="none">DEST MAC</text></g><text x="520" y="110" fill="#E8731C" font-size="9.5" font-weight="700" text-anchor="middle" pointer-events="none">↻ rewritten each hop</text></svg><p id="pktCap" style="font-size:13px;color:var(--text-muted);margin:12px 0 0;line-height:1.6"><b>Click any field</b> to see what it carries. <span style="color:#4FA82E;font-weight:700">Green</span> = source &middot; <span style="color:#9B2FAE;font-weight:700">purple</span> = destination IP (constant) &middot; <span style="color:#E8731C;font-weight:700">orange</span> = destination MAC (rewritten each hop).</p></div>
+    <p>That missing field is the <strong>destination MAC</strong>: the Bulgaria server isn't on your local network, so the packet is handed to the <strong>next hop</strong> (your router). From there it's <strong>routed</strong> across the internet &mdash; the next section &mdash; with the MAC rewritten at each hop (how each hop discovers the next MAC is the ARP story in Section 9).</p>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> IP routing is like the postal service</h2>
+    <p>Now the packet exists, addressed to that Bulgaria server's IP &mdash; how does it actually get there? <strong>IP routing</strong> works hop by hop: no single point knows the whole path, each stop only knows its <strong>next hop</strong>. Just like a letter from San Jose to Sofia, every facility that doesn't know how to reach the destination forwards it to the next stop up the chain, until one does. Step through it:</p>
     <div class="widget" id="postal">
       <h4>Packet journey &mdash; next-hop forwarding</h4>
       <div id="hops" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px"></div>
@@ -173,16 +183,6 @@ input[type=range]{ accent-color:var(--accent); }
       <div class="lbl">The crucial detail</div>
       At every hop the <strong>destination IP stays the same</strong> (it's the final address), but the <strong>MAC address is rewritten</strong> to point at the <em>next</em> machine in the chain. IP says where it's ultimately going; MAC says the very next physical step.
     </div>
-  </section>
-
-  <section>
-    <h2><span class="num">3</span> What's inside the packet &mdash; and DNS</h2>
-    <p>Routing uses numbers, not names, so your browser first does a <strong>DNS resolution</strong> (Domain Name Service) to turn <code class="inline">example.com</code> into an IP address:</p>
-    <div class="widget"><h4>DNS resolution: name → IP</h4><svg viewBox="0 0 690 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif"><defs><marker id="dnsA" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa3a8"/></marker></defs><rect x="30" y="52" width="160" height="52" rx="8" fill="#2D3748"/><text x="110" y="75" fill="#fff" font-size="12.5" font-weight="700" text-anchor="middle">Your browser</text><text x="110" y="93" fill="#cbd5e0" font-size="9.5" font-weight="500" text-anchor="middle">wants example.com</text><rect x="290" y="52" width="150" height="52" rx="8" fill="#0E7490"/><text x="365" y="75" fill="#fff" font-size="12.5" font-weight="700" text-anchor="middle">DNS resolver</text><text x="365" y="93" fill="#d4eef4" font-size="9.5" font-weight="500" text-anchor="middle">name → number</text><rect x="540" y="52" width="120" height="52" rx="8" fill="#fff" stroke="#cfd6da" stroke-width="1"/><text x="600" y="72" fill="#5f5e5a" font-size="10" font-weight="600" text-anchor="middle">IP address</text><text x="600" y="92" fill="#1a1a18" font-size="11" font-weight="700" text-anchor="middle" font-family="'JetBrains Mono',monospace">203.0.113.10</text><line x1="192" y1="78" x2="288" y2="78" stroke="#9aa3a8" stroke-width="2" marker-end="url(#dnsA)"/><text x="240" y="68" fill="#5f5e5a" font-size="10" font-weight="600" text-anchor="middle">example.com ?</text><line x1="442" y1="78" x2="538" y2="78" stroke="#9aa3a8" stroke-width="2" marker-end="url(#dnsA)"/><text x="491" y="68" fill="#5f5e5a" font-size="10" font-weight="600" text-anchor="middle">here it is</text></svg></div>
-    <div class="notebox"><div class="lbl">Why this matters for security</div>Everything downstream trusts this name&rarr;IP answer. Poison it and users are silently sent to an attacker &mdash; a <b>DNS spoofing</b> attack, where the lookup returns a bad IP address. We cover it in Module 2.</div>
-    <p>Now your client builds a packet &mdash; notice how the addresses pair up, and the one field it can't fill yet:</p>
-    <div class="widget"><h4>Anatomy of a packet</h4><svg viewBox="0 0 700 146" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif"><rect x="30" y="48" width="90" height="46" rx="5" fill="#1a1a18" stroke="#ffffff" stroke-width="1"/><text x="75.0" y="76" fill="#fff" font-size="12" font-weight="800" text-anchor="middle" font-family="Barlow,Arial,sans-serif">MSG</text><rect x="120" y="48" width="110" height="46" rx="5" fill="#4FA82E" stroke="#ffffff" stroke-width="1"/><text x="175.0" y="76" fill="#fff" font-size="12" font-weight="800" text-anchor="middle" font-family="Barlow,Arial,sans-serif">SRC IP</text><rect x="230" y="48" width="115" height="46" rx="5" fill="#4FA82E" stroke="#ffffff" stroke-width="1"/><text x="287.5" y="76" fill="#fff" font-size="12" font-weight="800" text-anchor="middle" font-family="Barlow,Arial,sans-serif">SRC MAC</text><rect x="345" y="48" width="110" height="46" rx="5" fill="#9B2FAE" stroke="#ffffff" stroke-width="1"/><text x="400.0" y="76" fill="#fff" font-size="12" font-weight="800" text-anchor="middle" font-family="Barlow,Arial,sans-serif">DEST IP</text><rect x="455" y="48" width="130" height="46" rx="5" fill="#E8731C" stroke="#ffffff" stroke-width="1"/><text x="520.0" y="76" fill="#fff" font-size="12" font-weight="800" text-anchor="middle" font-family="Barlow,Arial,sans-serif">DEST MAC</text><text x="520" y="110" fill="#E8731C" font-size="9.5" font-weight="700" text-anchor="middle" font-family="Barlow,Arial,sans-serif">↻ rewritten each hop</text><text x="30" y="130" fill="#5f5e5a" font-size="10.5" font-weight="600" text-anchor="start" font-family="Barlow,Arial,sans-serif">Green = source fields · purple = DEST IP (constant) — only the orange DEST MAC changes at each hop.</text></svg></div>
-    <p>The <strong>destination MAC</strong> is the unknown: the destination isn't on your local network, so the packet goes to the <strong>next hop</strong> (your router) and the MAC is rewritten at every hop &mdash; the switching and ARP story in Section 9.</p>
   </section>
 
   <section>
@@ -495,4 +495,27 @@ function renderARP(){
 document.getElementById('arpNext').onclick=()=>{ if(arpStep<ARP_STEPS.length-1){arpStep++;renderARP();} };
 document.getElementById('arpReset').onclick=()=>{ arpStep=0;renderARP(); };
 renderARP();
+
+/* ---------- interactive packet anatomy ---------- */
+(function(){
+  const EXP={
+    'msg':['MSG \u2014 the payload',"The actual data being carried \u2014 your HTTP request for the page on the way out, or the page content on the way back. Everything else in the packet is just addressing wrapped around this."],
+    'src-ip':['Source IP',"The IP address of the machine that sent the packet \u2014 your device. It identifies the sender across the whole internet and stays the same from end to end."],
+    'src-mac':['Source MAC',"The physical (hardware) address of the network card the packet is leaving from. Unlike the IP, a MAC only has meaning on the local link \u2014 this hop."],
+    'dest-ip':['Destination IP',"The final destination \u2014 the Bulgaria server's IP that DNS gave us. Routers read this to know where the packet is ultimately headed; it never changes along the way."],
+    'dest-mac':['Destination MAC',"The physical address of the <b>next hop</b> \u2014 not the final server. Each router rewrites it to the next machine's MAC, hop by hop, until the packet reaches the destination's local network."]
+  };
+  const segs=document.querySelectorAll('#pkt .pkt-seg');
+  const cap=document.getElementById('pktCap');
+  if(!segs.length||!cap) return;
+  function select(seg){
+    segs.forEach(gg=>{const r=gg.querySelector('rect'); const on=gg.dataset.seg===seg;
+      r.setAttribute('stroke', on?'#1a1a18':'#ffffff'); r.setAttribute('stroke-width', on?'3':'1');});
+    const e=EXP[seg]; cap.innerHTML='<b>'+e[0]+'.</b> '+e[1];
+  }
+  segs.forEach(gg=>{
+    gg.addEventListener('click',()=>select(gg.dataset.seg));
+    gg.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();select(gg.dataset.seg);}});
+  });
+})();
 </script></body></html>
