@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Securing Internet Communications</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+* { box-sizing:border-box; margin:0; padding:0; }
+:root{
+  --slate-dark:#1A202C; --slate:#2D3748;
+  --accent:#0E7490; --accent-dark:#0B5567; --accent-soft:#CFF1F6;
+  --info:#1E40AF; --info-soft:#DBEAFE;
+  --text:#1a1a18; --text-muted:#5f5e5a; --text-light:#888780;
+  --border:rgba(0,0,0,0.09); --bg:#fafaf8; --bg-card:#fff; --bg-code:#f6f6f3; --tag-bg:#f1f0eb;
+  /* widget-compat tokens */
+  --rust:#B45309; --soft:#888780; --muted:#5f5e5a; --rule:rgba(0,0,0,0.09);
+  --ok:#2e7d57; --callout-bg:#f1f9fb; --code-bg:#f6f6f3;
+}
+body{ font-family:'Barlow',sans-serif; background:var(--bg); color:var(--text); line-height:1.65; min-height:100vh; }
+
+/* page nav (header + footer) */
+.pagenav{ background:var(--slate-dark); }
+.pagenav.foot{ margin-top:48px; }
+.pagenav-inner{ max-width:920px; margin:0 auto; padding:11px 32px; display:flex; justify-content:space-between; align-items:center; gap:16px; }
+.pagenav .brand{ color:rgba(255,255,255,0.45); font-size:11px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; white-space:nowrap; }
+.navbtns{ display:flex; gap:8px; }
+.navbtn{ display:inline-flex; align-items:center; gap:6px; font-family:'Barlow',sans-serif; font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#fff; background:rgba(255,255,255,0.10); border:1px solid rgba(255,255,255,0.22); border-radius:6px; padding:7px 13px; text-decoration:none; transition:0.15s; white-space:nowrap; }
+.navbtn:hover{ background:var(--accent); border-color:var(--accent); }
+.navbtn.disabled{ opacity:0.28; pointer-events:none; }
+@media(max-width:560px){ .pagenav .brand{ display:none } .pagenav-inner{ justify-content:center } }
+
+/* header */
+.header{ background:#fff; padding:56px 0 44px; border-bottom:0.5px solid var(--border); }
+.header-inner{ max-width:920px; margin:0 auto; padding:0 32px; }
+.header-eyebrow{ font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:14px; display:flex; align-items:center; gap:12px; }
+.header-eyebrow::after{ content:''; flex:1; height:0.5px; background:var(--border); max-width:120px; }
+.header h1{ font-family:'Barlow Condensed',sans-serif; font-size:clamp(34px,4.5vw,52px); font-weight:900; letter-spacing:-0.01em; line-height:1.05; color:var(--text); margin-bottom:18px; }
+.header h1 em{ font-style:normal; color:var(--accent); }
+.header-meta-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+.module-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:var(--slate); color:#fff; }
+.topic-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:#F1F5F9; color:#475569; }
+.topic-pill.accent{ background:var(--accent-soft); color:var(--accent-dark); }
+
+/* page */
+.page{ max-width:920px; margin:0 auto; padding:0 32px 48px; }
+
+/* objectives */
+.objectives{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--accent); border-radius:6px; padding:22px 28px; margin:36px 0 14px; }
+.obj-label{ font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:14px; }
+.objectives ul{ list-style:none; }
+.objectives ul li{ font-size:14px; color:var(--text); padding:5px 0 5px 20px; position:relative; line-height:1.55; }
+.objectives ul li::before{ content:'◇'; position:absolute; left:0; color:var(--accent); font-size:10px; top:9px; }
+
+/* sections */
+section{ margin-top:44px; }
+section h2{ font-family:'Barlow Condensed',sans-serif; font-size:28px; font-weight:800; letter-spacing:0.005em; color:var(--text); margin-bottom:20px; display:flex; align-items:baseline; gap:20px; }
+section h2 .num{ font-family:'Barlow Condensed',sans-serif; font-size:56px; font-weight:900; color:var(--accent); letter-spacing:-0.02em; line-height:0.85; min-width:42px; }
+section h3{ font-family:'Barlow',sans-serif; font-size:17px; font-weight:700; color:var(--text); margin:28px 0 12px; }
+section p{ font-size:14.5px; color:var(--text); line-height:1.75; margin-bottom:14px; }
+section p strong{ font-weight:700; color:var(--text); }
+section ul{ font-size:14.5px; line-height:1.75; color:var(--text); padding-left:22px; margin:8px 0 16px; }
+section ul li{ margin:4px 0; }
+section a{ color:var(--accent-dark); text-decoration:underline; text-decoration-color:rgba(0,0,0,0.2); text-underline-offset:2px; }
+section a:hover{ text-decoration-color:var(--accent); }
+
+/* compare tables */
+.compare-table{ width:100%; border-collapse:collapse; margin:16px 0 20px; font-size:13.5px; background:var(--bg-card); border:0.5px solid var(--border); border-radius:6px; overflow:hidden; }
+.compare-table thead th{ font-size:10px; font-weight:700; color:var(--text-light); text-transform:uppercase; letter-spacing:0.06em; padding:11px 16px; text-align:left; border-bottom:0.5px solid var(--border); background:#fafaf8; }
+.compare-table tbody td{ padding:11px 16px; border-bottom:0.5px solid #f0efe8; vertical-align:top; color:var(--text); line-height:1.55; }
+.compare-table tbody td:first-child{ font-weight:600; background:#fafaf8; width:28%; }
+.compare-table tbody tr:last-child td{ border-bottom:none; }
+
+/* code */
+pre{ font-family:'JetBrains Mono',monospace; background:var(--bg-code); border:0.5px solid var(--border); border-radius:6px; padding:14px 18px; font-size:12px; line-height:1.7; color:var(--text); overflow-x:auto; margin:12px 0 18px; }
+pre code{ font-family:inherit; }
+.code-label{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-light); margin:14px 0 6px; }
+.code-comment{ color:#9a988f; }
+.code-cmd{ color:var(--accent); font-weight:600; }
+.code-key{ color:var(--info); font-weight:600; }
+code.inline{ font-family:'JetBrains Mono',monospace; font-size:12.5px; background:var(--tag-bg); padding:1px 6px; border-radius:3px; color:var(--text); }
+
+/* callout boxes */
+.keybox{ background:var(--accent-soft); border-left:3px solid var(--accent); border-radius:0 6px 6px 0; padding:14px 18px; margin:14px 0 18px; font-size:13.5px; line-height:1.65; color:var(--text); }
+.keybox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--accent-dark); margin-bottom:6px; }
+.keybox b{ color:var(--accent-dark); }
+.notebox{ background:#FBF3E8; border-left:3px solid var(--rust); border-radius:0 6px 6px 0; padding:14px 18px; margin:14px 0 18px; font-size:13.5px; line-height:1.65; }
+.notebox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--rust); margin-bottom:6px; }
+
+/* concept cards */
+.concept-grid{ display:flex; flex-direction:column; gap:10px; margin-top:14px; }
+.concept-card{ background:var(--bg-card); border:0.5px solid var(--border); border-radius:7px; overflow:hidden; }
+.concept-head{ display:flex; align-items:center; gap:14px; padding:14px 20px; cursor:pointer; user-select:none; transition:background 0.15s; }
+.concept-head:hover{ background:#fafaf8; }
+.concept-icon{ font-size:16px; flex-shrink:0; color:var(--accent); }
+.concept-title{ flex:1; font-size:14.5px; font-weight:700; color:var(--text); }
+.concept-sub{ font-size:12px; color:var(--text-muted); font-weight:400; margin-top:1px; }
+.concept-chev{ font-size:10px; color:var(--text-light); }
+.concept-body{ display:none; padding:0 20px 18px; border-top:0.5px solid #f0efe8; }
+.concept-body.open{ display:block; }
+.concept-body p{ font-size:13.5px; line-height:1.7; color:var(--text); margin-top:12px; }
+.concept-body ul{ font-size:13.5px; margin-top:8px; }
+
+/* assessment / summary box */
+.assessment-box{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--slate); border-radius:0 6px 6px 0; padding:20px 24px; margin:30px 0 0; }
+.assessment-box .assess-label{ font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); margin-bottom:10px; }
+.assessment-box p{ font-size:13.5px; line-height:1.7; margin-bottom:10px; }
+.assessment-box p:last-child{ margin-bottom:0; }
+
+/* ===== interactive widgets ===== */
+.widget{ border:0.5px solid var(--border); border-radius:8px; padding:20px; margin:16px 0; background:var(--bg-card); }
+.widget h4{ margin:0 0 14px; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); font-weight:700; }
+.controls{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:14px; }
+button.ui{ font-family:'Barlow',sans-serif; cursor:pointer; border:1px solid var(--accent); background:var(--accent); color:#fff; padding:7px 16px; border-radius:6px; font-size:12.5px; font-weight:600; transition:0.15s; }
+button.ui:hover{ background:var(--accent-dark); border-color:var(--accent-dark); }
+button.ui.ghost{ background:#fff; color:var(--accent); }
+button.ui.ghost:hover{ background:var(--accent-soft); }
+.fade{ animation:fade 0.35s ease; }
+@keyframes fade{ from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+input[type=range]{ accent-color:var(--accent); }
+.kbd{ display:inline-block; background:#fff; border:1px solid #d6dbde; border-bottom-width:2px; border-radius:5px; padding:.05em .45em; font-family:'JetBrains Mono',monospace; font-size:.82em; }
+</style>
+</head><body>
+<header class="pagenav"><div class="pagenav-inner">
+  <span class="brand">Cloud Security Fundamentals</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn" href="../module-1/04-ports.html">&larr; Prev</a>
+    <a class="navbtn" href="02-cia-triad.html">Next &rarr;</a>
+  </nav>
+</div></header>
+
+<div class="header"><div class="header-inner">
+  <div class="header-eyebrow">Module 2 &nbsp;·&nbsp; Securing Internet Communications</div>
+  <h1>Securing Internet <em>Communications</em></h1>
+  <div class="header-meta-row">
+    <span class="module-pill">Module 2</span>
+    <span class="topic-pill">Security foundations</span>
+    <span class="topic-pill accent">Encryption &amp; TLS</span>
+  </div>
+</div></div>
+
+<div class="page">
+
+  <div class="objectives">
+    <div class="obj-label">Learning Objectives</div>
+    <ul>
+      <li>Explain why ordinary internet communication is insecure (the man-in-the-middle risk)</li>
+      <li>Describe symmetric vs asymmetric encryption and the key-sharing problem each one creates or solves</li>
+      <li>Explain how digital certificates and Certificate Authorities establish trust in a server's identity</li>
+      <li>Trace the TLS handshake that turns an open HTTP connection into secure HTTPS</li>
+    </ul>
+  </div>
+
+  <section>
+    <h2><span class="num">1</span> Where we are</h2>
+    <p>In Module 1, we got a packet from your browser to a bank's web server: the URL resolved through <strong>DNS</strong>, a <strong>TCP three-way handshake</strong> opened a session, and <strong>IP</strong> carried the packets hop by hop. That works &mdash; but the channel is wide open. Now we ask the next question: <strong>how do we secure it?</strong></p>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> The threat: man-in-the-middle</h2>
+    <p>You open <code class="inline">chase.com</code> and type your <strong>username and password</strong>. Those credentials travel back over the open session &mdash; and <strong>anyone in the middle</strong>, tapping the wire or listening to the Wi-Fi, can read them straight off the network.</p>
+    <div class="widget"><h4>A man-in-the-middle attack</h4><svg viewBox="0 0 700 210" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif"><defs><marker id="mitmA" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa3a8"/></marker></defs><rect x="40" y="66" width="140" height="54" rx="8" fill="#2D3748"/><text x="110" y="90" fill="#fff" font-size="13.5" font-weight="700" text-anchor="middle">You</text><text x="110" y="107" fill="#cbd5e0" font-size="10.5" font-weight="500" text-anchor="middle">(browser)</text><rect x="520" y="66" width="140" height="54" rx="8" fill="#2D3748"/><text x="590" y="90" fill="#fff" font-size="13" font-weight="700" text-anchor="middle">Bank server</text><text x="590" y="107" fill="#cbd5e0" font-size="9.5" font-weight="500" text-anchor="middle">examplebank.com</text><line x1="180" y1="93" x2="520" y2="93" stroke="#9aa3a8" stroke-width="2"/><rect x="300" y="78" width="100" height="30" rx="6" fill="#fff" stroke="#cbd5e0" stroke-width="1"/><text x="350" y="97" fill="#1a1a18" font-size="11" font-weight="700" text-anchor="middle" font-family="'JetBrains Mono',monospace">user : pass</text><text x="350" y="70" fill="#5f5e5a" font-size="10" font-weight="600" text-anchor="middle">plaintext</text><line x1="350" y1="108" x2="350" y2="150" stroke="#D7263D" stroke-width="2" stroke-dasharray="4 4"/><rect x="280" y="150" width="140" height="46" rx="8" fill="#fdecee" stroke="#D7263D" stroke-width="1"/><text x="350" y="170" fill="#D7263D" font-size="12.5" font-weight="800" text-anchor="middle">Attacker</text><text x="350" y="187" fill="#9a2230" font-size="10.5" font-weight="600" text-anchor="middle">reads the credentials</text></svg></div>
+    <div class="keybox">
+      <div class="lbl">Man-in-the-middle (MITM)</div>
+      An attacker positioned between you and the server reads (or alters) traffic you assume is private. Sending credentials as <b>plaintext</b> over a shared medium is all it takes. The fix is to make the contents unreadable in transit &mdash; <b>encryption</b>.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> What encryption is</h2>
+    <p><strong>Encryption</strong> converts readable <strong>plaintext</strong> into scrambled <strong>ciphertext</strong>; <strong>decryption</strong> reverses it. Even if a man-in-the-middle captures the ciphertext, they can't recover the original message. Every scheme has two pieces: an <strong>algorithm</strong> and a <strong>key</strong>.</p>
+    <div class="widget" id="caesar">
+      <h4>Try it: a shift cipher</h4>
+      <div class="controls" style="margin-top:0;align-items:center">
+        <span style="font-size:13px;color:var(--text-muted)">Algorithm: shift right &nbsp;&middot;&nbsp; Key: <b id="cShiftVal">2</b></span>
+        <input id="cShift" type="range" min="1" max="25" value="2" style="flex:1;min-width:120px;vertical-align:middle">
+      </div>
+      <div style="margin-top:14px"><div class="code-label">Plaintext</div>
+        <input id="cIn" type="text" value="roses are red" style="width:100%;box-sizing:border-box;font-family:'JetBrains Mono',monospace;font-size:13px;padding:9px 11px;border:1px solid #e4e7e9;border-radius:7px;background:#fff;color:#1a1a18"></div>
+      <div style="margin-top:10px"><div class="code-label">Ciphertext</div>
+        <div id="cOut" style="font-family:'JetBrains Mono',monospace;font-size:13px;padding:11px;border-radius:7px;background:#1f2730;color:#7fd4e8;word-break:break-all;min-height:18px"></div></div>
+      <p style="font-size:12.5px;color:var(--text-muted);margin:12px 0 0;line-height:1.55">A simple shift like this is cracked instantly. Real systems use complex algorithms &mdash; <b>AES</b> (Advanced Encryption Standard), <b>3DES</b>, or <b>RSA</b> (Rivest&ndash;Shamir&ndash;Adleman) &mdash; but the two ingredients are always the same: an <b>algorithm</b> and a <b>key</b>.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> Symmetric encryption &mdash; and its problem</h2>
+    <p>The simplest model uses <strong>one shared key</strong> for both encryption and decryption &mdash; like a lock with a single key that both parties hold. You and the bank agree on a key ahead of time; you encrypt your credentials with it, the bank decrypts with the same key. It's <strong>fast and simple</strong>.</p>
+    <p>But there are two problems. First, the <strong>key-sharing chicken-and-egg problem</strong>: to communicate securely you first need a shared key &mdash; but how do you send the key itself securely over the same untrusted internet? Second, because <strong>both parties hold the key</strong>, it's twice as exposed: if either side loses it, the protection is gone.</p>
+    <div class="widget"><h4>Symmetric encryption: one shared key</h4><svg viewBox="0 0 500 110" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif"><defs><marker id="aae" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#5f8a9c"/></marker></defs><g transform="translate(58 60)"><path d="M -8 -2 V -9 A 8 8 0 0 1 8 -9 V -2" fill="none" stroke="#2D3748" stroke-width="3.5" stroke-linecap="round"/><rect x="-14" y="-2" width="28" height="22" rx="3" fill="#2D3748"/><circle cx="0" cy="7" r="2.6" fill="#fff"/><rect x="-1.2" y="8.5" width="2.4" height="6" rx="1" fill="#fff"/></g><line x1="84" y1="58" x2="122" y2="58" stroke="#5f8a9c" stroke-width="2" marker-end="url(#aae)"/><g transform="translate(158 58)"><circle cx="-10" cy="0" r="6.5" fill="#2D3748"/><circle cx="-10" cy="0" r="2.6" fill="#fff"/><rect x="-4" y="-2" width="18" height="4" rx="1" fill="#2D3748"/><rect x="9" y="2" width="3" height="5" fill="#2D3748"/><rect x="3" y="2" width="3" height="5" fill="#2D3748"/></g><line x1="184" y1="58" x2="222" y2="58" stroke="#5f8a9c" stroke-width="2" marker-end="url(#aae)"/><g transform="translate(256 60)"><path d="M -8 -2 V -9 A 8 8 0 0 1 7 -14" fill="none" stroke="#2D3748" stroke-width="3.5" stroke-linecap="round"/><rect x="-14" y="-2" width="28" height="22" rx="3" fill="#2D3748"/><circle cx="0" cy="7" r="2.6" fill="#fff"/><rect x="-1.2" y="8.5" width="2.4" height="6" rx="1" fill="#fff"/></g><text x="300" y="54" fill="#5f5e5a" font-size="11.5" font-weight="600">The same key both locks</text><text x="300" y="70" fill="#5f5e5a" font-size="11.5" font-weight="600">and unlocks the data.</text></svg></div>
+  </section>
+
+  <section>
+    <h2><span class="num">5</span> Asymmetric encryption</h2>
+    <p><strong>Asymmetric encryption</strong> solves the key-sharing problem with a <strong>key pair</strong>: two mathematically linked keys where <strong>what one locks, only the other unlocks</strong>. The receiver keeps one key <strong>private</strong> (never shared) and publishes the other as a <strong>public</strong> key that anyone may use.</p>
+    <p>To send the bank a secret, you grab the <strong>bank's public key</strong> and encrypt with it. Only the <strong>bank's private key</strong> can decrypt &mdash; and the bank never shares that. So a man-in-the-middle, holding only the public key, can't read anything. Crucially, <strong>no shared secret ever crosses the wire</strong>. This is the basis of <strong>PKI (Public Key Infrastructure)</strong>, which underlies all secure internet communication.</p>
+    <div class="widget"><h4>Asymmetric encryption: a key pair</h4><svg viewBox="0 0 720 210" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif"><defs><marker id="aae" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#5f8a9c"/></marker></defs><text x="20" y="22" fill="#2D3748" font-size="12.5" font-weight="700">What one key locks, only the other opens</text><g transform="translate(70 72)"><path d="M -8 -2 V -9 A 8 8 0 0 1 8 -9 V -2" fill="none" stroke="#2D3748" stroke-width="3.5" stroke-linecap="round"/><rect x="-14" y="-2" width="28" height="22" rx="3" fill="#2D3748"/><circle cx="0" cy="7" r="2.6" fill="#fff"/><rect x="-1.2" y="8.5" width="2.4" height="6" rx="1" fill="#fff"/></g><g transform="translate(134 72)"><circle cx="-10" cy="0" r="6.5" fill="#1f9d4d"/><circle cx="-10" cy="0" r="2.6" fill="#fff"/><rect x="-4" y="-2" width="18" height="4" rx="1" fill="#1f9d4d"/><rect x="9" y="2" width="3" height="5" fill="#1f9d4d"/><rect x="3" y="2" width="3" height="5" fill="#1f9d4d"/></g><line x1="152" y1="70" x2="212" y2="70" stroke="#5f8a9c" stroke-width="2" marker-end="url(#aae)"/><g transform="translate(252 72)"><circle cx="-10" cy="0" r="6.5" fill="#D7263D"/><circle cx="-10" cy="0" r="2.6" fill="#fff"/><rect x="-4" y="-2" width="18" height="4" rx="1" fill="#D7263D"/><rect x="9" y="2" width="3" height="5" fill="#D7263D"/><rect x="3" y="2" width="3" height="5" fill="#D7263D"/></g><g transform="translate(314 72)"><path d="M -8 -2 V -9 A 8 8 0 0 1 7 -14" fill="none" stroke="#2D3748" stroke-width="3.5" stroke-linecap="round"/><rect x="-14" y="-2" width="28" height="22" rx="3" fill="#2D3748"/><circle cx="0" cy="7" r="2.6" fill="#fff"/><rect x="-1.2" y="8.5" width="2.4" height="6" rx="1" fill="#fff"/></g><text x="360" y="68" fill="#5f5e5a" font-size="11.5" font-weight="600">Locked with the public (green) key —</text><text x="360" y="84" fill="#5f5e5a" font-size="11.5" font-weight="600">only the private (red) key opens it.</text><g transform="translate(70 135)"><path d="M -8 -2 V -9 A 8 8 0 0 1 8 -9 V -2" fill="none" stroke="#2D3748" stroke-width="3.5" stroke-linecap="round"/><rect x="-14" y="-2" width="28" height="22" rx="3" fill="#2D3748"/><circle cx="0" cy="7" r="2.6" fill="#fff"/><rect x="-1.2" y="8.5" width="2.4" height="6" rx="1" fill="#fff"/></g><g transform="translate(134 135)"><circle cx="-10" cy="0" r="6.5" fill="#D7263D"/><circle cx="-10" cy="0" r="2.6" fill="#fff"/><rect x="-4" y="-2" width="18" height="4" rx="1" fill="#D7263D"/><rect x="9" y="2" width="3" height="5" fill="#D7263D"/><rect x="3" y="2" width="3" height="5" fill="#D7263D"/></g><line x1="152" y1="133" x2="212" y2="133" stroke="#5f8a9c" stroke-width="2" marker-end="url(#aae)"/><g transform="translate(252 135)"><circle cx="-10" cy="0" r="6.5" fill="#1f9d4d"/><circle cx="-10" cy="0" r="2.6" fill="#fff"/><rect x="-4" y="-2" width="18" height="4" rx="1" fill="#1f9d4d"/><rect x="9" y="2" width="3" height="5" fill="#1f9d4d"/><rect x="3" y="2" width="3" height="5" fill="#1f9d4d"/></g><g transform="translate(314 135)"><path d="M -8 -2 V -9 A 8 8 0 0 1 7 -14" fill="none" stroke="#2D3748" stroke-width="3.5" stroke-linecap="round"/><rect x="-14" y="-2" width="28" height="22" rx="3" fill="#2D3748"/><circle cx="0" cy="7" r="2.6" fill="#fff"/><rect x="-1.2" y="8.5" width="2.4" height="6" rx="1" fill="#fff"/></g><text x="360" y="131" fill="#5f5e5a" font-size="11.5" font-weight="600">Locked with the private (red) key —</text><text x="360" y="147" fill="#5f5e5a" font-size="11.5" font-weight="600">only the public (green) key opens it.</text><rect x="20" y="173" width="320" height="28" rx="6" fill="#fafaf8" stroke="#e4e7e9"/><g transform="translate(50 187)"><circle cx="-10" cy="0" r="6.5" fill="#D7263D"/><circle cx="-10" cy="0" r="2.6" fill="#fff"/><rect x="-4" y="-2" width="18" height="4" rx="1" fill="#D7263D"/><rect x="9" y="2" width="3" height="5" fill="#D7263D"/><rect x="3" y="2" width="3" height="5" fill="#D7263D"/></g><text x="72" y="191" fill="#5f5e5a" font-size="11" font-weight="700">Private key</text><g transform="translate(190 187)"><circle cx="-10" cy="0" r="6.5" fill="#1f9d4d"/><circle cx="-10" cy="0" r="2.6" fill="#fff"/><rect x="-4" y="-2" width="18" height="4" rx="1" fill="#1f9d4d"/><rect x="9" y="2" width="3" height="5" fill="#1f9d4d"/><rect x="3" y="2" width="3" height="5" fill="#1f9d4d"/></g><text x="214" y="191" fill="#5f5e5a" font-size="11" font-weight="700">Public key</text></svg></div>
+    <table class="compare-table">
+      <thead><tr><th></th><th>Symmetric</th><th>Asymmetric</th></tr></thead>
+      <tbody>
+        <tr><td>Keys</td><td>one shared key</td><td>public + private key pair</td></tr>
+        <tr><td>Key sharing</td><td>must share secretly in advance (the hard part)</td><td>nothing secret is shared</td></tr>
+        <tr><td>Speed</td><td>fast, simple</td><td>slow, math-heavy</td></tr>
+        <tr><td>Main weakness</td><td>exposure &mdash; both sides hold the key</td><td>computationally expensive</td></tr>
+      </tbody>
+    </table>
+    <div class="keybox">
+      <div class="lbl">The trade-off that shapes everything next</div>
+      Symmetric is <b>fast but hard to key-share</b>; asymmetric is <b>easy to key-share but slow</b>. The real internet uses asymmetric encryption <em>once</em> &mdash; just to exchange a symmetric key &mdash; then switches to fast symmetric encryption for the rest of the session. Hold that thought for the TLS handshake below.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">6</span> Digital certificates &amp; Certificate Authorities</h2>
+    <p>Encryption hides the message &mdash; but how do you know the public key really belongs to your bank, and not an attacker? You could be sent to a <strong>fake bank site</strong> by a <strong>phishing</strong> email, or by <strong>DNS spoofing</strong> (the DNS lookup resolves <code class="inline">chase.com</code> to a bad, attacker-controlled <strong>IP address</strong> instead of the real one). Encryption to the wrong party is no protection at all.</p>
+    <p>The answer is a <strong>digital certificate</strong>. The bank gives its public key and identifying details to a <strong>Certificate Authority (CA)</strong> &mdash; a small set of highly trusted organizations (e.g. DigiCert, VeriSign). The CA verifies the bank is who it claims to be, then <strong>signs</strong> the certificate with the CA's own private key. Your browser ships with the CAs' public keys, so it can <strong>validate</strong> the signature and trust the bank's public key inside.</p>
+    <div class="notebox">
+      <div class="lbl">Why not skip the CA?</div>
+      Think of applying to a university: you can't mail your own grades and expect them to count &mdash; your school sends them, because a trusted third party vouches for them. A bank can't vouch for its own identity either; the CA's signature is what makes the certificate trustworthy. A valid certificate is what produces the <b>padlock</b> in your browser.
+    </div>
+    <div class="widget" id="cert">
+      <h4>Anatomy of a digital certificate</h4>
+      <p style="font-size:12.5px;color:var(--text-muted);margin:-2px 0 14px">Click any field to see what it's for.</p>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start">
+        <div style="flex:1;min-width:250px;border:1px solid #cfe7ee;border-radius:10px;overflow:hidden;background:#fff">
+          <div style="background:#0E7490;color:#fff;padding:9px 14px;font-weight:700;font-size:13px">&#10003;&nbsp; Digital Certificate</div>
+          <div id="certRows"></div>
+        </div>
+        <div id="certDetail" style="flex:1;min-width:230px;border-radius:10px;background:#f1f9fb;border:1px solid #cfe7ee;padding:14px 16px;font-size:13px;line-height:1.6;color:#1a1a18;min-height:118px"></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">7</span> The TLS handshake &mdash; putting it together</h2>
+    <p>Here is how a browser turns an open HTTP connection into secure <strong>HTTPS</strong>. After the TCP handshake from Module 1, the encryption is negotiated using everything above &mdash; certificates to establish trust, asymmetric encryption to exchange a key, symmetric encryption for speed. Step through it:</p>
+    <div class="widget" id="tls">
+      <h4>TLS handshake: HTTP &rarr; HTTPS</h4>
+      <div id="tlsStage" style="min-height:60px"></div>
+      <div class="controls"><button class="ui" id="tlsNext">Next step &rarr;</button><button class="ui ghost" id="tlsReset">Reset</button></div>
+      <p id="tlsCap" style="font-size:13px;color:var(--text-muted);margin:12px 0 0;line-height:1.6"></p>
+    </div>
+    <p>Adding this encryption layer on top of the transport connection is called <strong>TLS (Transport Layer Security)</strong>. HTTP carried over TLS is <strong>HTTPS</strong> &mdash; the "S" is <em>Secure</em>. Both sides have now agreed on the <strong>encryption key</strong> and the <strong>encryption algorithm</strong>: the two ingredients from Section 3.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">8</span> From securing the channel to the CIA triad</h2>
+    <p>Step back from the bank example. Any two parties communicating across a channel they don't control need a few basic <strong>assurances</strong>:</p>
+    <ul>
+      <li><strong>Confidentiality</strong> &mdash; no one in the middle can read the conversation. (Solved by <em>encryption</em>.)</li>
+      <li><strong>Integrity</strong> &mdash; no one can alter the message (&ldquo;send $1,000&rdquo; must not become &ldquo;send $100,000&rdquo;), and we're talking to the <em>right</em> party. (Solved by <em>signatures</em> and <em>certificates</em>.)</li>
+      <li><strong>Availability</strong> &mdash; the other party is reachable when we need it.</li>
+    </ul>
+    <div class="keybox">
+      <div class="lbl">Next</div>
+      These three assurances &mdash; <b>Confidentiality, Integrity, Availability</b> &mdash; are the <b>CIA triad</b>, the framework that organizes every security decision in this course. That's the next page.
+    </div>
+  </section>
+
+</div>
+
+<footer class="pagenav foot"><div class="pagenav-inner">
+  <span class="brand">Module 2 &middot; Securing Internet Communications</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn" href="../module-1/04-ports.html">&larr; Prev</a>
+    <a class="navbtn" href="02-cia-triad.html">Next &rarr;</a>
+  </nav>
+</div></footer>
+
+<script>function toggleConcept(id){
+  const body=document.getElementById(id);
+  const chev=document.getElementById(id+'-chev');
+  const open=body.classList.contains('open');
+  body.classList.toggle('open',!open);
+  chev.textContent=open?'▶':'▼';
+}
+
+/* ---------- shift cipher ---------- */
+(function(){
+  const inp=document.getElementById('cIn'), sh=document.getElementById('cShift'),
+        out=document.getElementById('cOut'), val=document.getElementById('cShiftVal');
+  function enc(s,k){return s.replace(/[a-z]/gi,c=>{const b=c<='Z'?65:97;return String.fromCharCode((c.charCodeAt(0)-b+k)%26+b);});}
+  function up(){val.textContent=sh.value; out.textContent=enc(inp.value, +sh.value)||'\u2014';}
+  inp.addEventListener('input',up); sh.addEventListener('input',up); up();
+})();
+
+/* ---------- TLS handshake stepper ---------- */
+(function(){
+  const STEPS=[
+    {dir:'note', label:'TCP handshake (SYN \u2192 SYN-ACK \u2192 ACK)',
+     cap:"The TCP three-way handshake from Module 1 just opens the connection. At this point <b>nothing is encrypted</b> \u2014 this is plain HTTP."},
+    {dir:'cs', label:'ClientHello',
+     cap:"<b>Client \u2192 Server.</b> &ldquo;Hello \u2014 here are the cipher algorithms I support.&rdquo;"},
+    {dir:'sc', label:'ServerHello + Certificate',
+     cap:"<b>Server \u2192 Client.</b> The server replies and presents its <b>digital certificate</b> (signed by a CA), which contains the bank's <b>public key</b>."},
+    {dir:'note', label:'Client validates the certificate',
+     cap:"The browser checks the CA's signature using a CA public key it already trusts, confirms the identity, and extracts the bank's <b>public key</b>."},
+    {dir:'cs', label:'Key exchange (session key, encrypted with public key)',
+     cap:"<b>Client \u2192 Server.</b> The client generates a random <b>symmetric session key</b>, encrypts it with the <b>bank's public key</b>, and sends it. Only the bank's <b>private key</b> can open it."},
+    {dir:'sc', label:'Server confirms',
+     cap:"<b>Server.</b> Decrypts with its private key \u2014 both sides now hold the same <b>symmetric session key</b> and have agreed on the algorithm."},
+    {dir:'done', label:'\uD83D\uDD12 Encrypted session (HTTPS)',
+     cap:"From here, <b>everything</b> \u2014 login, transfers \u2014 is encrypted with the fast symmetric session key. This is <b>HTTPS</b>: HTTP over TLS. The padlock appears."}
+  ];
+  let i=0; const stage=document.getElementById('tlsStage'), cap=document.getElementById('tlsCap');
+  function row(s,active){
+    let arrow='', bg=active?'#0E7490':'#f3f5f6', fg=active?'#fff':'#5f5e5a', bd=active?'#0E7490':'#e4e7e9';
+    if(s.dir==='cs') arrow='Client \u2192 Server';
+    else if(s.dir==='sc') arrow='Server \u2192 Client';
+    else if(s.dir==='done'){bg=active?'#1f7a3d':'#eaf6ee'; fg=active?'#fff':'#2c6e49'; bd=active?'#1f7a3d':'#bfe3cd'; arrow='secure';}
+    else arrow='\u2014';
+    return `<div style="display:flex;align-items:center;gap:12px;border-radius:8px;padding:10px 13px;margin-bottom:6px;background:${bg};color:${fg};border:1px solid ${bd};transition:.2s">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;opacity:.9;min-width:92px">${arrow}</span>
+      <span style="flex:1;font-weight:700;font-size:13px">${s.label}</span></div>`;
+  }
+  function render(){
+    stage.innerHTML=STEPS.slice(0,i+1).map((s,idx)=>row(s,idx===i)).join('');
+    cap.innerHTML=STEPS[i].cap;
+    stage.classList.remove('fade');void stage.offsetWidth;stage.classList.add('fade');
+  }
+  document.getElementById('tlsNext').onclick=()=>{if(i<STEPS.length-1){i++;render();}};
+  document.getElementById('tlsReset').onclick=()=>{i=0;render();};
+  render();
+})();
+
+/* ---------- clickable digital certificate ---------- */
+(function(){
+  const FIELDS=[
+    {k:'Subject (CN)', v:'examplebank.com', d:'<b>Who the certificate is for.</b> Your browser checks this matches the site in the address bar. If it doesn\u2019t match, you get a security warning.'},
+    {k:'Issuer', v:'DigiCert Inc \u2014 a CA', d:'<b>The Certificate Authority that signed it.</b> The CA verified the bank\u2019s identity before issuing the certificate. Your browser ships with a built-in list of trusted CAs.'},
+    {k:'Validity', v:'2026-01-01 \u2192 2027-01-01', d:'<b>The certificate\u2019s lifetime.</b> Certificates expire. An expired \u2014 or not-yet-valid \u2014 certificate is rejected by the browser.'},
+    {k:'Public Key', v:'RSA 2048-bit \u00b7 30:82:01\u2026', d:'<b>The bank\u2019s public key.</b> Your browser extracts it and uses it to encrypt the session key during the TLS handshake \u2014 the key exchange in Section 7.'},
+    {k:'Signature', v:'signed with the CA\u2019s private key', d:'<b>The CA\u2019s digital signature.</b> Your browser verifies it using the CA\u2019s public key it already trusts. A valid signature proves the certificate is genuine and unaltered \u2014 this is the whole reason a CA is needed.'}
+  ];
+  const rows=document.getElementById('certRows'), det=document.getElementById('certDetail');
+  if(!rows) return;
+  function render(sel){
+    rows.innerHTML=FIELDS.map((f,i)=>{
+      const on=i===sel;
+      return `<div data-i="${i}" style="display:flex;gap:8px;padding:9px 14px;cursor:pointer;border-top:1px solid #eef1f2;border-left:3px solid ${on?'#0E7490':'transparent'};background:${on?'#f1f9fb':'#fff'};transition:.15s">
+        <span style="min-width:96px;font-size:11px;font-weight:700;color:#5f5e5a;text-transform:uppercase;letter-spacing:.03em">${f.k}</span>
+        <span style="flex:1;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:#1a1a18;word-break:break-all">${f.v}</span>
+      </div>`;
+    }).join('');
+    rows.querySelectorAll('[data-i]').forEach(r=>r.onclick=()=>pick(+r.dataset.i));
+    det.innerHTML = sel<0 ? '<span style="color:#5f5e5a">Select a field on the certificate to learn what it does.</span>' : FIELDS[sel].d;
+  }
+  function pick(i){render(i);}
+  render(-1);
+})();
+</script>
+</body></html>
