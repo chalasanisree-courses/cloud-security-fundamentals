@@ -180,16 +180,11 @@ input[type=range]{ accent-color:var(--accent); }
 
   <section>
     <h2><span class="num">3</span> What's inside the packet &mdash; and DNS</h2>
-    <p>Routing uses numbers, not names. So the first thing your browser does with <code class="inline">example.com</code> is a <strong>DNS resolution</strong> (Domain Name Service) to turn the name into an IP address. Then your client fills in a packet:</p>
-    <table class="compare-table">
-      <thead><tr><th>Field</th><th>Value your client can set</th></tr></thead>
-      <tbody>
-        <tr><td>Source IP</td><td>Your machine's IP &mdash; known</td></tr>
-        <tr><td>Source MAC</td><td>Your machine's physical address &mdash; known</td></tr>
-        <tr><td>Destination IP</td><td>Resolved by DNS &mdash; known</td></tr>
-        <tr><td>Destination MAC</td><td><em>Unknown</em> &mdash; so set to the <strong>next hop</strong> (your home router), then rewritten at each hop</td></tr>
-      </tbody>
-    </table>
+    <p>Routing uses numbers, not names, so your browser first does a <strong>DNS resolution</strong> (Domain Name Service) to turn <code class="inline">example.com</code> into an IP address:</p>
+    <div class="widget"><h4>DNS resolution: name → IP</h4><svg viewBox="0 0 690 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif"><defs><marker id="dnsA" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa3a8"/></marker></defs><rect x="30" y="52" width="160" height="52" rx="8" fill="#2D3748"/><text x="110" y="75" fill="#fff" font-size="12.5" font-weight="700" text-anchor="middle">Your browser</text><text x="110" y="93" fill="#cbd5e0" font-size="9.5" font-weight="500" text-anchor="middle">wants example.com</text><rect x="290" y="52" width="150" height="52" rx="8" fill="#0E7490"/><text x="365" y="75" fill="#fff" font-size="12.5" font-weight="700" text-anchor="middle">DNS resolver</text><text x="365" y="93" fill="#d4eef4" font-size="9.5" font-weight="500" text-anchor="middle">name → number</text><rect x="540" y="52" width="120" height="52" rx="8" fill="#fff" stroke="#cfd6da" stroke-width="1"/><text x="600" y="72" fill="#5f5e5a" font-size="10" font-weight="600" text-anchor="middle">IP address</text><text x="600" y="92" fill="#1a1a18" font-size="11" font-weight="700" text-anchor="middle" font-family="'JetBrains Mono',monospace">203.0.113.10</text><line x1="192" y1="78" x2="288" y2="78" stroke="#9aa3a8" stroke-width="2" marker-end="url(#dnsA)"/><text x="240" y="68" fill="#5f5e5a" font-size="10" font-weight="600" text-anchor="middle">example.com ?</text><line x1="442" y1="78" x2="538" y2="78" stroke="#9aa3a8" stroke-width="2" marker-end="url(#dnsA)"/><text x="491" y="68" fill="#5f5e5a" font-size="10" font-weight="600" text-anchor="middle">here it is</text></svg></div>
+    <p>Now your client builds a packet &mdash; notice how the addresses pair up, and the one field it can't fill yet:</p>
+    <div class="widget"><h4>Anatomy of a packet</h4><svg viewBox="0 0 700 135" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif"><defs><marker id="pktA" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa3a8"/></marker></defs><rect x="30" y="70" width="95" height="46" rx="6" fill="#e7ecee" stroke="#cfd6da" stroke-width="1"/><text x="77.5" y="98" fill="#5f5e5a" font-size="11.5" font-weight="700" text-anchor="middle">Src MAC</text><rect x="125" y="70" width="95" height="46" rx="6" fill="#e7ecee" stroke="#cfd6da" stroke-width="1"/><text x="172.5" y="98" fill="#5f5e5a" font-size="11.5" font-weight="700" text-anchor="middle">Dst MAC</text><rect x="220" y="70" width="95" height="46" rx="6" fill="#d9eef4" stroke="#cfd6da" stroke-width="1"/><text x="267.5" y="98" fill="#234f68" font-size="11.5" font-weight="700" text-anchor="middle">Src IP</text><rect x="315" y="70" width="95" height="46" rx="6" fill="#d9eef4" stroke="#cfd6da" stroke-width="1"/><text x="362.5" y="98" fill="#234f68" font-size="11.5" font-weight="700" text-anchor="middle">Dst IP</text><rect x="410" y="70" width="200" height="46" rx="6" fill="#0E7490" stroke="#cfd6da" stroke-width="1"/><text x="510.0" y="98" fill="#fff" font-size="11.5" font-weight="700" text-anchor="middle">Payload (data)</text><path d="M30 60 V54 H220 V60" fill="none" stroke="#9aa3a8" stroke-width="1.3"/><text x="125" y="46" fill="#5f5e5a" font-size="10.5" font-weight="600" text-anchor="middle">rewritten at every hop · Layer 2</text><path d="M220 60 V54 H410 V60" fill="none" stroke="#9aa3a8" stroke-width="1.3"/><text x="315" y="46" fill="#5f5e5a" font-size="10.5" font-weight="600" text-anchor="middle">constant end-to-end · Layer 3</text></svg></div>
+    <p>The <strong>destination MAC</strong> is the unknown: the destination isn't on your local network, so the packet goes to the <strong>next hop</strong> (your router) and the MAC is rewritten at every hop &mdash; the switching and ARP story in Section 9.</p>
   </section>
 
   <section>
@@ -235,11 +230,15 @@ input[type=range]{ accent-color:var(--accent); }
         <button class="ui ghost" id="hsReset">Reset</button>
       </div>
     </div>
+    <div class="keybox">
+      <div class="lbl">TCP and IP: a division of labor</div>
+      <b>IP delivers, but doesn't guarantee.</b> IP is connectionless and unreliable by itself &mdash; it just forwards packets hop by hop, with no promise they arrive, arrive intact, or arrive in order. <b>TCP guarantees, but doesn't move packets.</b> Riding on top of IP, TCP adds the session (the handshake), correct ordering, and retransmission of anything lost. IP moves the packets; TCP makes the conversation reliable.
+    </div>
   </section>
 
   <section>
     <h2><span class="num">7</span> Seeing it for real &mdash; Wireshark</h2>
-    <p><strong>Wireshark</strong> captures the actual packets. Typing <code class="inline">example.com</code> produces this sequence:</p>
+    <p><strong>Wireshark</strong> captures the actual packets &mdash; and on a server with no GUI, <code class="inline">tcpdump</code> does the same job from the command line. Typing <code class="inline">example.com</code> produces this sequence:</p>
     <div class="widget" id="pcap"><h4>Packet capture (PCAP)</h4><div id="pcapList"></div></div>
     <p>Note the redirect: typing plain <code class="inline">example.com</code> hits HTTP first, then gets redirected to <strong>HTTPS on port 443</strong> &mdash; the secure protocol.</p>
   </section>
@@ -276,6 +275,13 @@ input[type=range]{ accent-color:var(--accent); }
       <div id="arpStage"></div>
       <div class="controls"><button class="ui" id="arpNext">Next step &rarr;</button><button class="ui ghost" id="arpReset">Reset</button></div>
       <p id="arpCaption" style="font-size:13px;color:var(--text-muted);margin:12px 0 0;line-height:1.6"></p>
+    </div>
+    <p>One nuance: if the destination is on <strong>another</strong> network, your computer can't ARP for it &mdash; the destination isn't local. Instead it ARPs for the <strong>default gateway</strong> (your router) and hands the packet there. So ARP always resolves the <em>next local hop</em>: the destination device when it's local, or the gateway when the destination is remote.</p>
+    <h3>Reporting problems: ICMP</h3>
+    <p>Not every packet carries application data. <strong>ICMP (Internet Control Message Protocol)</strong> is a Layer&nbsp;3 protocol for <strong>control and error messages</strong> about IP communication &mdash; carried inside IP packets, so it travels across routers and networks. It powers two everyday tools: <code class="inline">ping</code> (an ICMP echo request and reply &mdash; &ldquo;can I reach this host?&rdquo;) and <code class="inline">traceroute</code> (which reads ICMP time&#8209;exceeded messages to map each hop along the path). ICMP carries no application data; it just lets devices report conditions and verify connectivity.</p>
+    <div class="keybox">
+      <div class="lbl">ARP vs ICMP &mdash; don't confuse them</div>
+      <b>ARP</b> prepares an IP packet for <em>local</em> delivery (find the MAC for the next hop). <b>ICMP</b> is an IP&#8209;level message that <em>reports</em> network conditions (ping, traceroute). One resolves addresses; the other reports status.
     </div>
   </section>
 
