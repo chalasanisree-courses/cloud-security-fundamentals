@@ -375,6 +375,7 @@ function toggle(id){
   const open=body.classList.contains('open');
   body.classList.toggle('open',!open);
   chev.textContent=open?'▶':'▼';
+  persistOpen();
 }
 function toggleSvc(){
   const body=document.getElementById('svc-body');
@@ -382,6 +383,7 @@ function toggleSvc(){
   const open=body.classList.contains('open');
   body.classList.toggle('open',!open);
   chev.textContent=open?'▶':'▼';
+  persistOpen();
 }
 function filterSvc(layer,btn){
   document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
@@ -391,7 +393,31 @@ function filterSvc(layer,btn){
     row.style.display=(layer!=='all'&&rl!==layer)?'none':'';
   });
 }
-toggle('m1');
+/* ---- remember which sections are open across Home / Back within a tab session ---- */
+var CSF_OPEN_KEY='csf-open-sections';
+function persistOpen(){
+  try{
+    var ids=[].slice.call(document.querySelectorAll('.module-body.open, .svc-body.open')).map(function(el){return el.id;});
+    sessionStorage.setItem(CSF_OPEN_KEY, JSON.stringify(ids));
+  }catch(e){/* storage unavailable — fall back to no persistence */}
+}
+function openSection(id){
+  var body=document.getElementById(id);
+  if(!body) return;
+  body.classList.add('open');
+  var chev=document.getElementById(id==='svc-body'?'svc-chev':id+'-chev');
+  if(chev) chev.textContent='\u25BC';
+}
+(function restoreOpen(){
+  var saved=null;
+  try{ saved=JSON.parse(sessionStorage.getItem(CSF_OPEN_KEY)); }catch(e){}
+  if(saved && saved.length){
+    saved.forEach(openSection);
+  } else if(saved===null){
+    openSection('m1');   // first load this session: open Module 1 by default
+  }
+  /* if saved is an empty array, the user had everything collapsed — honor that */
+})();
 </script>
 
 </body>
