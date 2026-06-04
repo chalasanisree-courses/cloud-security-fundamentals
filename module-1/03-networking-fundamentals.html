@@ -1,8 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Networking Fundamentals</title>
-<style>@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Networking Fundamentals</title><style>@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
 * { box-sizing:border-box; margin:0; padding:0; }
 :root{
   --slate-dark:#1A202C; --slate:#2D3748;
@@ -116,8 +113,7 @@ button.ui.ghost:hover{ background:var(--accent-soft); }
 @keyframes fade{ from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
 input[type=range]{ accent-color:var(--accent); }
 .kbd{ display:inline-block; background:#fff; border:1px solid #d6dbde; border-bottom-width:2px; border-radius:5px; padding:.05em .45em; font-family:'JetBrains Mono',monospace; font-size:.82em; }
-</style>
-</head><body>
+</style></head><body>
 <header class="pagenav"><div class="pagenav-inner">
   <span class="brand">Cloud Security Fundamentals</span>
   <nav class="navbtns">
@@ -194,7 +190,7 @@ input[type=range]{ accent-color:var(--accent); }
     <p>You can inspect your machine's addresses from a terminal &mdash; <span class="kbd">ipconfig</span> on Windows, <span class="kbd">ifconfig</span> on macOS/Linux:</p>
     <div class="code-label">Terminal &mdash; ifconfig (macOS)</div>
 <pre><code>en0:  <span class="code-comment">(Wi-Fi interface)</span>
-  ether   a4:83:e7:2b:6d:1f          <span class="code-comment"># MAC address (physical, fixed)</span>
+  ether   10:bd:3a:7e:4d:3f          <span class="code-comment"># MAC address (physical, fixed)</span>
   inet    <span class="code-key">192.168.1.165</span>             <span class="code-comment"># IPv4 address (given by your router)</span>
   inet6   fe80::1c3a:...             <span class="code-comment"># IPv6 address</span></code></pre>
     <p>Every device on your home network shares the same network prefix and gets a different host number: your Mac <code class="inline">192.168.1.165</code>, your phone <code class="inline">192.168.1.250</code>, the router <code class="inline">192.168.1.254</code>.</p>
@@ -295,14 +291,13 @@ input[type=range]{ accent-color:var(--accent); }
         <tbody>
           <tr><td>Network bits</td><td id="cNet"></td></tr>
           <tr><td>Host bits</td><td id="cHost"></td></tr>
-          <tr><td>Total addresses</td><td id="cTotal"></td></tr>
-          <tr><td>Usable hosts <span style="font-weight:400;color:var(--text-light)">(minus network + broadcast)</span></td><td id="cUsable"></td></tr>
+          <tr><td>Host addresses <span style="font-weight:400;color:var(--text-light)">(2<sup>host bits</sup>)</span></td><td id="cTotal"></td></tr>
         </tbody>
       </table>
     </div>
     <div class="notebox">
       <div class="lbl">Worked example</div>
-      A <code class="inline">/28</code> leaves <code class="inline">32 &minus; 28 = 4</code> host bits &rarr; <code class="inline">2&#8308; = 16</code> total addresses &rarr; <strong>14 usable</strong> (one reserved for the network ID, one for broadcast). So a <code class="inline">/28</code> can't number 20 devices.
+      A <code class="inline">/28</code> leaves <code class="inline">32 &minus; 28 = 4</code> host bits &rarr; <code class="inline">2&#8308; = 16</code> host addresses. So a <code class="inline">/28</code> block can't number 20 devices.
     </div>
   </section>
 
@@ -333,7 +328,7 @@ input[type=range]{ accent-color:var(--accent); }
 
 /* ---------- Postal / next-hop ---------- */
 const HOPS=[
-  {n:"Your computer (San Jose)",mac:"a4:83:e7:2b:6d:1f &rarr; <b>router</b>"},
+  {n:"Your computer (San Jose)",mac:"10:bd:3a:7e:4d:3f &rarr; <b>router</b>"},
   {n:"Home router",mac:"rewritten &rarr; <b>ISP router</b>"},
   {n:"ISP router (San Francisco)",mac:"rewritten &rarr; <b>next router</b>"},
   {n:"Backbone router (Washington, D.C.)",mac:"rewritten &rarr; <b>international hub</b>"},
@@ -446,11 +441,9 @@ function renderCIDR(){
   const p=+slide.value;
   document.getElementById('cidrVal').textContent=p;
   const host=32-p, total=Math.pow(2,host);
-  const usable=host<=1?0:total-2;
   document.getElementById('cNet').textContent=p+" bits";
   document.getElementById('cHost').textContent=host+" bits";
   document.getElementById('cTotal').innerHTML="2<sup>"+host+"</sup> = "+total.toLocaleString();
-  document.getElementById('cUsable').textContent=usable.toLocaleString();
   // 32 bit cells
   let cells="";
   for(let i=0;i<32;i++){
@@ -467,15 +460,15 @@ renderCIDR();
 
 /* ---------- ARP (Address Resolution Protocol) ---------- */
 const ARP_DEVICES=[
-  {name:'Your computer', ip:'192.168.1.165', mac:'a4:83:e7:2b:6d:1f', self:true},
-  {name:'Smart TV',      ip:'192.168.1.250', mac:'b8:27:eb:14:aa:01', target:true},
+  {name:'Your computer', ip:'192.168.1.165', mac:'10:bd:3a:7e:4d:3f', self:true},
+  {name:'Smart TV',      ip:'192.168.1.250', mac:'1E:54:25:7E:D2:3E', target:true},
   {name:'Printer',       ip:'192.168.1.5',   mac:'00:1b:63:84:45:e6'},
   {name:'Phone',         ip:'192.168.1.30',  mac:'3c:5a:b4:09:77:d2'},
 ];
 const ARP_STEPS=[
   {cap:"Your computer wants to send a frame to the <b>Smart TV (192.168.1.250)</b> on the same network &mdash; but it only knows the TV's <b>IP</b>, not its <b>MAC</b>."},
   {cap:"<b>Broadcast.</b> Your computer asks <i>everyone</i> on the subnet: &ldquo;Who has 192.168.1.250? Tell me your MAC.&rdquo; Every device hears it.", mode:'broadcast'},
-  {cap:"<b>Reply.</b> Only the Smart TV answers: &ldquo;192.168.1.250 is at <b>b8:27:eb:14:aa:01</b>.&rdquo; Now your computer knows the MAC.", mode:'reply'},
+  {cap:"<b>Reply.</b> Only the Smart TV answers: &ldquo;192.168.1.250 is at <b>1E:54:25:7E:D2:3E</b>.&rdquo; Now your computer knows the MAC.", mode:'reply'},
   {cap:"<b>Deliver.</b> Your computer builds the frame with the TV's MAC as the destination and switches it straight there &mdash; no router involved. This never leaves the local network.", mode:'deliver'},
 ];
 let arpStep=0;
@@ -502,5 +495,4 @@ function renderARP(){
 document.getElementById('arpNext').onclick=()=>{ if(arpStep<ARP_STEPS.length-1){arpStep++;renderARP();} };
 document.getElementById('arpReset').onclick=()=>{ arpStep=0;renderARP(); };
 renderARP();
-</script>
-</body></html>
+</script></body></html>
