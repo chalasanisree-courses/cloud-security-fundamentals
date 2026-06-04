@@ -285,25 +285,38 @@ input[type=range]{ accent-color:var(--accent); }
       (sub?`<text x="${x+w/2}" y="${y+h/2+13}" text-anchor="middle" font-size="8.5" font-weight="600" fill="rgba(255,255,255,.85)">${sub}</text>`:'');
   }
   function line(x1,y1,x2,y2,c){return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c||'#c4c9cc'}" stroke-width="2"/>`;}
+  // machine centers and geometry
+  const MX=[85,215,345,475], MW=112, MTOP=258, MH=54;
   function render(step){
-    let s=`<svg viewBox="0 0 560 270" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
-    if(step>=3){ s+=`<rect x="14" y="14" width="532" height="242" rx="12" fill="none" stroke="${T}" stroke-width="2.5" stroke-dasharray="9 6"/><text x="280" y="32" text-anchor="middle" font-size="10.5" font-weight="800" fill="${T}" letter-spacing="1.5">NETWORK PERIMETER</text>`; }
-    // tier boxes
-    s+=box(40,128,78,44,S,'Clients','workstations');
-    s+=box(196,128,90,44,T,'Web','server');
-    s+=box(330,128,90,44,T,'App','server');
-    s+=box(452,128,80,44,S,'Database','server');
-    s+=line(118,150,196,150);s+=line(286,150,330,150);s+=line(420,150,452,150);
-    if(step>=2){
-      s+=box(150,205,120,34,mute,'Switches / Routers','');
-      s+=line(210,172,210,205,mute);
-      s+=`<text x="455" y="226" text-anchor="middle" font-size="10" font-weight="700" fill="${mute}">\u2191 to the internet</text>`;
-    }
+    let s=`<svg viewBox="0 0 560 360" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    // perimeter (step 3)
     if(step>=3){
-      s+=box(312,205,96,34,R,'Firewall + IDS/IPS','');
-      s+=line(360,172,360,205,R);
-      s+=`<circle cx="79" cy="118" r="6" fill="${G}"/><circle cx="241" cy="118" r="6" fill="${G}"/><circle cx="375" cy="118" r="6" fill="${G}"/><circle cx="492" cy="118" r="6" fill="${G}"/>`;
-      s+=`<text x="280" y="252" text-anchor="middle" font-size="8.5" font-weight="700" fill="${G}">\u25cf endpoint protection on every machine</text>`;
+      s+=`<rect x="18" y="72" width="524" height="270" rx="14" fill="none" stroke="${T}" stroke-width="2.5" stroke-dasharray="9 6"/>`+
+         `<text x="34" y="93" font-size="10.5" font-weight="800" fill="${T}" letter-spacing="1.5">NETWORK PERIMETER</text>`;
+    }
+    // internet + the path down into the network (step 1)
+    if(step>=1){
+      s+=line(280,58,280,196,mute);                 // internet -> switching fabric (firewall overlays at step 2)
+      s+=box(200,18,160,40,S,'Internet','the outside world');
+    }
+    // switching fabric (step 1)
+    if(step>=1){
+      s+=box(60,196,440,34,mute,'Switches / Routers','');
+      MX.forEach(x=>{ s+=line(x,MTOP,x,230,mute); });  // each machine drops to the fabric
+    }
+    // firewall gateway on the internet path (step 2)
+    if(step>=2){
+      s+=box(200,104,160,40,R,'Firewall + IDS/IPS','');
+    }
+    // the four machines (always)
+    s+=box(MX[0]-MW/2,MTOP,MW,MH,S,'Clients','workstations');
+    s+=box(MX[1]-MW/2,MTOP,MW,MH,T,'Web','server');
+    s+=box(MX[2]-MW/2,MTOP,MW,MH,T,'App','server');
+    s+=box(MX[3]-MW/2,MTOP,MW,MH,S,'Database','server');
+    // endpoint protection badges on each machine (step 2)
+    if(step>=2){
+      MX.forEach(x=>{ s+=`<circle cx="${x+MW/2-13}" cy="${MTOP+13}" r="6.5" fill="${G}" stroke="#fff" stroke-width="2"/>`; });
+      s+=`<text x="280" y="332" text-anchor="middle" font-size="9" font-weight="700" fill="${G}">\u25cf endpoint protection (antivirus / EDR) on every machine</text>`;
     }
     s+=`</svg>`;
     stage.innerHTML=s; cap.textContent=caps[step];
@@ -379,9 +392,9 @@ input[type=range]{ accent-color:var(--accent); }
     s+=`<rect x="168" y="20" width="150" height="170" rx="10" fill="#FBF3E8" stroke="${R}" stroke-width="1.5" stroke-dasharray="6 5"/><text x="243" y="38" text-anchor="middle" font-size="9.5" font-weight="800" fill="${R}" letter-spacing="1">DMZ</text>`;
     // enterprise band
     s+=`<rect x="338" y="20" width="208" height="170" rx="10" fill="#f1f9fb" stroke="${T}" stroke-width="1.5"/><text x="442" y="38" text-anchor="middle" font-size="9.5" font-weight="800" fill="${T}" letter-spacing="1">ENTERPRISE NETWORK</text>`;
-    s+=comp('net','20',92,120,'Internet','outside','net',S).replace('width="120"','width="120"');
-    s+=comp('web','183',92,120,(flow===2?'Email gateway':(flow===1?'Secure Web GW':'Web server')),'in DMZ','web',R);
-    s+=comp('app','360',92,164,(flow===2?'Mail server':'App / internal'),'inside','app',T);
+    s+=comp('net',20,92,120,'Internet','outside','net',S);
+    s+=comp('web',183,92,120,(flow===2?'Email gateway':(flow===1?'Secure Web GW':'Web server')),'in DMZ','web',R);
+    s+=comp('app',360,92,164,(flow===2?'Mail server':'App / internal'),'inside','app',T);
     // arrows
     s+=`<line x1="140" y1="115" x2="183" y2="115" stroke="#c4c9cc" stroke-width="2" marker-end="url(#ah)"/>`;
     s+=`<line x1="303" y1="115" x2="360" y2="115" stroke="#c4c9cc" stroke-width="2" marker-end="url(#ah)"/>`;

@@ -363,7 +363,7 @@ input[type=range]{ accent-color:var(--accent); }
       s+=`<circle cx="140" cy="140" r="${l.r}" fill="${l.c}" fill-opacity="${on?0.95:0.5}" stroke="${l.c}" stroke-width="${on?3.5:1.5}" data-i="${i}" style="cursor:pointer"/>`;
     });
     // labels at top of each ring
-    L.forEach((l,i)=>{ s+=`<text x="140" y="${140-l.r+15}" text-anchor="middle" font-size="10.5" font-weight="800" fill="#fff" stroke="rgba(0,0,0,.4)" stroke-width="2.4" paint-order="stroke" style="pointer-events:none">${l.k}</text>`; });
+    L.forEach((l,i)=>{ s+=`<text x="140" y="${140-l.r+15}" text-anchor="middle" font-size="11" font-weight="800" fill="#fff" stroke="rgba(0,0,0,.45)" stroke-width="1.6" paint-order="stroke" style="pointer-events:none">${l.k}</text>`; });
     s+=`</svg>`;
     svg.innerHTML=s;
     svg.querySelectorAll('circle').forEach(c=>c.onclick=()=>{sel=+c.dataset.i;render();});
