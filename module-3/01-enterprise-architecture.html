@@ -167,6 +167,10 @@ input[type=range]{ accent-color:var(--accent); }
       <li>You, the customer, check your status by reaching the <strong>web server</strong>.</li>
     </ul>
     <p>This is the classic <strong>three-tier architecture</strong>: a <em>web</em> tier, an <em>application</em> tier, and a <em>database</em> tier. It's the backbone of almost every enterprise application &mdash; but it's only the bones. Let's add flesh.</p>
+    <div class="widget">
+      <h4>The three-tier application</h4>
+      <div id="tierStage"></div>
+    </div>
     <div class="keybox">
       <div class="lbl">The three tiers</div>
       <b>Web server</b> takes requests from the outside &rarr; <b>application server</b> runs the business logic &rarr; <b>database server</b> stores the data. Each tier has a different job, and &mdash; as we'll see in the next note &mdash; lives on its own network for good reason.
@@ -176,15 +180,11 @@ input[type=range]{ accent-color:var(--accent); }
   <section>
     <h2><span class="num">3</span> Add the plumbing &mdash; and the guards</h2>
     <p>Clients and servers don't connect by magic. <strong>Networking equipment</strong> &mdash; switches and routers &mdash; interconnects everything and provides the path to the internet. And once you're connected to the internet, you need a new class of equipment whose entire purpose is protection: <strong>security equipment</strong> like firewalls and IDS/IPS.</p>
-    <p>Click through to watch a bare three-tier app grow into a defended enterprise:</p>
+    <p>Here's the full picture. Click any box &mdash; or the perimeter itself &mdash; to see what each part does:</p>
     <div class="widget" id="buildup">
-      <h4>Building up the enterprise</h4>
+      <h4>The defended enterprise &mdash; click any component</h4>
       <div id="buStage"></div>
-      <p id="buCaption" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:40px"></p>
-      <div class="controls">
-        <button class="ui" id="buNext">Next layer &rarr;</button>
-        <button class="ui ghost" id="buReset">Reset</button>
-      </div>
+      <div id="buDetail" style="background:var(--bg);border-radius:8px;padding:14px 16px;margin-top:14px;min-height:64px"></div>
     </div>
     <div class="notebox">
       <div class="lbl">Two kinds of infrastructure, two kinds of security</div>
@@ -269,61 +269,94 @@ input[type=range]{ accent-color:var(--accent); }
 </div></footer>
 
 <script>
-/* ---------- 3. Build-up diagram ---------- */
+/* ---------- 2. Three-tier diagram (static) ---------- */
 (function(){
-  const stage=document.getElementById('buStage'),cap=document.getElementById('buCaption');
-  const T='#0E7490', S='#2D3748', G='#2EA65A', R='#B45309', mute='#9aa3a8';
-  const caps=[
-    'A bare three-tier application: client machines reach a web server, which talks to an application server, which reads from a database.',
-    'Networking equipment \u2014 switches and routers \u2014 interconnects the machines and provides a path to the internet.',
-    'Security equipment is added: a firewall and IDS/IPS guard the network; endpoint protection (antivirus) runs on every client and server.',
-    'Together the security equipment forms a single network perimeter \u2014 the wall that separates the trusted enterprise from the open internet.'
-  ];
-  function box(x,y,w,h,fill,label,sub,stroke){
-    return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="7" fill="${fill}" stroke="${stroke||'none'}" stroke-width="1.5"/>`+
-      `<text x="${x+w/2}" y="${y+(sub?h/2-2:h/2+4)}" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">${label}</text>`+
-      (sub?`<text x="${x+w/2}" y="${y+h/2+13}" text-anchor="middle" font-size="8.5" font-weight="600" fill="rgba(255,255,255,.85)">${sub}</text>`:'');
+  const stage=document.getElementById('tierStage');
+  if(!stage) return;
+  function box(x,y,w,h,fill,label,sub){
+    return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="7" fill="${fill}"/>`+
+      `<text x="${x+w/2}" y="${y+h/2-2}" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">${label}</text>`+
+      `<text x="${x+w/2}" y="${y+h/2+13}" text-anchor="middle" font-size="8.5" font-weight="600" fill="rgba(255,255,255,.85)">${sub}</text>`;
   }
-  function line(x1,y1,x2,y2,c){return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c||'#c4c9cc'}" stroke-width="2"/>`;}
-  // machine centers and geometry
-  const MX=[85,215,345,475], MW=112, MTOP=258, MH=54;
-  function render(step){
-    let s=`<svg viewBox="0 0 560 360" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
-    // perimeter (step 3)
-    if(step>=3){
-      s+=`<rect x="18" y="72" width="524" height="270" rx="14" fill="none" stroke="${T}" stroke-width="2.5" stroke-dasharray="9 6"/>`+
-         `<text x="34" y="93" font-size="10.5" font-weight="800" fill="${T}" letter-spacing="1.5">NETWORK PERIMETER</text>`;
-    }
-    // internet + the path down into the network (step 1)
-    if(step>=1){
-      s+=line(280,58,280,196,mute);                 // internet -> switching fabric (firewall overlays at step 2)
-      s+=box(200,18,160,40,S,'Internet','the outside world');
-    }
-    // switching fabric (step 1)
-    if(step>=1){
-      s+=box(60,196,440,34,mute,'Switches / Routers','');
-      MX.forEach(x=>{ s+=line(x,MTOP,x,230,mute); });  // each machine drops to the fabric
-    }
-    // firewall gateway on the internet path (step 2)
-    if(step>=2){
-      s+=box(200,104,160,40,R,'Firewall + IDS/IPS','');
-    }
-    // the four machines (always)
-    s+=box(MX[0]-MW/2,MTOP,MW,MH,S,'Clients','workstations');
-    s+=box(MX[1]-MW/2,MTOP,MW,MH,T,'Web','server');
-    s+=box(MX[2]-MW/2,MTOP,MW,MH,T,'App','server');
-    s+=box(MX[3]-MW/2,MTOP,MW,MH,S,'Database','server');
-    // endpoint protection badges on each machine (step 2)
-    if(step>=2){
-      MX.forEach(x=>{ s+=`<circle cx="${x+MW/2-13}" cy="${MTOP+13}" r="6.5" fill="${G}" stroke="#fff" stroke-width="2"/>`; });
-      s+=`<text x="280" y="332" text-anchor="middle" font-size="9" font-weight="700" fill="${G}">\u25cf endpoint protection (antivirus / EDR) on every machine</text>`;
-    }
+  function arrow(x1,x2,y){return `<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="#9aa3a8" stroke-width="2.4" marker-end="url(#ta)"/>`;}
+  let s=`<svg viewBox="0 0 600 210" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+  s+=`<defs><marker id="ta" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa3a8"/></marker></defs>`;
+  s+=box(18,66,120,60,'#2D3748','Client','laptop / desktop');
+  s+=box(170,66,120,60,'#0E7490','Web server','tier 1 \u00b7 front');
+  s+=box(322,66,120,60,'#2E86C8','App server','tier 2 \u00b7 logic');
+  s+=box(474,66,110,60,'#8E5CA8','Database','tier 3 \u00b7 data');
+  s+=arrow(138,170,96)+arrow(290,322,96)+arrow(442,474,96);
+  // bracket under the three server tiers
+  s+=`<path d="M170 150 V158 H584 V150" fill="none" stroke="#c4c9cc" stroke-width="1.5"/>`;
+  s+=`<text x="377" y="178" text-anchor="middle" font-size="11" font-weight="700" fill="var(--text-muted)">the three-tier application</text>`;
+  s+=`<text x="78" y="150" text-anchor="middle" font-size="9" font-weight="600" fill="#9aa3a8">you / employee</text>`;
+  s+=`</svg>`;
+  stage.innerHTML=s;
+})();
+
+/* ---------- 3. Defended enterprise (static, clickable) ---------- */
+(function(){
+  const stage=document.getElementById('buStage'), detail=document.getElementById('buDetail');
+  const T='#0E7490', S='#2D3748', G='#2EA65A', R='#B45309', SL='#475569', mute='#9aa3a8';
+  const INFO={
+    internet:{t:'Internet',d:'The open, untrusted outside world \u2014 full of malware and attackers. It is the one thing outside the perimeter; the only way in is up through the firewall.'},
+    firewall:{t:'Firewall',d:'The perimeter gate. It enforces rules on which traffic may cross between the internet and the enterprise network.'},
+    idsips:{t:'IDS / IPS',d:'Intrusion Detection / Prevention. It watches for malicious or anomalous behaviour that slips past the firewall rules.'},
+    switches:{t:'Switches / Router',d:'The networking hub. Every machine \u2014 clients and servers alike \u2014 connects here, and it carries traffic up toward the internet.'},
+    clients:{t:'Client machines',d:'Employee workstations, inside the enterprise network. They connect to the switch/router like the servers do, run Client Endpoint Protection (EPP), and reach the internet only through the firewall \u2014 never directly.'},
+    web:{t:'Web server',d:'The front tier. It receives requests and forwards only the valid ones deeper into the network.'},
+    app:{t:'Application server',d:'Runs the business logic that powers the enterprise\u2019s applications.'},
+    db:{t:'Database server',d:'Stores the data \u2014 the crown jewels: financial, health, and personal records.'},
+    perimeter:{t:'Network perimeter',d:'The wall that separates the trusted enterprise network \u2014 clients and servers both \u2014 from the open internet. Only the internet sits outside it.'}
+  };
+  function box(x,y,w,h,fill,label,sub,comp,sel){
+    const on=comp===sel;
+    return `<g data-comp="${comp}" style="cursor:pointer">`+
+      (on?`<rect x="${x-4}" y="${y-4}" width="${w+8}" height="${h+8}" rx="10" fill="none" stroke="${T}" stroke-width="3"/>`:'')+
+      `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="7" fill="${fill}"/>`+
+      `<text x="${x+w/2}" y="${y+(sub?h/2-2:h/2+4)}" text-anchor="middle" font-size="11.5" font-weight="800" fill="#fff">${label}</text>`+
+      (sub?`<text x="${x+w/2}" y="${y+h/2+13}" text-anchor="middle" font-size="8.5" font-weight="600" fill="rgba(255,255,255,.85)">${sub}</text>`:'')+
+      `</g>`;
+  }
+  function line(x1,y1,x2,y2){return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#c4c9cc" stroke-width="2"/>`;}
+  function badge(cx,cy){return `<circle cx="${cx}" cy="${cy}" r="6.5" fill="${G}" stroke="#fff" stroke-width="2" pointer-events="none"/>`;}
+  const NODE=[{x:130,c:'clients'},{x:294,c:'web'},{x:416,c:'app'},{x:538,c:'db'}];
+  function render(sel){
+    let s=`<svg viewBox="0 0 640 430" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    // perimeter encloses everything EXCEPT the internet
+    const psel=sel==='perimeter';
+    s+=`<g data-comp="perimeter" style="cursor:pointer"><rect x="24" y="74" width="592" height="340" rx="14" fill="${psel?'rgba(14,116,144,.05)':'none'}" stroke="${T}" stroke-width="${psel?3:2.5}" stroke-dasharray="9 6"/><text x="40" y="95" font-size="10.5" font-weight="800" fill="${T}" letter-spacing="1.4">NETWORK PERIMETER</text></g>`;
+    // vertical spine: internet -> firewall -> ids/ips -> router
+    s+=line(320,58,320,104)+line(320,144,320,160)+line(320,200,320,216)+line(320,258,320,300);
+    // distribution bus + drops to each node
+    s+=line(130,300,538,300);
+    NODE.forEach(n=>{ s+=line(n.x,300,n.x,340); });
+    // internet (outside)
+    s+=box(250,16,140,42,S,'Internet','the outside world','internet',sel);
+    // security gateway (inside, stacked) + hub
+    s+=box(250,104,140,40,R,'Firewall',null,'firewall',sel);
+    s+=box(250,160,140,40,SL,'IDS / IPS',null,'idsips',sel);
+    s+=box(235,216,170,42,mute,'Switches / Router',null,'switches',sel);
+    // the machines: clients + three server tiers, all inside the perimeter
+    s+=box(60,340,140,56,S,'Clients','workstations \u00b7 EPP','clients',sel);
+    s+=box(240,340,108,56,T,'Web','server','web',sel);
+    s+=box(362,340,108,56,'#2E86C8','App','server','app',sel);
+    s+=box(484,340,108,56,'#8E5CA8','Database','server','db',sel);
+    // endpoint protection badges on every machine
+    s+=badge(187,353)+badge(335,353)+badge(457,353)+badge(579,353);
+    s+=`<text x="320" y="409" text-anchor="middle" font-size="9" font-weight="700" fill="${G}">\u25cf endpoint protection (EPP / antivirus) on every machine</text>`;
     s+=`</svg>`;
-    stage.innerHTML=s; cap.textContent=caps[step];
+    stage.innerHTML=s;
+    stage.querySelectorAll('[data-comp]').forEach(g=>g.onclick=()=>{ sel=g.getAttribute('data-comp'); render(sel); });
+    if(sel && INFO[sel]){
+      detail.className='fade';
+      detail.innerHTML=`<b style="font-size:14px;color:${T}">${INFO[sel].t}</b><p style="font-size:13px;line-height:1.6;margin:6px 0 0">${INFO[sel].d}</p>`;
+      setTimeout(()=>detail.classList.remove('fade'),360);
+    } else {
+      detail.innerHTML='<span style="font-size:13px;color:var(--text-muted)">Click any box \u2014 or the perimeter \u2014 to see what it does.</span>';
+    }
   }
-  let step=0; render(0);
-  document.getElementById('buNext').onclick=()=>{ step=Math.min(step+1,3); render(step); };
-  document.getElementById('buReset').onclick=()=>{ step=0; render(0); };
+  render(null);
 })();
 
 /* ---------- 4. Castle <-> Enterprise mapping ---------- */
