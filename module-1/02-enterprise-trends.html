@@ -277,17 +277,18 @@ va.onclick=()=>{renderVirt(true);va.className="ui";vb.className="ui ghost"};
 renderVirt(false);
 
 /* ---- Shared responsibility matrix ---- */
-const LAYERS=["Applications","Runtime / Data","Operating System","Virtualization","Physical Servers","Storage & Network"];
+const LAYERS=["Data","Applications","Runtime","Operating System","Virtualization","Physical Servers","Storage & Network"];
 // who manages: 'you' or 'prov', per model [traditional, iaas, saas]
+// Data sits at the top and stays YOURS even in SaaS — you always own your data.
 const OWN={
-  0:["you","you","you","you","you","you"],
-  1:["you","you","you","prov","prov","prov"],
-  2:["prov","prov","prov","prov","prov","prov"]
+  0:["you","you","you","you","you","you","you"],
+  1:["you","you","you","you","prov","prov","prov"],
+  2:["you","prov","prov","prov","prov","prov","prov"]
 };
 const CAPS={
   0:"<b>Traditional / on&#8209;prem.</b> You own and maintain everything — from the building's power to the application code.",
-  1:"<b>IaaS (Infrastructure as a Service).</b> The provider runs the physical layer and virtualization; you still manage the OS, runtime, and your applications. Example: renting an AWS server.",
-  2:"<b>SaaS (Software as a Service).</b> The provider manages the entire stack; you simply use the application. Example: Office 365 instead of running your own Exchange server."
+  1:"<b>IaaS (Infrastructure as a Service).</b> The provider runs the physical layer and virtualization; you still manage the OS, runtime, applications, and your data. Example: renting an AWS server.",
+  2:"<b>SaaS (Software as a Service).</b> The provider runs the whole stack and you just use the app &mdash; but <b>your data stays yours</b>: you control what goes in it and who can access it. Example: Office 365 instead of running your own Exchange server."
 };
 const srmStage=document.getElementById('srmStage');
 const srmCap=document.getElementById('srmCaption');
