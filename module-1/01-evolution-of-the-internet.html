@@ -260,19 +260,10 @@ input[type=range]{ accent-color:var(--accent); }
 
   <section>
     <h2><span class="num">3</span> The through-line &mdash; and why it matters for security</h2>
-    <p>Read top to bottom, the eras are a single argument: each layer was added onto the one before it.</p>
-    <div class="concept-grid">
-      <div class="concept-card">
-        <div class="concept-head" onclick="toggleConcept('c-stack')">
-          <span class="concept-icon">◈</span>
-          <span class="concept-title">Each era added surface area<span class="concept-sub">More connectivity, more to defend</span></span>
-          <span class="concept-chev" id="c-stack-chev">▶</span>
-        </div>
-        <div class="concept-body" id="c-stack">
-          <p><strong>Standard connections</strong> (TCP/IP) made the internet possible &rarr; <strong>standard information exchange</strong> (the Web) made it useful &rarr; <strong>mobility</strong> (networks + devices) made it everywhere &rarr; <strong>the cloud</strong> made applications location&#8209;independent &rarr; <strong>IoT</strong> connected everything &rarr; <strong>AI</strong> now sits on top, improving every experience.</p>
-          <p>Every one of those steps added more endpoints, more data in motion, and more things an attacker can reach. That expanding surface is exactly why the rest of this course exists.</p>
-        </div>
-      </div>
+    <p>Read top to bottom, the eras are a single argument: each layer was added onto the one before it. <strong>Standard connections</strong> (TCP/IP) made the internet possible &rarr; <strong>standard information exchange</strong> (the Web) made it useful &rarr; <strong>mobility</strong> (networks + devices) made it everywhere &rarr; <strong>the cloud</strong> made applications location&#8209;independent &rarr; <strong>IoT</strong> connected everything &rarr; <strong>AI</strong> now sits on top, improving every experience.</p>
+    <div class="keybox">
+      <div class="lbl">Each era added surface area</div>
+      Every one of those steps added more endpoints, more data in motion, and more things an attacker can reach. That expanding surface is exactly why the rest of this course exists.
     </div>
     <div class="notebox">
       <div class="lbl">Remember</div>
@@ -291,22 +282,42 @@ input[type=range]{ accent-color:var(--accent); }
   </nav>
 </div></footer>
 
-<script>function toggleConcept(id){
-  const body=document.getElementById(id);
-  const chev=document.getElementById(id+'-chev');
-  const open=body.classList.contains('open');
-  body.classList.toggle('open',!open);
-  chev.textContent=open?'▶':'▼';
-}
-
+<script>
 document.querySelectorAll('.era-head').forEach(head=>{
+  head.setAttribute('aria-expanded','false');
+  const bd = head.nextElementSibling;
+
+  // when an expand transition finishes, release the fixed max-height so the
+  // body can reflow freely (window resize, orientation change) without clipping
+  bd.addEventListener('transitionend', ()=>{
+    if(head.getAttribute('aria-expanded')==='true') bd.style.maxHeight='none';
+  });
+
   head.addEventListener('click',()=>{
-    const bd = head.nextElementSibling;
-    const open = bd.style.maxHeight && bd.style.maxHeight!=='0px';
-    document.querySelectorAll('.era-bd').forEach(b=>{ if(b!==bd) b.style.maxHeight='0px'; });
-    document.querySelectorAll('.era-tw').forEach(t=>t.textContent='+');
-    bd.style.maxHeight = open ? '0px' : bd.scrollHeight+'px';
-    head.querySelector('.era-tw').textContent = open ? '+' : '\u2013';
+    const open = head.getAttribute('aria-expanded')==='true';
+
+    // close every other accordion (re-pin its height first so the close animates)
+    document.querySelectorAll('.era-head').forEach(h=>{
+      if(h===head) return;
+      const b=h.nextElementSibling;
+      if(h.getAttribute('aria-expanded')==='true'){
+        b.style.maxHeight=b.scrollHeight+'px';
+        requestAnimationFrame(()=>{ b.style.maxHeight='0px'; });
+      }
+      h.setAttribute('aria-expanded','false');
+      h.querySelector('.era-tw').textContent='+';
+    });
+
+    if(open){
+      bd.style.maxHeight=bd.scrollHeight+'px';          // re-pin from 'none'
+      requestAnimationFrame(()=>{ bd.style.maxHeight='0px'; });
+      head.setAttribute('aria-expanded','false');
+      head.querySelector('.era-tw').textContent='+';
+    }else{
+      bd.style.maxHeight=bd.scrollHeight+'px';
+      head.setAttribute('aria-expanded','true');
+      head.querySelector('.era-tw').textContent='\u2013';
+    }
   });
 });
 // open the first stage by default
