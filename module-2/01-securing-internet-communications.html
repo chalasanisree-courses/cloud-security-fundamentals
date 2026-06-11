@@ -211,7 +211,7 @@ input[type=range]{ accent-color:var(--accent); }
   <section>
     <h2><span class="num">6</span> Digital certificates &amp; Certificate Authorities</h2>
     <p>Encryption hides the message &mdash; but how do you know the public key really belongs to your bank, and not an attacker? You could be sent to a <strong>fake bank site</strong> by a <strong>phishing</strong> email, or by <strong>DNS spoofing</strong> (the DNS lookup resolves <code class="inline">chase.com</code> to a bad, attacker-controlled <strong>IP address</strong> instead of the real one). Encryption to the wrong party is no protection at all.</p>
-    <p>The answer is a <strong>digital certificate</strong>. The bank gives its public key and identifying details to a <strong>Certificate Authority (CA)</strong> &mdash; a small set of highly trusted organizations (e.g. DigiCert, VeriSign). The CA verifies the bank is who it claims to be, then <strong>signs</strong> the certificate with the CA's own private key. Your browser ships with the CAs' public keys, so it can <strong>validate</strong> the signature and trust the bank's public key inside.</p>
+    <p>The answer is a <strong>digital certificate</strong>. The bank gives its public key and identifying details to a <strong>Certificate Authority (CA)</strong> &mdash; a small set of highly trusted organizations (e.g. DigiCert, Let's Encrypt). The CA verifies the bank is who it claims to be, then <strong>signs</strong> the certificate with the CA's own private key. Your browser ships with the CAs' public keys, so it can <strong>validate</strong> the signature and trust the bank's public key inside.</p>
     <div class="notebox">
       <div class="lbl">Why not skip the CA?</div>
       Think of applying to a university: you can't mail your own grades and expect them to count &mdash; your school sends them, because a trusted third party vouches for them. A bank can't vouch for its own identity either; the CA's signature is what makes the certificate trustworthy. A valid certificate is what produces the <b>padlock</b> in your browser.
@@ -239,6 +239,10 @@ input[type=range]{ accent-color:var(--accent); }
       <p id="tlsCap" style="font-size:13px;color:var(--text-muted);margin:12px 0 0;line-height:1.6"></p>
     </div>
     <p>Adding this encryption layer on top of the transport connection is called <strong>TLS (Transport Layer Security)</strong>. HTTP carried over TLS is <strong>HTTPS</strong> &mdash; the "S" is <em>Secure</em>. Both sides have now agreed on the <strong>encryption key</strong> and the <strong>encryption algorithm</strong>: the two ingredients from Section 3.</p>
+    <div class="notebox">
+      <div class="lbl">A modernization note &mdash; TLS 1.3</div>
+      The exchange above &mdash; the client encrypting the session key with the server's public key &mdash; is the classic <b>TLS 1.2</b> story, and the clearest way to learn the idea. Today's standard, <b>TLS 1.3</b>, derives the session key differently (both sides compute it together via a <b>Diffie&#8211;Hellman</b> exchange, so the key itself never crosses the wire at all). The trust logic is unchanged: certificate &rarr; CA validation &rarr; asymmetric setup &rarr; fast symmetric session.
+    </div>
   </section>
 
   <section>
