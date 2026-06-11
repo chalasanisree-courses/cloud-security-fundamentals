@@ -113,6 +113,18 @@ button.ui.ghost:hover{ background:var(--accent-soft); }
 @keyframes fade{ from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
 input[type=range]{ accent-color:var(--accent); }
 .kbd{ display:inline-block; background:#fff; border:1px solid #d6dbde; border-bottom-width:2px; border-radius:5px; padding:.05em .45em; font-family:'JetBrains Mono',monospace; font-size:.82em; }
+/* era accordion */
+.era{ border-top:1px solid var(--rule); }
+.era:last-child{ border-bottom:1px solid var(--rule); }
+.era-head{ all:unset; display:flex; gap:14px; align-items:baseline; width:100%; cursor:pointer; padding:13px 4px; }
+.era-tag{ font-family:'JetBrains Mono',monospace; color:var(--rust); font-weight:700; min-width:92px; font-size:12px; }
+.era-title{ font-weight:700; color:var(--accent-dark); flex:1; font-size:14.5px; }
+.era-tw{ color:var(--soft); font-size:1.2em; transition:.2s; }
+.era-bd{ max-height:0; overflow:hidden; transition:max-height .3s ease; }
+.era-bd > ul{ padding:2px 4px 12px 1.4em; margin:0; font-size:13.5px; line-height:1.7; }
+.era-bd .inner{ padding:0 4px 16px; }
+.era-bd .inner p{ font-size:13px; line-height:1.7; margin:10px 0 0; }
+.era-bd .inner .acros{ font-size:12px; color:var(--text-muted); margin-top:6px; }
 </style></head><body>
 <header class="pagenav"><div class="pagenav-inner">
   <span class="brand">Cloud Security Fundamentals</span>
@@ -147,65 +159,107 @@ input[type=range]{ accent-color:var(--accent); }
 
   <section>
     <h2><span class="num">1</span> Where we are</h2>
-    <p>This is the first lecture of the course, and it deliberately starts before security. Everything we will defend &mdash; networks, hosts, data, identities &mdash; rides on the internet, so we begin by understanding <strong>how the internet came to be and why it looks the way it does today</strong>. We'll start in the <strong>pre&#8209;internet</strong> world, then trace the story across <strong>five eras</strong>, and the key idea is that each era solved a problem the previous one created &mdash; while quietly enlarging the attack surface.</p>
-    <div class="keybox">
-      <div class="lbl">Pre&#8209;internet: islands of computing</div>
-      Computers were <b>mainframes</b> &mdash; massive machines filling entire rooms, owned by large institutions like universities and governments. Users connected through <b>dumb terminals</b>. Mainframes at different institutions were wired together only in proprietary ways, so there was <b>no standard way for them to talk to each other</b>. The result was information silos &mdash; islands of data that couldn't reach one another.
-    </div>
+    <p>This is the first lecture of the course, and it deliberately starts before security. Everything we will defend &mdash; networks, hosts, data, identities &mdash; rides on the internet, so we begin by understanding <strong>how the internet came to be and why it looks the way it does today</strong>. The whole story fits in one timeline below: the <strong>pre&#8209;internet</strong> world, then <strong>five eras</strong> of evolution. The key idea is that each era solved a problem the previous one created &mdash; while quietly enlarging the attack surface.</p>
   </section>
 
   <section>
-    <h2><span class="num">2</span> The five eras</h2>
-    <p>From the rise of the personal computer to the age of AI, the internet grew in distinct waves. Click each era to expand what changed.</p>
+    <h2><span class="num">2</span> The timeline</h2>
+    <p>Click each stage to expand what changed &mdash; the 1990s and 2020s stages carry extra depth (the Web protocols and the AI stack).</p>
     <div class="widget" id="timeline">
-      <h4>Interactive timeline</h4>
-      <div id="eras"></div>
+      <h4>Interactive timeline &mdash; pre&#8209;internet + five eras</h4>
+      <div id="eras">
+
+        <div class="era">
+          <button type="button" class="era-head"><span class="era-tag">Pre&#8209;internet</span><span class="era-title">Islands of computing</span><span class="era-tw">+</span></button>
+          <div class="era-bd">
+            <ul>
+              <li>Computers were <b>mainframes</b> &mdash; massive machines filling entire rooms, owned by large institutions like universities and governments. Users connected through <b>dumb terminals</b>.</li>
+              <li>Mainframes at different institutions were wired together only in proprietary ways &mdash; <b>no standard way for them to talk to each other</b>.</li>
+              <li>The result: information silos &mdash; islands of data that couldn't reach one another. Every era that follows removes another barrier.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="era">
+          <button type="button" class="era-head"><span class="era-tag">1970s&ndash;80s</span><span class="era-title">Personal computers + the birth of TCP/IP</span><span class="era-tw">+</span></button>
+          <div class="era-bd">
+            <ul>
+              <li>Computers became affordable &mdash; people owned them at home, not just institutions.</li>
+              <li>Machines needed a <b>standard</b> way to connect. Proprietary mainframe links gave way to <b>TCP/IP</b> (Transmission Control Protocol / Internet Protocol).</li>
+              <li>TCP/IP became the backbone of the internet. This is the moment the internet truly begins.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="era">
+          <button type="button" class="era-head"><span class="era-tag">1990s</span><span class="era-title">The World Wide Web &mdash; and the protocols that built it</span><span class="era-tw">+</span></button>
+          <div class="era-bd">
+            <ul>
+              <li>Connecting computers only matters if they can <b>exchange information</b>. The Web's protocols made that possible: <b>HTTP, SMTP, FTP</b>.</li>
+              <li><b>Search engines</b> (Google) made the flood of new information findable.</li>
+              <li><b>Browser wars</b> (Microsoft vs Netscape) &mdash; a fight to own the client end of the experience.</li>
+            </ul>
+            <div class="inner">
+              <svg viewBox="0 0 660 186" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif"><defs><marker id="protoA" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa3a8"/></marker></defs><rect x="30" y="64" width="150" height="64" rx="8" fill="#2D3748"/><text x="105" y="90" fill="#fff" font-size="14" font-weight="700" text-anchor="middle">Client</text><text x="105" y="109" fill="#cbd5e0" font-size="10.5" font-weight="500" text-anchor="middle">(browser)</text><rect x="480" y="64" width="150" height="64" rx="8" fill="#2D3748"/><text x="555" y="90" fill="#fff" font-size="14" font-weight="700" text-anchor="middle">Server</text><text x="555" y="109" fill="#cbd5e0" font-size="10" font-weight="500" text-anchor="middle">web / mail / file</text><line x1="182" y1="74" x2="478" y2="74" stroke="#0E7490" stroke-width="2" marker-end="url(#protoA)"/><rect x="272" y="63" width="116" height="20" rx="5" fill="#f1f9fb" stroke="#0E7490"/><text x="330" y="77" fill="#0E7490" font-size="10.5" font-weight="700" text-anchor="middle" font-family="'JetBrains Mono',monospace">HTTP &middot; web pages</text><line x1="182" y1="100" x2="478" y2="100" stroke="#0E7490" stroke-width="2" marker-end="url(#protoA)"/><rect x="272" y="89" width="116" height="20" rx="5" fill="#f1f9fb" stroke="#0E7490"/><text x="330" y="103" fill="#0E7490" font-size="10.5" font-weight="700" text-anchor="middle" font-family="'JetBrains Mono',monospace">SMTP &middot; email</text><line x1="182" y1="126" x2="478" y2="126" stroke="#0E7490" stroke-width="2" marker-end="url(#protoA)"/><rect x="272" y="115" width="116" height="20" rx="5" fill="#f1f9fb" stroke="#0E7490"/><text x="330" y="129" fill="#0E7490" font-size="10.5" font-weight="700" text-anchor="middle" font-family="'JetBrains Mono',monospace">FTP &middot; files</text><text x="330" y="166" fill="#5f5e5a" font-size="10.5" font-weight="600" text-anchor="middle">WWW application protocols (1990s) &mdash; distinct from TCP/IP networking.</text></svg>
+              <p class="acros"><b>HTTP</b> = HyperText Transfer Protocol &middot; <b>SMTP</b> = Simple Mail Transfer Protocol &middot; <b>FTP</b> = File Transfer Protocol.</p>
+              <p>Whoever owned the browser shaped the user's entire internet experience &mdash; which is what the browser wars were really about. Google ultimately controlled both ends: the client (Chrome's leading share) and the server (search).</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="era">
+          <button type="button" class="era-head"><span class="era-tag">2000s</span><span class="era-title">Mobile networks, mobile devices, and the cloud</span><span class="era-tw">+</span></button>
+          <div class="era-bd">
+            <ul>
+              <li>Landlines gave way to <b>mobile networks</b> &mdash; cellular (2G/3G/LTE) and Wi-Fi.</li>
+              <li><b>Smartphones</b> (Apple, Android) made that mobility useful.</li>
+              <li><b>Cloud applications</b> arrived: store files in Dropbox instead of your disk, use Gmail instead of a local mail app, Facebook, Amazon. The internet was reliable enough that apps no longer had to live on your device.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="era">
+          <button type="button" class="era-head"><span class="era-tag">2010s</span><span class="era-title">The Internet of Things (IoT)</span><span class="era-tw">+</span></button>
+          <div class="era-bd">
+            <ul>
+              <li>The things connected to the internet were no longer just PCs and phones.</li>
+              <li>TVs, thermostats, fans, appliances &mdash; all online, all backed by cloud apps.</li>
+              <li>Netflix streams to your TV; Google Nest controls your thermostat. Everyday objects became internet endpoints.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="era">
+          <button type="button" class="era-head"><span class="era-tag">2020s</span><span class="era-title">The age of AI &mdash; and the new AI stack</span><span class="era-tw">+</span></button>
+          <div class="era-bd">
+            <ul>
+              <li>AI now improves experiences across the whole internet: <b>fraud detection</b> in banking, <b>personalized recommendations</b> in shopping, <b>chatbots</b> in customer service. Those are AI <em>applications</em>.</li>
+              <li>To see <em>where</em> AI sits underneath those applications, compare the traditional computing stack with the AI stack &mdash; the layers line up, but the middle changes.</li>
+            </ul>
+            <div class="inner">
+              <svg viewBox="0 0 700 250" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">
+                <text x="160" y="26" text-anchor="middle" fill="#5f5e5a" font-size="12" font-weight="700" letter-spacing="0.06em">TRADITIONAL STACK</text>
+                <text x="520" y="26" text-anchor="middle" fill="#5f5e5a" font-size="12" font-weight="700" letter-spacing="0.06em">AI STACK</text>
+                <rect x="40" y="44"  width="240" height="58" rx="8" fill="#3d8aa3"/><text x="160" y="71" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">Application</text><text x="160" y="90" text-anchor="middle" fill="#eaf3f6" font-size="11">packaged apps</text>
+                <rect x="40" y="110" width="240" height="58" rx="8" fill="#6b6f73"/><text x="160" y="137" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">Platform</text><text x="160" y="156" text-anchor="middle" fill="#e9eaeb" font-size="11">middleware &middot; databases &middot; OS</text>
+                <rect x="40" y="176" width="240" height="58" rx="8" fill="#2D3748"/><text x="160" y="203" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">Infrastructure</text><text x="160" y="222" text-anchor="middle" fill="#cbd5e0" font-size="11">virtualization / cloud</text>
+                <rect x="400" y="44"  width="240" height="58" rx="8" fill="#3d8aa3"/><text x="520" y="71" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">Application</text><text x="520" y="90" text-anchor="middle" fill="#eaf3f6" font-size="11">Copilot &middot; ChatGPT &middot; chatbots</text>
+                <rect x="400" y="110" width="240" height="58" rx="8" fill="#0E7490" stroke="#0B5567" stroke-width="2"/><text x="520" y="135" text-anchor="middle" fill="#fff" font-size="14" font-weight="800">Model &amp; Orchestration</text><text x="520" y="155" text-anchor="middle" fill="#d4eef4" font-size="11.5" font-weight="700">LLMs &mdash; e.g. GPT-5</text>
+                <rect x="400" y="176" width="240" height="58" rx="8" fill="#2D3748"/><text x="520" y="203" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">Infrastructure</text><text x="520" y="222" text-anchor="middle" fill="#cbd5e0" font-size="11">hardware / GPUs to run the models</text>
+                <line x1="290" y1="139" x2="392" y2="139" stroke="#9aa3a8" stroke-width="2" stroke-dasharray="4 4"/>
+                <text x="341" y="132" text-anchor="middle" fill="#9aa3a8" font-size="16">&rarr;</text>
+              </svg>
+              <p>The <b>Platform</b> layer of the traditional stack is replaced by the <b>Model &amp; Orchestration</b> layer &mdash; the new heart of the stack, where the <b>large language models (LLMs)</b> live. Applications sit on top of it; <b>infrastructure</b> (GPUs and cloud) sits beneath it. That middle layer is the one to remember &mdash; it's what makes the stack &ldquo;AI.&rdquo;</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
     </div>
   </section>
 
   <section>
-    <h2><span class="num">3</span> The protocols that built the Web</h2>
-    <p>Connecting computers only matters if they can <strong>exchange information</strong>. In the 1990s the World Wide Web brought together the protocols that made exchange possible:</p>
-    <div class="widget"><h4>The protocols that built the Web</h4><svg viewBox="0 0 660 186" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif"><defs><marker id="protoA" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa3a8"/></marker></defs><rect x="30" y="64" width="150" height="64" rx="8" fill="#2D3748"/><text x="105" y="90" fill="#fff" font-size="14" font-weight="700" text-anchor="middle">Client</text><text x="105" y="109" fill="#cbd5e0" font-size="10.5" font-weight="500" text-anchor="middle">(browser)</text><rect x="480" y="64" width="150" height="64" rx="8" fill="#2D3748"/><text x="555" y="90" fill="#fff" font-size="14" font-weight="700" text-anchor="middle">Server</text><text x="555" y="109" fill="#cbd5e0" font-size="10" font-weight="500" text-anchor="middle">web / mail / file</text><line x1="182" y1="74" x2="478" y2="74" stroke="#0E7490" stroke-width="2" marker-end="url(#protoA)"/><rect x="272" y="63" width="116" height="20" rx="5" fill="#f1f9fb" stroke="#0E7490"/><text x="330" y="77" fill="#0E7490" font-size="10.5" font-weight="700" text-anchor="middle" font-family="'JetBrains Mono',monospace">HTTP · web pages</text><line x1="182" y1="100" x2="478" y2="100" stroke="#0E7490" stroke-width="2" marker-end="url(#protoA)"/><rect x="272" y="89" width="116" height="20" rx="5" fill="#f1f9fb" stroke="#0E7490"/><text x="330" y="103" fill="#0E7490" font-size="10.5" font-weight="700" text-anchor="middle" font-family="'JetBrains Mono',monospace">SMTP · email</text><line x1="182" y1="126" x2="478" y2="126" stroke="#0E7490" stroke-width="2" marker-end="url(#protoA)"/><rect x="272" y="115" width="116" height="20" rx="5" fill="#f1f9fb" stroke="#0E7490"/><text x="330" y="129" fill="#0E7490" font-size="10.5" font-weight="700" text-anchor="middle" font-family="'JetBrains Mono',monospace">FTP · files</text><text x="330" y="166" fill="#5f5e5a" font-size="10.5" font-weight="600" text-anchor="middle">WWW application protocols (1990s) — distinct from TCP/IP networking.</text></svg></div>
-    <p style="font-size:13px;color:var(--text-muted)"><strong>HTTP</strong> = HyperText Transfer Protocol &middot; <strong>SMTP</strong> = Simple Mail Transfer Protocol &middot; <strong>FTP</strong> = File Transfer Protocol.</p>
-    <p>Once information was flowing, it had to be <strong>findable</strong> &mdash; which is why <strong>search engines</strong> mattered, and why Google rose to dominance. The 1990s "browser wars" between Microsoft and Netscape were a fight over the client end, because whoever owned the browser shaped the user's entire internet experience. Google ultimately controlled both ends: the client (Chrome's leading share) and the server (search).</p>
-  </section>
-
-  <section>
-    <h2><span class="num">4</span> The AI stack</h2>
-    <p>The 2020s are the <strong>age of AI</strong>. In the lecture you saw AI woven into everyday services &mdash; <strong>fraud detection</strong> in banking, <strong>personalized recommendations</strong> in online shopping, and <strong>chatbots</strong> in customer service. Those are AI <em>applications</em>.</p>
-    <p>To see <em>where</em> AI sits underneath those applications, the course reading (the <em>History of Computing</em> notes) compares the traditional computing stack with the new AI stack &mdash; the layers line up, but the middle changes.</p>
-    <div class="widget"><h4>Traditional stack vs AI stack</h4>
-    <svg viewBox="0 0 700 290" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">
-      <text x="160" y="26" text-anchor="middle" fill="#5f5e5a" font-size="12" font-weight="700" letter-spacing="0.06em">TRADITIONAL STACK</text>
-      <text x="520" y="26" text-anchor="middle" fill="#5f5e5a" font-size="12" font-weight="700" letter-spacing="0.06em">AI STACK</text>
-      <!-- traditional -->
-      <rect x="40" y="44"  width="240" height="58" rx="8" fill="#3d8aa3"/><text x="160" y="71" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">Application</text><text x="160" y="90" text-anchor="middle" fill="#eaf3f6" font-size="11">packaged apps</text>
-      <rect x="40" y="110" width="240" height="58" rx="8" fill="#6b6f73"/><text x="160" y="137" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">Platform</text><text x="160" y="156" text-anchor="middle" fill="#e9eaeb" font-size="11">middleware · databases · OS</text>
-      <rect x="40" y="176" width="240" height="58" rx="8" fill="#2D3748"/><text x="160" y="203" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">Infrastructure</text><text x="160" y="222" text-anchor="middle" fill="#cbd5e0" font-size="11">virtualization / cloud</text>
-      <!-- ai -->
-      <rect x="400" y="44"  width="240" height="58" rx="8" fill="#3d8aa3"/><text x="520" y="71" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">Application</text><text x="520" y="90" text-anchor="middle" fill="#eaf3f6" font-size="11">Copilot · ChatGPT · chatbots</text>
-      <rect x="400" y="110" width="240" height="58" rx="8" fill="#0E7490" stroke="#0B5567" stroke-width="2"/><text x="520" y="135" text-anchor="middle" fill="#fff" font-size="14" font-weight="800">Model &amp; Orchestration</text><text x="520" y="155" text-anchor="middle" fill="#d4eef4" font-size="11.5" font-weight="700">LLMs — e.g. GPT-5</text>
-      <rect x="400" y="176" width="240" height="58" rx="8" fill="#2D3748"/><text x="520" y="203" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">Infrastructure</text><text x="520" y="222" text-anchor="middle" fill="#cbd5e0" font-size="11">hardware / GPUs to run the models</text>
-      <!-- arrow indicating the swap -->
-      <line x1="290" y1="139" x2="392" y2="139" stroke="#9aa3a8" stroke-width="2" stroke-dasharray="4 4"/>
-      <text x="341" y="132" text-anchor="middle" fill="#9aa3a8" font-size="16">→</text>
-    </svg>
-    <p style="font-size:12.5px;color:var(--text-muted);margin:8px 0 0;line-height:1.55">The <b>Platform</b> layer of the traditional stack is replaced by the <b>Model &amp; Orchestration</b> layer &mdash; the new heart of the stack, where the large language models live.</p>
-    </div>
-    <ul>
-      <li><strong>Application layer</strong> &mdash; the user-facing AI apps (Copilot, ChatGPT, chatbots).</li>
-      <li><strong>Model &amp; Orchestration layer</strong> &mdash; where the <strong>large language models (LLMs) such as GPT-5</strong> live. This is the layer that makes the stack &ldquo;AI.&rdquo;</li>
-      <li><strong>Infrastructure layer</strong> &mdash; the hardware (GPUs and cloud) that runs the models.</li>
-    </ul>
-    <div class="keybox">
-      <div class="lbl">The layer to remember</div>
-      In the AI stack, the <b>Model</b> (Model &amp; Orchestration) layer is where the LLMs &mdash; like GPT-5 &mdash; actually live. Applications sit on top of it; infrastructure sits beneath it.
-    </div>
-  </section>
-
-  <section>
-    <h2><span class="num">5</span> The through-line &mdash; and why it matters for security</h2>
+    <h2><span class="num">3</span> The through-line &mdash; and why it matters for security</h2>
     <p>Read top to bottom, the eras are a single argument: each layer was added onto the one before it.</p>
     <div class="concept-grid">
       <div class="concept-card">
@@ -245,51 +299,16 @@ input[type=range]{ accent-color:var(--accent); }
   chev.textContent=open?'▶':'▼';
 }
 
-const ERAS = [
-  {tag:"1970s–80s", title:"Personal computers + the birth of TCP/IP",
-   pts:["Computers became affordable — people owned them at home, not just institutions.",
-        "Machines needed a <b>standard</b> way to connect. Proprietary mainframe links gave way to <b>TCP/IP</b> (Transmission Control Protocol / Internet Protocol).",
-        "TCP/IP became the backbone of the internet. This is the moment the internet truly begins."]},
-  {tag:"1990s", title:"The World Wide Web",
-   pts:["<b>HTTP, SMTP, FTP</b> let connected machines actually exchange information.",
-        "<b>Search engines</b> (Google) made the flood of new information findable.",
-        "<b>Browser wars</b> (Microsoft vs Netscape) — a fight to own the client end of the experience."]},
-  {tag:"2000s", title:"Mobile networks, mobile devices, and the cloud",
-   pts:["Landlines gave way to <b>mobile networks</b> — cellular (2G/3G/LTE) and Wi-Fi.",
-        "<b>Smartphones</b> (Apple, Android) made that mobility useful.",
-        "<b>Cloud applications</b> arrived: store files in Dropbox instead of your disk, use Gmail instead of a local mail app, Facebook, Amazon. The internet was reliable enough that apps no longer had to live on your device."]},
-  {tag:"2010s", title:"The Internet of Things (IoT)",
-   pts:["The things connected to the internet were no longer just PCs and phones.",
-        "TVs, thermostats, fans, appliances — all online, all backed by cloud apps.",
-        "Netflix streams to your TV; Google Nest controls your thermostat. Everyday objects became internet endpoints."]},
-  {tag:"2020s", title:"The age of AI",
-   pts:["AI now improves experiences across the whole internet.",
-        "Fraud prevention in banking, personalized shopping recommendations, chatbots.",
-        "AI sits as a new layer on top of everything the previous eras built."]}
-];
-const wrap = document.getElementById('eras');
-ERAS.forEach((e,i)=>{
-  const row=document.createElement('div');
-  row.style.cssText="border-top:1px solid var(--rule);";
-  if(i===ERAS.length-1) row.style.borderBottom="1px solid var(--rule)";
-  const head=document.createElement('button');
-  head.type="button";
-  head.style.cssText="all:unset;display:flex;gap:14px;align-items:baseline;width:100%;cursor:pointer;padding:13px 4px;";
-  head.innerHTML=`<span style="font-family:monospace;color:var(--rust);font-weight:700;min-width:78px">${e.tag}</span>
-    <span style="font-weight:700;color:var(--accent-dark);flex:1">${e.title}</span>
-    <span class="tw" style="color:var(--soft);font-size:1.2em;transition:.2s">+</span>`;
-  const body=document.createElement('div');
-  body.style.cssText="max-height:0;overflow:hidden;transition:max-height .28s ease;";
-  body.innerHTML=`<ul style="padding:0 4px 14px 1.4em;margin:0">${e.pts.map(p=>`<li>${p}</li>`).join('')}</ul>`;
-  head.onclick=()=>{
-    const open=body.style.maxHeight && body.style.maxHeight!=="0px";
-    document.querySelectorAll('#eras .tw').forEach(t=>t.textContent="+");
-    document.querySelectorAll('#eras div div').forEach(b=>{if(b!==body)b.style.maxHeight="0px";});
-    body.style.maxHeight = open ? "0px" : body.scrollHeight+"px";
-    head.querySelector('.tw').textContent = open ? "+" : "–";
-  };
-  row.appendChild(head); row.appendChild(body); wrap.appendChild(row);
+document.querySelectorAll('.era-head').forEach(head=>{
+  head.addEventListener('click',()=>{
+    const bd = head.nextElementSibling;
+    const open = bd.style.maxHeight && bd.style.maxHeight!=='0px';
+    document.querySelectorAll('.era-bd').forEach(b=>{ if(b!==bd) b.style.maxHeight='0px'; });
+    document.querySelectorAll('.era-tw').forEach(t=>t.textContent='+');
+    bd.style.maxHeight = open ? '0px' : bd.scrollHeight+'px';
+    head.querySelector('.era-tw').textContent = open ? '+' : '\u2013';
+  });
 });
-// open first by default
-wrap.querySelector('button').click();
+// open the first stage by default
+document.querySelector('.era-head').click();
 </script></body></html>
