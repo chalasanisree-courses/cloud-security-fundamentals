@@ -147,19 +147,43 @@ input[type=range]{ accent-color:var(--accent); }
 
   <section>
     <h2><span class="num">1</span> Where we are</h2>
-    <p>So far we've watched the <em>consumer</em> internet grow &mdash; Dropbox, Gmail, Amazon, social apps delivered from the cloud. This lecture turns to what was happening inside <strong>companies</strong>, because two enterprise shifts &mdash; <strong>virtualization</strong> and <strong>cloud computing</strong> &mdash; are what made modern cloud security a discipline at all. They also introduce the single most important idea for the rest of the course: <strong>shared responsibility</strong>.</p>
+    <p>Let's take a look at how enterprises set up their networks &mdash; and how the traditional corporate network has evolved through two shifts: <strong>virtualization</strong> and <strong>cloud computing</strong>. Along the way we'll meet the single most important idea for the rest of the course: <strong>shared responsibility</strong>.</p>
   </section>
 
   <section>
     <h2><span class="num">2</span> The traditional corporate network</h2>
     <p>Picture a company &mdash; say General Electric. Employees get client devices (laptops, desktops) and use them to reach applications running on <strong>servers the company owns</strong>:</p>
     <ul>
-      <li>A salesperson takes an order on their laptop &rarr; the order is stored on a <strong>database server</strong>;</li>
-      <li>an <strong>application server</strong> processes it;</li>
-      <li>the customer checks status through a <strong>web server</strong>.</li>
+      <li>A salesperson takes an order on their laptop (a <strong>client</strong>) &rarr; the order is stored on a <strong>database server</strong> (Tier&nbsp;3);</li>
+      <li>an <strong>application server</strong> (Tier&nbsp;2) processes it;</li>
+      <li>the customer checks status through a <strong>web server</strong> (Tier&nbsp;1).</li>
     </ul>
-    <div class="widget"><h4>The traditional corporate network</h4><svg viewBox="0 0 700 264" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif"><defs><marker id="entA" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa3a8"/></marker></defs><rect x="20" y="36" width="120" height="46" rx="8" fill="#f3f5f6" stroke="#cfd6da" stroke-width="1"/><text x="80" y="58" fill="#2D3748" font-size="12.5" font-weight="800" text-anchor="middle" font-family="Barlow,Arial,sans-serif">Laptop</text><text x="80" y="74" fill="#5f5e5a" font-size="9.5" font-weight="500" text-anchor="middle" font-family="Barlow,Arial,sans-serif">employee</text><rect x="20" y="102" width="120" height="46" rx="8" fill="#f3f5f6" stroke="#cfd6da" stroke-width="1"/><text x="80" y="124" fill="#2D3748" font-size="12.5" font-weight="800" text-anchor="middle" font-family="Barlow,Arial,sans-serif">Desktop</text><text x="80" y="140" fill="#5f5e5a" font-size="9.5" font-weight="500" text-anchor="middle" font-family="Barlow,Arial,sans-serif">employee</text><rect x="20" y="168" width="120" height="46" rx="8" fill="#f3f5f6" stroke="#cfd6da" stroke-width="1"/><text x="80" y="190" fill="#2D3748" font-size="12.5" font-weight="800" text-anchor="middle" font-family="Barlow,Arial,sans-serif">Laptop</text><text x="80" y="206" fill="#5f5e5a" font-size="9.5" font-weight="500" text-anchor="middle" font-family="Barlow,Arial,sans-serif">employee</text><rect x="210" y="92" width="130" height="64" rx="8" fill="#2D3748"/><text x="275" y="120" fill="#fff" font-size="13" font-weight="800" text-anchor="middle" font-family="Barlow,Arial,sans-serif">Web server</text><text x="275" y="138" fill="#cbd5e0" font-size="10" font-weight="500" text-anchor="middle" font-family="Barlow,Arial,sans-serif">customer-facing</text><rect x="370" y="92" width="130" height="64" rx="8" fill="#2D3748"/><text x="435" y="120" fill="#fff" font-size="13" font-weight="800" text-anchor="middle" font-family="Barlow,Arial,sans-serif">App server</text><text x="435" y="138" fill="#cbd5e0" font-size="10" font-weight="500" text-anchor="middle" font-family="Barlow,Arial,sans-serif">processing</text><rect x="530" y="92" width="130" height="64" rx="8" fill="#2D3748"/><text x="595" y="120" fill="#fff" font-size="13" font-weight="800" text-anchor="middle" font-family="Barlow,Arial,sans-serif">Database</text><text x="595" y="138" fill="#cbd5e0" font-size="10" font-weight="500" text-anchor="middle" font-family="Barlow,Arial,sans-serif">stores the data</text><line x1="142" y1="59" x2="206" y2="124" stroke="#9aa3a8" stroke-width="2" marker-end="url(#entA)"/><line x1="142" y1="125" x2="206" y2="124" stroke="#9aa3a8" stroke-width="2" marker-end="url(#entA)"/><line x1="142" y1="191" x2="206" y2="124" stroke="#9aa3a8" stroke-width="2" marker-end="url(#entA)"/><line x1="340" y1="124" x2="366" y2="124" stroke="#9aa3a8" stroke-width="2" marker-end="url(#entA)"/><line x1="500" y1="124" x2="526" y2="124" stroke="#9aa3a8" stroke-width="2" marker-end="url(#entA)"/><text x="20" y="236" fill="#5f5e5a" font-size="10.5" font-weight="600" text-anchor="start" font-family="Barlow,Arial,sans-serif">Clients reach the web server, which hands work to the app server; the app server reads and</text><text x="20" y="252" fill="#5f5e5a" font-size="10.5" font-weight="600" text-anchor="start" font-family="Barlow,Arial,sans-serif">writes the database behind it. One role per server — clients never touch the database directly.</text></svg></div>
-    <p>Around all of this sits a <strong>strong network boundary</strong>: firewalls and security appliances separate the corporate network from the internet. A few machines (web servers) face the internet; the rest of the network stays isolated.</p>
+    <div class="widget"><h4>The traditional corporate network &mdash; click any box, or the boundary itself</h4>
+    <svg id="entSvg" viewBox="0 0 700 268" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">
+      <defs><marker id="entA" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa3a8"/></marker></defs>
+      <!-- enterprise boundary (solid, clickable) -->
+      <g class="ent" data-k="boundary" style="cursor:pointer">
+        <rect class="ent-r" x="14" y="22" width="672" height="232" rx="12" fill="#fdfdfc" stroke="#0B5567" stroke-width="2"/>
+        <rect x="190" y="12" width="320" height="20" rx="4" fill="#0B5567"/>
+        <text x="350" y="26" fill="#fff" font-size="11" font-weight="800" letter-spacing="0.06em" text-anchor="middle">ENTERPRISE NETWORK BOUNDARY</text>
+      </g>
+      <!-- clients group (dotted) -->
+      <rect x="28" y="48" width="140" height="190" rx="10" fill="none" stroke="#9aa3a8" stroke-width="1.5" stroke-dasharray="5 5"/>
+      <text x="98" y="42" fill="#5f5e5a" font-size="10.5" font-weight="800" letter-spacing="0.08em" text-anchor="middle">CLIENTS</text>
+      <!-- servers group (dotted) -->
+      <rect x="202" y="76" width="472" height="100" rx="10" fill="none" stroke="#9aa3a8" stroke-width="1.5" stroke-dasharray="5 5"/>
+      <text x="438" y="70" fill="#5f5e5a" font-size="10.5" font-weight="800" letter-spacing="0.08em" text-anchor="middle">SERVERS</text>
+<g class="ent" data-k="client" style="cursor:pointer"><rect class="ent-r" x="40" y="64" width="116" height="44" rx="8" fill="#f3f5f6" stroke="transparent" stroke-width="2.5"/><text x="98.0" y="90.5" fill="#2D3748" font-size="13" font-weight="800" text-anchor="middle">Client</text></g><g class="ent" data-k="client" style="cursor:pointer"><rect class="ent-r" x="40" y="122" width="116" height="44" rx="8" fill="#f3f5f6" stroke="transparent" stroke-width="2.5"/><text x="98.0" y="148.5" fill="#2D3748" font-size="13" font-weight="800" text-anchor="middle">Client</text></g><g class="ent" data-k="client" style="cursor:pointer"><rect class="ent-r" x="40" y="180" width="116" height="44" rx="8" fill="#f3f5f6" stroke="transparent" stroke-width="2.5"/><text x="98.0" y="206.5" fill="#2D3748" font-size="13" font-weight="800" text-anchor="middle">Client</text></g><g class="ent" data-k="tier1" style="cursor:pointer"><rect class="ent-r" x="216" y="96" width="124" height="60" rx="8" fill="#2D3748" stroke="transparent" stroke-width="2.5"/><text x="278.0" y="130.5" fill="#fff" font-size="13" font-weight="800" text-anchor="middle">Tier 1</text></g><g class="ent" data-k="tier2" style="cursor:pointer"><rect class="ent-r" x="376" y="96" width="124" height="60" rx="8" fill="#2D3748" stroke="transparent" stroke-width="2.5"/><text x="438.0" y="130.5" fill="#fff" font-size="13" font-weight="800" text-anchor="middle">Tier 2</text></g><g class="ent" data-k="tier3" style="cursor:pointer"><rect class="ent-r" x="536" y="96" width="124" height="60" rx="8" fill="#2D3748" stroke="transparent" stroke-width="2.5"/><text x="598.0" y="130.5" fill="#fff" font-size="13" font-weight="800" text-anchor="middle">Tier 3</text></g>
+      <!-- flows: clients -> Tier 1, Tier 1 -> 2 -> 3 -->
+      <line x1="158" y1="86"  x2="212" y2="122" stroke="#9aa3a8" stroke-width="2" marker-end="url(#entA)"/>
+      <line x1="158" y1="144" x2="212" y2="128" stroke="#9aa3a8" stroke-width="2" marker-end="url(#entA)"/>
+      <line x1="158" y1="202" x2="212" y2="134" stroke="#9aa3a8" stroke-width="2" marker-end="url(#entA)"/>
+      <line x1="340" y1="126" x2="372" y2="126" stroke="#9aa3a8" stroke-width="2" marker-end="url(#entA)"/>
+      <line x1="500" y1="126" x2="532" y2="126" stroke="#9aa3a8" stroke-width="2" marker-end="url(#entA)"/>
+    </svg>
+    <p id="entCaption" style="font-size:13px;color:var(--text-muted);margin:12px 0 0;line-height:1.65"></p>
+    </div>
+    <p>Around all of this sits a <strong>strong network boundary</strong> &mdash; the solid line in the diagram: firewalls and security appliances separate the corporate network from the internet. A few machines (web servers) face the internet; the rest of the network stays isolated.</p>
     <div class="keybox">
       <div class="lbl">The data center was a maintenance burden</div>
       Running your own servers meant rooms full of racks, each typically running a <b>single application</b>. That demanded heavy <b>cabling</b> to interconnect racks, <b>backup power</b> so applications stayed available, and <b>cooling</b> for the heat all that hardware produced.
@@ -168,7 +192,7 @@ input[type=range]{ accent-color:var(--accent); }
 
   <section>
     <h2><span class="num">3</span> Shift one &mdash; virtualization</h2>
-    <p>By the 2000s, CPUs and memory had become so powerful that one&#8209;app&#8209;per&#8209;server left machines badly <strong>underutilized</strong>. The fix was the <strong>hypervisor</strong> &mdash; a virtualization layer that lets a single physical server present itself as <strong>many virtual servers</strong>, each with its own OS and apps. Pioneered by <strong>VMware</strong>, it let companies consolidate many machines into few &mdash; cutting cost, cabling, power, and cooling.</p>
+    <p>By the 2000s, CPUs and memory had become so powerful that one&#8209;app&#8209;per&#8209;server left machines badly <strong>underutilized</strong>. The fix was the <strong>hypervisor</strong> &mdash; a virtualization layer that lets a single physical server present itself as <strong>many virtual servers</strong>, each with its own OS and apps. Virtualization itself dates back to 1960s mainframes, but <strong>VMware</strong> pioneered it on the ordinary x86 servers enterprises actually run &mdash; letting companies consolidate many machines into few, cutting cost, cabling, power, and cooling.</p>
     <div class="widget" id="virt">
       <h4>One physical server: before vs after virtualization</h4>
       <div class="controls" style="margin-top:0;margin-bottom:16px">
@@ -182,9 +206,9 @@ input[type=range]{ accent-color:var(--accent); }
 
   <section>
     <h2><span class="num">4</span> Shift two &mdash; cloud computing</h2>
-    <p>In the 2010s, companies like <strong>AWS (Amazon Web Services)</strong> filled huge data centers with servers and let other companies simply <strong>rent</strong> them over the internet &mdash; no hardware to own. It's like <strong>calling an Uber when you need a ride instead of buying and maintaining a car</strong>: you get the capability without owning the asset. This produced two models that differ in <strong>who is responsible for what</strong>. Click each model to see the split:</p>
+    <p>Starting in the mid&#8209;2000s &mdash; <strong>AWS (Amazon Web Services)</strong> launched its first services in 2006 &mdash; and accelerating through the 2010s as enterprises followed, cloud providers filled huge data centers with servers and let other companies simply <strong>rent</strong> them over the internet &mdash; no hardware to own. It's like <strong>calling an Uber when you need a ride instead of buying and maintaining a car</strong>: you get the capability without owning the asset. This produced two new models alongside the traditional setup, differing in <strong>who is responsible for what</strong>. Click each of the three to see the split:</p>
     <div class="widget" id="srm">
-      <h4>Who manages what?</h4>
+      <h4>Who manages what? &mdash; the simple version (Module 4 walks the full layer-by-layer stack)</h4>
       <div class="controls" style="margin-top:0;margin-bottom:16px">
         <button class="ui" data-m="0">Traditional (on&#8209;prem)</button>
         <button class="ui ghost" data-m="1">IaaS</button>
@@ -195,7 +219,7 @@ input[type=range]{ accent-color:var(--accent); }
     </div>
     <div class="keybox">
       <div class="lbl">The key insight: a responsibility gradient</div>
-      <b>Traditional</b> &mdash; you run the infrastructure <em>and</em> the apps. <b>IaaS</b> (renting an AWS server) &mdash; the provider runs the physical infrastructure; <em>you</em> still run and maintain the applications on top. <b>SaaS</b> (Office 365 instead of running Exchange yourself) &mdash; you don't worry about infrastructure at all; you just <em>use</em> the application.
+      <b>Traditional</b> &mdash; you run the infrastructure <em>and</em> the apps. <b>IaaS</b> (renting an AWS server) &mdash; the provider runs the physical infrastructure; <em>you</em> still run the operating system and the applications on top (a missed OS patch is on you). <b>SaaS</b> (Office 365 instead of running Exchange yourself) &mdash; you don't worry about infrastructure at all; you just <em>use</em> the application. Module 4 returns to these models in depth and adds a middle option, <b>PaaS</b>.
     </div>
   </section>
 
@@ -276,32 +300,29 @@ vb.onclick=()=>{renderVirt(false);vb.className="ui";va.className="ui ghost"};
 va.onclick=()=>{renderVirt(true);va.className="ui";vb.className="ui ghost"};
 renderVirt(false);
 
-/* ---- Shared responsibility matrix ---- */
-const LAYERS=["Data","Applications","Runtime","Operating System","Virtualization","Physical Servers","Storage & Network"];
-// who manages: 'you' or 'prov', per model [traditional, iaas, saas]
-// Data sits at the top and stays YOURS even in SaaS — you always own your data.
-const OWN={
-  0:["you","you","you","you","you","you","you"],
-  1:["you","you","you","you","prov","prov","prov"],
-  2:["you","prov","prov","prov","prov","prov","prov"]
-};
+/* ---- Shared responsibility: the simple version ---- */
+const ROWS=[
+  {label:"Your data \u2014 and who may access it", own:["pin","pin","pin"]},
+  {label:"Applications",                            own:["you","you","prov"]},
+  {label:"Infrastructure \u2014 servers, storage, networking", own:["you","prov","prov"]}
+];
 const CAPS={
-  0:"<b>Traditional / on&#8209;prem.</b> You own and maintain everything — from the building's power to the application code.",
-  1:"<b>IaaS (Infrastructure as a Service).</b> The provider runs the physical layer and virtualization; you still manage the OS, runtime, applications, and your data. Example: renting an AWS server.",
-  2:"<b>SaaS (Software as a Service).</b> The provider runs the whole stack and you just use the app &mdash; but <b>your data stays yours</b>: you control what goes in it and who can access it. Example: Office 365 instead of running your own Exchange server."
+  0:"<b>Traditional / on&#8209;prem.</b> You own and run everything \u2014 from the building's power to the application code.",
+  1:"<b>IaaS (Infrastructure as a Service).</b> The provider runs the physical infrastructure; you run everything on top \u2014 the OS, your applications, your data. Example: renting an AWS server.",
+  2:"<b>SaaS (Software as a Service).</b> The provider runs the application and everything beneath it. Your data is the one thing that never transfers: you decide what goes into it and who can access it. Example: Office 365 instead of running your own Exchange server."
 };
 const srmStage=document.getElementById('srmStage');
 const srmCap=document.getElementById('srmCaption');
 function renderSRM(m){
-  const rows=LAYERS.map((L,i)=>{
-    const who=OWN[m][i];
-    const isYou=who==="you";
-    const bg=isYou?"#0E7490":"#e7ecee";
+  const rows=ROWS.map(R=>{
+    const who=R.own[m];
+    const pin=who==="pin", isYou=pin||who==="you";
+    const bg=pin?"#B45309":(isYou?"#0E7490":"#e7ecee");
     const fg=isYou?"#fff":"#7b8a91";
-    const tag=isYou?"YOU MANAGE":"Provider manages";
+    const tag=pin?"ALWAYS YOU":(isYou?"YOU MANAGE":"Provider manages");
     return `<div style="display:flex;align-items:center;gap:12px;background:${bg};color:${fg};
       border-radius:6px;padding:9px 13px;margin-bottom:5px;font-size:.9rem">
-      <span style="flex:1;font-weight:700">${L}</span>
+      <span style="flex:1;font-weight:700">${R.label}</span>
       <span style="font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;opacity:.95">${tag}</span></div>`;
   }).join('');
   srmStage.innerHTML=rows;
@@ -316,4 +337,28 @@ document.querySelectorAll('#srm [data-m]').forEach(b=>{
   };
 });
 renderSRM(0);
+
+/* ---- clickable enterprise network diagram ---- */
+(function(){
+  const INFO={
+    client:"<b>Client.</b> Any device an employee uses to reach the company's applications \u2014 a laptop, a desktop, or a mobile device. Clients consume services; they don't host them.",
+    tier1:"<b>Tier 1 \u2014 the web server.</b> The front door: it receives requests from browsers (employees inside, customers outside) and forwards valid ones deeper into the network.",
+    tier2:"<b>Tier 2 \u2014 the application server.</b> Runs the business logic \u2014 it processes the salesperson's order and does the actual work of the application.",
+    tier3:"<b>Tier 3 \u2014 the database server.</b> Stores the data: orders, customer records, financials. Only the application server talks to it \u2014 clients never touch the database directly.",
+    boundary:"<b>Enterprise network boundary.</b> Firewalls and security appliances that separate the trusted corporate network from the open internet. Only a few machines (Tier 1) ever face the outside."
+  };
+  const DEFAULT="<b>Click any box.</b> The flow: clients reach Tier 1, Tier 1 hands work to Tier 2, and Tier 2 reads and writes Tier 3 behind it \u2014 one role per tier.";
+  const cap=document.getElementById('entCaption');
+  cap.innerHTML=DEFAULT;
+  document.querySelectorAll('#entSvg .ent').forEach(g=>{
+    g.addEventListener('click',e=>{
+      e.stopPropagation();
+      document.querySelectorAll('#entSvg .ent-r').forEach(r=>r.setAttribute('stroke', r.closest('[data-k]').dataset.k==='boundary' ? '#0B5567' : 'transparent'));
+      const r=g.querySelector('.ent-r');
+      r.setAttribute('stroke','#B45309');
+      cap.innerHTML=INFO[g.dataset.k];
+      cap.classList.remove('fade');void cap.offsetWidth;cap.classList.add('fade');
+    });
+  });
+})();
 </script></body></html>
