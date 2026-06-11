@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Software Development in the Cloud &mdash; Module 4</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+* { box-sizing:border-box; margin:0; padding:0; }
+:root{
+  --slate-dark:#1A202C; --slate:#2D3748;
+  --accent:#0E7490; --accent-dark:#0B5567; --accent-soft:#CFF1F6;
+  --info:#1E40AF; --info-soft:#DBEAFE;
+  --text:#1a1a18; --text-muted:#5f5e5a; --text-light:#888780;
+  --border:rgba(0,0,0,0.09); --bg:#fafaf8; --bg-card:#fff; --bg-code:#f6f6f3; --tag-bg:#f1f0eb;
+  --rust:#B45309; --soft:#888780; --muted:#5f5e5a; --rule:rgba(0,0,0,0.09);
+  --ok:#2e7d57; --callout-bg:#f1f9fb; --code-bg:#f6f6f3;
+}
+body{ font-family:'Barlow',sans-serif; background:var(--bg); color:var(--text); line-height:1.65; min-height:100vh; }
+
+.pagenav{ background:var(--slate-dark); }
+.pagenav.foot{ margin-top:48px; }
+.pagenav-inner{ max-width:920px; margin:0 auto; padding:11px 32px; display:flex; justify-content:space-between; align-items:center; gap:16px; }
+.pagenav .brand{ color:rgba(255,255,255,0.45); font-size:11px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; white-space:nowrap; }
+.navbtns{ display:flex; gap:8px; }
+.navbtn{ display:inline-flex; align-items:center; gap:6px; font-family:'Barlow',sans-serif; font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#fff; background:rgba(255,255,255,0.10); border:1px solid rgba(255,255,255,0.22); border-radius:6px; padding:7px 13px; text-decoration:none; transition:0.15s; white-space:nowrap; }
+.navbtn:hover{ background:var(--accent); border-color:var(--accent); }
+.navbtn.disabled{ opacity:0.28; pointer-events:none; }
+@media(max-width:560px){ .pagenav .brand{ display:none } .pagenav-inner{ justify-content:center } }
+
+.header{ background:#fff; padding:56px 0 44px; border-bottom:0.5px solid var(--border); }
+.header-inner{ max-width:920px; margin:0 auto; padding:0 32px; }
+.header-eyebrow{ font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:14px; display:flex; align-items:center; gap:12px; }
+.header-eyebrow::after{ content:''; flex:1; height:0.5px; background:var(--border); max-width:120px; }
+.header h1{ font-family:'Barlow Condensed',sans-serif; font-size:clamp(34px,4.5vw,52px); font-weight:900; letter-spacing:-0.01em; line-height:1.05; color:var(--text); margin-bottom:18px; }
+.header h1 em{ font-style:normal; color:var(--accent); }
+.header-meta-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+.module-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:var(--slate); color:#fff; }
+.topic-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:#F1F5F9; color:#475569; }
+.topic-pill.accent{ background:var(--accent-soft); color:var(--accent-dark); }
+
+.page{ max-width:920px; margin:0 auto; padding:0 32px 48px; }
+
+.objectives{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--accent); border-radius:6px; padding:20px 26px; margin:34px 0 14px; }
+.obj-label{ font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:12px; }
+.objectives ul{ list-style:none; }
+.objectives ul li{ font-size:13.5px; color:var(--text); padding:4px 0 4px 20px; position:relative; line-height:1.5; }
+.objectives ul li::before{ content:'◇'; position:absolute; left:0; color:var(--accent); font-size:10px; top:8px; }
+
+section{ margin-top:42px; }
+section h2{ font-family:'Barlow Condensed',sans-serif; font-size:27px; font-weight:800; color:var(--text); margin-bottom:8px; display:flex; align-items:baseline; gap:18px; }
+section h2 .num{ font-family:'Barlow Condensed',sans-serif; font-size:54px; font-weight:900; color:var(--accent); letter-spacing:-0.02em; line-height:0.85; min-width:40px; }
+section .lead{ font-size:14.5px; color:var(--text-muted); line-height:1.6; margin:0 0 6px 58px; max-width:660px; }
+section p{ font-size:14.5px; color:var(--text); line-height:1.7; margin-bottom:12px; }
+section p strong{ font-weight:700; }
+code.inline{ font-family:'JetBrains Mono',monospace; font-size:12.5px; background:var(--tag-bg); padding:1px 6px; border-radius:3px; color:var(--text); }
+
+pre{ font-family:'JetBrains Mono',monospace; background:var(--bg-code); border:0.5px solid var(--border); border-radius:6px; padding:14px 18px; font-size:12px; line-height:1.7; color:var(--text); overflow-x:auto; margin:8px 0 14px; }
+.code-comment{ color:#9a988f; }
+.code-key{ color:var(--info); font-weight:600; }
+
+.keybox{ background:var(--accent-soft); border-left:3px solid var(--accent); border-radius:0 6px 6px 0; padding:13px 18px; margin:16px 0 0; font-size:13px; line-height:1.6; color:var(--text); }
+.keybox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--accent-dark); margin-bottom:5px; }
+.keybox b{ color:var(--accent-dark); }
+.notebox{ background:#FBF3E8; border-left:3px solid var(--rust); border-radius:0 6px 6px 0; padding:13px 18px; margin:16px 0 0; font-size:13px; line-height:1.6; }
+.notebox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--rust); margin-bottom:5px; }
+
+.assessment-box{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--slate); border-radius:0 6px 6px 0; padding:18px 22px; margin:34px 0 0; }
+.assessment-box .assess-label{ font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); margin-bottom:8px; }
+.assessment-box p{ font-size:13px; line-height:1.65; margin:0; }
+
+.widget{ border:0.5px solid var(--border); border-radius:10px; padding:18px; margin:18px 0 0; background:var(--bg-card); }
+.widget h4{ margin:0 0 12px; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); font-weight:700; }
+.controls{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+button.ui{ font-family:'Barlow',sans-serif; cursor:pointer; border:1px solid var(--accent); background:var(--accent); color:#fff; padding:7px 16px; border-radius:6px; font-size:12.5px; font-weight:600; transition:0.15s; }
+button.ui:hover{ background:var(--accent-dark); border-color:var(--accent-dark); }
+button.ui.ghost{ background:#fff; color:var(--accent); }
+button.ui.ghost:hover{ background:var(--accent-soft); }
+.fade{ animation:fade 0.35s ease; }
+@keyframes fade{ from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+input[type=range]{ accent-color:var(--accent); }
+</style>
+</head><body>
+<header class="pagenav"><div class="pagenav-inner">
+  <span class="brand">Cloud Security Fundamentals</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn" href="01-cloud-computing.html">&larr; Prev</a>
+    <a class="navbtn disabled" href="#">Next &rarr;</a>
+  </nav>
+</div></header>
+
+<div class="header"><div class="header-inner">
+  <div class="header-eyebrow">Module 4 &nbsp;·&nbsp; Cloud Computing Overview</div>
+  <h1>Software Development <em>in the Cloud</em></h1>
+  <div class="header-meta-row">
+    <span class="module-pill">Module 4</span>
+    <span class="topic-pill">Infrastructure as Code</span>
+    <span class="topic-pill accent">Multi-tenancy &amp; VPC</span>
+  </div>
+</div></div>
+
+<div class="page">
+
+  <div class="objectives">
+    <div class="obj-label">In this note</div>
+    <ul>
+      <li>Traditional infrastructure and its siloed teams</li>
+      <li>The cloud's multi-tenant model &mdash; what a <em>VPC</em> isolates</li>
+      <li>Mapping old infrastructure onto AWS services</li>
+      <li>Infrastructure as Code, and the DevOps loop</li>
+    </ul>
+  </div>
+
+  <section>
+    <h2><span class="num">1</span> The old way: siloed teams</h2>
+    <p class="lead">In a traditional data center, separate teams own storage, servers, and the network. Deploying one app means a chain of tickets between them. Press deploy:</p>
+    <div class="widget" id="silos">
+      <h4>The coordination tax</h4>
+      <div class="controls" style="margin:0 0 14px">
+        <button class="ui" data-s="idle">The three teams</button>
+        <button class="ui ghost" data-s="deploy">Deploy a new app &rarr;</button>
+      </div>
+      <div id="silosStage"></div>
+      <p id="silosCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:34px"></p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> The cloud is a landlord</h2>
+    <p class="lead">One cloud hosts thousands of <strong>tenants</strong>. Each gets a private, walled-off space &mdash; on AWS, a <strong>VPC</strong> (Virtual Private Cloud). Click a tenant to see what they can and can't reach:</p>
+    <div class="widget" id="tenants">
+      <h4>Multi-tenant isolation</h4>
+      <div class="controls" style="margin:0 0 14px">
+        <button class="ui" data-t="within">Within Tenant A's VPC</button>
+        <button class="ui ghost" data-t="cross">Tenant A &rarr; Tenant B</button>
+      </div>
+      <div id="tenantStage"></div>
+      <p id="tenantCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:34px"></p>
+    </div>
+    <div class="keybox">
+      <div class="lbl">Why the VPC matters for security</div>
+      The VPC is the cloud's <b>isolation boundary</b> &mdash; logical separation between you and every other tenant on the same shared hardware. It's also the <b>network layer</b> of defense in depth, and the whole subject of the next module.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> Old infrastructure &rarr; AWS services</h2>
+    <p class="lead">Whatever you used to rack and wire, you now request as a service. Click a resource:</p>
+    <div class="widget" id="map">
+      <h4>Traditional resource &rarr; AWS service</h4>
+      <div class="controls" style="margin:0 0 14px">
+        <button class="ui" data-r="compute">Compute</button>
+        <button class="ui ghost" data-r="network">Networking</button>
+        <button class="ui ghost" data-r="storage">Storage</button>
+      </div>
+      <div id="mapStage" style="display:flex;gap:14px;flex-wrap:wrap;align-items:stretch"></div>
+      <p id="mapCaption" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:34px"></p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> Infrastructure as Code</h2>
+    <p class="lead">You don't click to build &mdash; you <strong>describe</strong> what you want in code, and <strong>Terraform</strong> reconciles reality to match. Drag the slider:</p>
+    <div class="widget" id="iac">
+      <h4>Desired state &rarr; Terraform plan &rarr; apply</h4>
+      <div class="controls" style="margin:0 0 6px">
+        <span style="font-size:12.5px;color:var(--text-muted)">Edit your code &mdash; desired servers:</span>
+        <input type="range" id="iacRange" min="0" max="10" value="4" style="flex:1;min-width:160px">
+        <span id="iacVal" style="font-family:'JetBrains Mono',monospace;font-weight:600;font-size:13px;color:var(--accent)">4</span>
+      </div>
+      <pre style="margin:8px 0 14px"><span class="code-comment"># main.tf — what you want</span>
+<span class="code-key">resource</span> "aws_instance" "web" {
+  count         = <span id="iacCode" style="color:#0E7490;font-weight:600">4</span>
+  instance_type = "t3.micro"
+}</pre>
+      <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-light);margin:4px 0 8px">Live infrastructure on AWS</div>
+      <div id="iacBoard" style="display:flex;gap:8px;flex-wrap:wrap;min-height:54px"></div>
+      <div class="controls" style="margin-top:14px">
+        <button class="ui" id="iacApply">Apply</button>
+        <span id="iacNote" style="font-size:12.5px;color:var(--text-muted);line-height:1.5"></span>
+      </div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:11px;color:var(--text-muted);margin-top:12px">
+        <span><span style="display:inline-block;width:11px;height:11px;border-radius:3px;background:#0E7490;vertical-align:-1px"></span> running</span>
+        <span><span style="display:inline-block;width:11px;height:11px;border-radius:3px;background:#eaf7ef;border:1.5px dashed #2e7d57;vertical-align:-1px"></span> to create</span>
+        <span><span style="display:inline-block;width:11px;height:11px;border-radius:3px;background:#fff;border:1.5px dashed #c0392b;vertical-align:-1px"></span> to destroy</span>
+      </div>
+    </div>
+    <div class="notebox">
+      <div class="lbl">Security cuts both ways</div>
+      A reviewed, hardened template deploys identically every time &mdash; but one bad line (an open security group, a public bucket) is reproduced everywhere. <b>Infrastructure as Code is misconfiguration as code too</b>, so templates get security-reviewed like any other code.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">5</span> Putting it together</h2>
+    <p class="lead">Consider a company that wants to move the web server hosting its public website to the cloud &mdash; for example, Coca-Cola moving the server behind <code class="inline">cocacola.com</code> to AWS. Step through it:</p>
+    <div class="widget" id="deploy">
+      <h4>From on-prem to live on AWS</h4>
+      <div id="depSteps" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px"></div>
+      <div id="depStage" style="background:var(--bg);border-radius:8px;padding:16px 18px;min-height:96px"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">6</span> The DevOps loop</h2>
+    <p class="lead">Development and operations run as one continuous loop &mdash; monitoring feeds straight back into planning. Click a stage:</p>
+    <div class="widget" id="devops">
+      <h4>The continuous loop</h4>
+      <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:center">
+        <div id="devopsStage" style="flex:1;min-width:230px"></div>
+        <p id="devopsCap" style="flex:1;min-width:220px;font-size:13px;color:var(--text-muted);line-height:1.6;margin:0">Click a stage in the loop.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="assessment-box">
+    <div class="assess-label">Remember</div>
+    <p>Traditional infrastructure means <strong>siloed teams</strong> (storage, systems, network) whose coordination is the bottleneck. The cloud is a <strong>multi-tenant landlord</strong> giving each tenant an isolated <strong>VPC</strong> &mdash; the network boundary covered next. Old resources map onto services: compute&nbsp;&rarr;&nbsp;<strong>EC2</strong>, networking&nbsp;&rarr;&nbsp;<strong>VPC subnets/route tables</strong> (+ Internet Gateway), storage&nbsp;&rarr;&nbsp;<strong>S3</strong>. You provision by <strong>writing code</strong> &mdash; Infrastructure as Code, reconciled by <strong>Terraform</strong> &mdash; and ship through a continuous <strong>DevOps</strong> loop.</p>
+  </div>
+
+</div>
+
+<footer class="pagenav foot"><div class="pagenav-inner">
+  <span class="brand">Module 4 &middot; Cloud Computing Overview</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn" href="01-cloud-computing.html">&larr; Prev</a>
+    <a class="navbtn disabled" href="#">Next &rarr;</a>
+  </nav>
+</div></footer>
+
+<script>
+/* ---------- 1. Siloed teams ---------- */
+(function(){
+  const stage=document.getElementById('silosStage'),cap=document.getElementById('silosCap');
+  const TEAMS=[['Storage team','provisions disk','#8E5CA8'],['Systems team','servers + clients','#0E7490'],['Network team','switches, routers, ports','#B45309']];
+  let mode='idle';
+  function box(x,t,sub,c,dim){return `<rect x="${x}" y="20" width="150" height="64" rx="8" fill="${c}" fill-opacity="${dim?0.25:1}"/>`+
+    `<text x="${x+75}" y="48" text-anchor="middle" font-size="13" font-weight="800" fill="#fff" fill-opacity="${dim?0.5:1}">${t}</text>`+
+    `<text x="${x+75}" y="65" text-anchor="middle" font-size="9.5" fill="#fff" fill-opacity="${dim?0.45:0.85}">${sub}</text>`;}
+  function render(){
+    const deploy=mode==='deploy';
+    let s=`<svg viewBox="0 0 520 150" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    s+=box(10,TEAMS[0][0],TEAMS[0][1],TEAMS[0][2],deploy?false:false);
+    s+=box(185,TEAMS[1][0],TEAMS[1][1],TEAMS[1][2],false);
+    s+=box(360,TEAMS[2][0],TEAMS[2][1],TEAMS[2][2],false);
+    if(deploy){
+      s+=`<defs><marker id="t" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#c0392b"/></marker></defs>`;
+      // systems -> storage (ticket 1), systems -> network (ticket 2)
+      s+=`<path d="M185 52 C 150 110, 120 110, 95 90" fill="none" stroke="#c0392b" stroke-width="2.2" stroke-dasharray="6 4" marker-end="url(#t)"/>`;
+      s+=`<text x="120" y="128" text-anchor="middle" font-size="10" font-weight="700" fill="#c0392b">ticket: provision disk</text>`;
+      s+=`<path d="M335 52 C 370 110, 400 110, 425 90" fill="none" stroke="#c0392b" stroke-width="2.2" stroke-dasharray="6 4" marker-end="url(#t)"/>`;
+      s+=`<text x="405" y="128" text-anchor="middle" font-size="10" font-weight="700" fill="#c0392b">ticket: open ports</text>`;
+    }
+    s+=`</svg>`;
+    stage.className='fade'; stage.innerHTML=s;
+    cap.innerHTML=deploy
+      ? 'To deploy one app, the <b>systems team</b> must file a ticket with storage to provision disk, then another with the network team to open ports. Every change is a round of cross-team coordination &mdash; the friction the cloud removes.'
+      : 'Three separate teams, three separate domains. On their own, nothing moves &mdash; until someone needs to deploy something that crosses all three.';
+    document.querySelectorAll('#silos [data-s]').forEach(b=>b.className='ui'+(b.dataset.s===mode?'':' ghost'));
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  render();
+  document.querySelectorAll('#silos [data-s]').forEach(b=>b.onclick=()=>{mode=b.dataset.s;render();});
+})();
+
+/* ---------- 2. Multi-tenant VPC isolation ---------- */
+(function(){
+  const stage=document.getElementById('tenantStage'),cap=document.getElementById('tenantCap');
+  const T=[['Tenant A','#0E7490'],['Tenant B','#8E5CA8'],['Tenant C','#B45309'],['Tenant D','#2E7D57']];
+  let mode='within';
+  function tbox(x,t,active){
+    let s=`<rect x="${x}" y="42" width="112" height="140" rx="10" fill="${active?'#fff':'#fcfcfb'}" stroke="${t[1]}" stroke-width="${active?2.8:1.2}" stroke-opacity="${active?1:0.4}"/>`;
+    s+=`<text x="${x+56}" y="62" text-anchor="middle" font-size="11.5" font-weight="800" fill="${t[1]}" fill-opacity="${active?1:0.6}">${t[0]}</text>`;
+    s+=`<text x="${x+56}" y="76" text-anchor="middle" font-size="8" font-weight="700" letter-spacing=".5" fill="#9aa3a8">VPC</text>`;
+    ['EC2','IGW','S3'].forEach((r,j)=>{
+      s+=`<rect x="${x+14}" y="${88+j*30}" width="84" height="22" rx="5" fill="#eef1f3" stroke="${active?t[1]:'none'}" stroke-width="${active?1:0}"/>`;
+      s+=`<text x="${x+56}" y="${103+j*30}" text-anchor="middle" font-size="10" font-weight="700" fill="${active?t[1]:'#9aa3a8'}">${r}</text>`;
+    });
+    return s;
+  }
+  function render(){
+    const cross=mode==='cross';
+    let s=`<svg viewBox="0 0 520 210" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    s+=`<rect x="6" y="6" width="508" height="198" rx="16" fill="#f4f6f8" stroke="#cfd6db" stroke-width="1.5"/>`;
+    s+=`<text x="20" y="26" font-size="10" font-weight="800" letter-spacing="1" fill="#9aa3a8">CLOUD VENDOR — SHARED HARDWARE</text>`;
+    s+=`<defs><marker id="ga" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2e7d57"/></marker>`+
+       `<marker id="ra" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#c0392b"/></marker></defs>`;
+    s+=tbox(20,T[0],true);          // A is always the actor
+    s+=tbox(144,T[1],cross);        // B lights up only when targeted
+    s+=tbox(268,T[2],false);
+    s+=tbox(392,T[3],false);
+    if(!cross){
+      // allowed: EC2 -> S3 inside Tenant A
+      s+=`<path d="M118 99 C 140 114, 140 144, 118 159" fill="none" stroke="#2e7d57" stroke-width="2.6" marker-end="url(#ga)"/>`;
+      s+=`<circle cx="150" cy="129" r="11" fill="#fff" stroke="#2e7d57" stroke-width="2"/><path d="M145 129 l3.5 4 l6 -8" fill="none" stroke="#2e7d57" stroke-width="2.4"/>`;
+    } else {
+      // blocked: A -> B stopped at the boundary wall
+      s+=`<path d="M118 120 L 132 120" fill="none" stroke="#c0392b" stroke-width="2.6" marker-end="url(#ra)"/>`;
+      s+=`<line x1="138" y1="46" x2="138" y2="178" stroke="#c0392b" stroke-width="2.6" stroke-dasharray="5 4"/>`;
+      s+=`<circle cx="138" cy="120" r="13" fill="#fff" stroke="#c0392b" stroke-width="2.6"/><text x="138" y="125.5" text-anchor="middle" font-size="16" font-weight="900" fill="#c0392b">&#215;</text>`;
+    }
+    s+=`</svg>`;
+    stage.className='fade'; stage.innerHTML=s;
+    cap.innerHTML = cross
+      ? '<b>Blocked.</b> Tenant A cannot reach into Tenant B&rsquo;s VPC &mdash; the boundary stops it cold, even though both run on the same physical hardware. That isolation <em>is</em> the VPC.'
+      : '<b>Allowed.</b> Inside its own VPC, Tenant A&rsquo;s resources (EC2 &harr; S3) talk freely. A tenant can do whatever it likes within its own walls.';
+    document.querySelectorAll('#tenants [data-t]').forEach(b=>b.className='ui'+(b.dataset.t===mode?'':' ghost'));
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  render();
+  document.querySelectorAll('#tenants [data-t]').forEach(b=>b.onclick=()=>{mode=b.dataset.t;render();});
+})();
+
+/* ---------- 3. Resource mapping ---------- */
+(function(){
+  const stage=document.getElementById('mapStage'),cap=document.getElementById('mapCaption');
+  const D={
+    compute:{old:'Physical servers',oldsub:'racked & maintained by the systems team',svc:'Amazon EC2',svcsub:'Elastic Compute Cloud — virtual servers on demand',
+      cap:'A server you bought, racked, and patched becomes an <b>EC2 instance</b> you request in seconds and release when done.'},
+    network:{old:'Switches & routers',oldsub:'wired & configured by the network team',svc:'VPC subnets & route tables',svcsub:'+ Internet Gateway as the internet on-ramp',
+      cap:'Internal switching and routing become <b>VPC subnets and route tables</b>. Reaching the public internet specifically goes through an <b>Internet Gateway</b> attached to your VPC.'},
+    storage:{old:'Storage arrays',oldsub:'provisioned by the storage team',svc:'Amazon S3',svcsub:'Simple Storage Service — object storage in buckets',
+      cap:'The disk arrays the storage team provisioned become <b>S3</b> &mdash; drop file objects into a bucket and never think about the underlying disks.'}
+  };
+  let r='compute';
+  function card(title,sub,accent){
+    return `<div style="flex:1;min-width:180px;background:${accent?'var(--accent-soft)':'var(--bg)'};border:0.5px solid var(--border);border-radius:8px;padding:14px 16px">`+
+      `<div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:${accent?'var(--accent-dark)':'var(--text-light)'};margin-bottom:6px">${accent?'AWS service':'Traditional'}</div>`+
+      `<div style="font-size:15px;font-weight:800;color:var(--text)">${title}</div>`+
+      `<div style="font-size:12px;color:var(--text-muted);margin-top:3px;line-height:1.5">${sub}</div></div>`;
+  }
+  function render(){
+    const d=D[r];
+    stage.className='fade';
+    stage.innerHTML=card(d.old,d.oldsub,false)+
+      `<div style="display:flex;align-items:center;font-size:22px;color:var(--accent);font-weight:900">&rarr;</div>`+
+      card(d.svc,d.svcsub,true);
+    cap.innerHTML=d.cap;
+    document.querySelectorAll('#map [data-r]').forEach(b=>{b.className='ui'+(b.dataset.r===r?'':' ghost');});
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  render();
+  document.querySelectorAll('#map [data-r]').forEach(b=>b.onclick=()=>{r=b.dataset.r;render();});
+})();
+
+/* ---------- 4. Infrastructure as Code (plan / apply) ---------- */
+(function(){
+  const range=document.getElementById('iacRange'),val=document.getElementById('iacVal'),code=document.getElementById('iacCode');
+  const board=document.getElementById('iacBoard'),note=document.getElementById('iacNote'),apply=document.getElementById('iacApply');
+  let running=4;               // what actually exists on AWS
+  function chip(bg,fg,border,strike,label){
+    return `<div style="width:48px;height:48px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;background:${bg};color:${fg};${border};${strike?'text-decoration:line-through':''}">${label}</div>`;
+  }
+  function render(){
+    const want=+range.value;
+    val.textContent=want; code.textContent=want;
+    const lo=Math.min(want,running), hi=Math.max(want,running);
+    let s='';
+    for(let i=0;i<hi;i++){
+      if(i<lo)            s+=chip('#0E7490','#fff','border:1.5px solid #0E7490',false,'EC2');           // staying
+      else if(want>running) s+=chip('#eaf7ef','#2e7d57','border:1.5px dashed #2e7d57',false,'+ new');    // to create
+      else                s+=chip('#fff','#c0392b','border:1.5px dashed #c0392b',true,'EC2');            // to destroy
+    }
+    if(hi===0) s='<span style="font-size:12.5px;color:var(--text-light)">No instances running.</span>';
+    board.innerHTML=s;
+    const diff=want-running;
+    if(diff>0){
+      note.innerHTML=`<b style="color:#2e7d57">Plan: +${diff} to create.</b> Code wants ${want}, ${running} running &mdash; press Apply.`;
+      apply.disabled=false;
+    } else if(diff<0){
+      note.innerHTML=`<b style="color:#c0392b">Plan: &minus;${-diff} to destroy.</b> Code wants ${want}, ${running} running &mdash; press Apply.`;
+      apply.disabled=false;
+    } else {
+      note.innerHTML=`<b>No changes.</b> ${running} running matches the ${want} your code asks for.`;
+      apply.disabled=true;
+    }
+    apply.style.opacity=apply.disabled?0.4:1; apply.style.cursor=apply.disabled?'default':'pointer';
+  }
+  render();
+  range.oninput=render;
+  apply.onclick=()=>{
+    if(running===+range.value) return;
+    const before=running; running=+range.value;
+    render();
+    const d=running-before;
+    note.innerHTML=`<b style="color:#0E7490">Applied.</b> Terraform ${d>0?'created '+d:'destroyed '+(-d)} instance${Math.abs(d)>1?'s':''}. ${running} now running.`;
+  };
+})();
+
+/* ---------- 5. Website deployment stepper ---------- */
+(function(){
+  const steps=document.getElementById('depSteps'),stage=document.getElementById('depStage');
+  const S=[
+    ['On-prem today','The company&rsquo;s public website runs on a web server in its own on-site data center. The goal: move it to AWS.'],
+    ['Write the IaC','The infrastructure team writes Infrastructure as Code to bring up <b>two EC2 instances</b> as web servers.'],
+    ['Run Apache','The <b>Apache HTTP server</b> is installed and running on both instances, ready to serve pages.'],
+    ['Deploy the app','The web team deploys the site — <b>HTML, CSS, JavaScript</b> — onto the servers.'],
+    ['Live & redundant','Two servers behind one name. If one fails the other keeps serving — the site slows instead of going dark.']
+  ];
+  let sel=0;
+  function render(){
+    steps.innerHTML=S.map((s,i)=>
+      `<button class="ui${i===sel?'':' ghost'}" data-i="${i}" style="font-size:11.5px;padding:6px 11px">${i+1}. ${s[0]}</button>`).join('');
+    steps.querySelectorAll('button').forEach(b=>b.onclick=()=>{sel=+b.dataset.i;render();});
+    stage.className='fade';
+    stage.innerHTML=`<div style="display:flex;gap:14px;align-items:center">`+
+      `<div style="flex-shrink:0;width:42px;height:42px;border-radius:10px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed';font-weight:900;font-size:22px">${sel+1}</div>`+
+      `<div><b style="font-size:14px">${S[sel][0]}</b><p style="font-size:13px;color:var(--text-muted);line-height:1.6;margin:3px 0 0">${S[sel][1]}</p></div></div>`;
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  render();
+})();
+
+/* ---------- 6. DevOps loop ---------- */
+(function(){
+  const stage=document.getElementById('devopsStage'),cap=document.getElementById('devopsCap');
+  const S=[
+    {k:'Plan',t:'dev',d:'Decide what to build — features, architecture, security requirements.'},
+    {k:'Code',t:'dev',d:'Write the application — and the Infrastructure as Code that runs it.'},
+    {k:'Build',t:'dev',d:'Compile and package into a deployable artifact.'},
+    {k:'Test',t:'dev',d:'Verify it works and is secure before it ever reaches production.'},
+    {k:'Release',t:'dev',d:'Hand the validated build to operations.'},
+    {k:'Deploy',t:'ops',d:'Provision the cloud infrastructure and roll out the release.'},
+    {k:'Operate',t:'ops',d:'Run the live service — the two EC2 web servers serving the site.'},
+    {k:'Monitor',t:'ops',d:'Watch performance. Rising response times? A server may be down — feed it back to Plan.'}
+  ];
+  let sel=0;
+  function render(){
+    const cx=140,cy=120,R=92,n=S.length;
+    let s=`<svg viewBox="0 0 280 240" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-width:340px;font-family:Barlow,Arial,sans-serif">`;
+    s+=`<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#e3e1d8" stroke-width="2"/>`;
+    S.forEach((st,i)=>{
+      const a=(i/n)*2*Math.PI - Math.PI/2;
+      const x=cx+R*Math.cos(a), y=cy+R*Math.sin(a);
+      const on=i===sel, col=st.t==='dev'?'#0E7490':'#2D3748';
+      s+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${on?15:11}" fill="${col}" fill-opacity="${on?1:0.85}" stroke="#fff" stroke-width="2" data-i="${i}" style="cursor:pointer"/>`;
+      const lx=cx+(R+22)*Math.cos(a), ly=cy+(R+22)*Math.sin(a);
+      s+=`<text x="${lx.toFixed(1)}" y="${(ly+3).toFixed(1)}" text-anchor="middle" font-size="9.5" font-weight="700" fill="${on?col:'#9aa3a8'}" style="pointer-events:none">${st.k}</text>`;
+    });
+    s+=`<text x="${cx}" y="${cy-4}" text-anchor="middle" font-size="11" font-weight="800" fill="#0E7490">DEV</text>`;
+    s+=`<text x="${cx}" y="${cy+12}" text-anchor="middle" font-size="11" font-weight="800" fill="#2D3748">OPS</text>`;
+    s+=`</svg>`;
+    stage.innerHTML=s;
+    stage.querySelectorAll('circle[data-i]').forEach(c=>c.onclick=()=>{sel=+c.dataset.i;render();});
+    const st=S[sel];
+    cap.className='fade';
+    cap.innerHTML=`<b style="color:${st.t==='dev'?'#0E7490':'#2D3748'}">${st.k}</b> &middot; <span style="text-transform:uppercase;font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--text-light)">${st.t}</span><br>${st.d}`;
+    setTimeout(()=>cap.classList.remove('fade'),360);
+  }
+  render();
+})();
+</script>
+</body></html>

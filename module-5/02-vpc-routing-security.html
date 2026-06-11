@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Inside the VPC: Routing &amp; Security &mdash; Module 5</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+* { box-sizing:border-box; margin:0; padding:0; }
+:root{
+  --slate-dark:#1A202C; --slate:#2D3748;
+  --accent:#0E7490; --accent-dark:#0B5567; --accent-soft:#CFF1F6;
+  --info:#1E40AF; --info-soft:#DBEAFE;
+  --text:#1a1a18; --text-muted:#5f5e5a; --text-light:#888780;
+  --border:rgba(0,0,0,0.09); --bg:#fafaf8; --bg-card:#fff; --bg-code:#f6f6f3; --tag-bg:#f1f0eb;
+  --rust:#B45309; --soft:#888780; --muted:#5f5e5a; --rule:rgba(0,0,0,0.09);
+  --ok:#2e7d57; --bad:#c0392b; --callout-bg:#f1f9fb; --code-bg:#f6f6f3;
+}
+body{ font-family:'Barlow',sans-serif; background:var(--bg); color:var(--text); line-height:1.65; min-height:100vh; }
+.pagenav{ background:var(--slate-dark); }
+.pagenav.foot{ margin-top:48px; }
+.pagenav-inner{ max-width:920px; margin:0 auto; padding:11px 32px; display:flex; justify-content:space-between; align-items:center; gap:16px; }
+.pagenav .brand{ color:rgba(255,255,255,0.45); font-size:11px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; white-space:nowrap; }
+.navbtns{ display:flex; gap:8px; }
+.navbtn{ display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#fff; background:rgba(255,255,255,0.10); border:1px solid rgba(255,255,255,0.22); border-radius:6px; padding:7px 13px; text-decoration:none; transition:0.15s; white-space:nowrap; }
+.navbtn:hover{ background:var(--accent); border-color:var(--accent); }
+.navbtn.disabled{ opacity:0.28; pointer-events:none; }
+@media(max-width:560px){ .pagenav .brand{ display:none } .pagenav-inner{ justify-content:center } }
+.header{ background:#fff; padding:56px 0 44px; border-bottom:0.5px solid var(--border); }
+.header-inner{ max-width:920px; margin:0 auto; padding:0 32px; }
+.header-eyebrow{ font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:14px; display:flex; align-items:center; gap:12px; }
+.header-eyebrow::after{ content:''; flex:1; height:0.5px; background:var(--border); max-width:120px; }
+.header h1{ font-family:'Barlow Condensed',sans-serif; font-size:clamp(34px,4.5vw,52px); font-weight:900; letter-spacing:-0.01em; line-height:1.05; color:var(--text); margin-bottom:18px; }
+.header h1 em{ font-style:normal; color:var(--accent); }
+.header-meta-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+.module-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:var(--slate); color:#fff; }
+.topic-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:#F1F5F9; color:#475569; }
+.topic-pill.accent{ background:var(--accent-soft); color:var(--accent-dark); }
+.page{ max-width:920px; margin:0 auto; padding:0 32px 48px; }
+.objectives{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--accent); border-radius:6px; padding:20px 26px; margin:34px 0 14px; }
+.obj-label{ font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:12px; }
+.objectives ul{ list-style:none; }
+.objectives ul li{ font-size:13.5px; color:var(--text); padding:4px 0 4px 20px; position:relative; line-height:1.5; }
+.objectives ul li::before{ content:'◇'; position:absolute; left:0; color:var(--accent); font-size:10px; top:8px; }
+section{ margin-top:42px; }
+section h2{ font-family:'Barlow Condensed',sans-serif; font-size:27px; font-weight:800; color:var(--text); margin-bottom:8px; display:flex; align-items:baseline; gap:18px; }
+section h2 .num{ font-family:'Barlow Condensed',sans-serif; font-size:54px; font-weight:900; color:var(--accent); letter-spacing:-0.02em; line-height:0.85; min-width:40px; }
+section .lead{ font-size:14.5px; color:var(--text-muted); line-height:1.6; margin:0 0 6px 58px; max-width:670px; }
+section p{ font-size:14.5px; color:var(--text); line-height:1.7; margin-bottom:12px; }
+section p strong{ font-weight:700; }
+code.inline{ font-family:'JetBrains Mono',monospace; font-size:12.5px; background:var(--tag-bg); padding:1px 6px; border-radius:3px; color:var(--text); }
+.keybox{ background:var(--accent-soft); border-left:3px solid var(--accent); border-radius:0 6px 6px 0; padding:13px 18px; margin:16px 0 0; font-size:13px; line-height:1.6; color:var(--text); }
+.keybox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--accent-dark); margin-bottom:5px; }
+.keybox b{ color:var(--accent-dark); }
+.notebox{ background:#FBF3E8; border-left:3px solid var(--rust); border-radius:0 6px 6px 0; padding:13px 18px; margin:16px 0 0; font-size:13px; line-height:1.6; }
+.notebox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--rust); margin-bottom:5px; }
+.compare-table{ width:100%; border-collapse:collapse; margin:18px 0 0; font-size:13px; background:var(--bg-card); border:0.5px solid var(--border); border-radius:6px; overflow:hidden; }
+.compare-table thead th{ font-size:10px; font-weight:700; color:var(--text-light); text-transform:uppercase; letter-spacing:0.06em; padding:11px 14px; text-align:left; border-bottom:0.5px solid var(--border); background:#fafaf8; }
+.compare-table thead th:first-child{ color:var(--text-light); }
+.compare-table tbody td{ padding:10px 14px; border-bottom:0.5px solid #f0efe8; vertical-align:top; color:var(--text); line-height:1.5; }
+.compare-table tbody td:first-child{ font-weight:700; background:#fafaf8; width:22%; }
+.compare-table tbody tr:last-child td{ border-bottom:none; }
+.assessment-box{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--slate); border-radius:0 6px 6px 0; padding:18px 22px; margin:34px 0 0; }
+.assessment-box .assess-label{ font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); margin-bottom:8px; }
+.assessment-box p{ font-size:13px; line-height:1.65; margin:0; }
+.widget{ border:0.5px solid var(--border); border-radius:10px; padding:18px; margin:18px 0 0; background:var(--bg-card); }
+.widget h4{ margin:0 0 12px; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); font-weight:700; }
+.controls{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+button.ui{ font-family:'Barlow',sans-serif; cursor:pointer; border:1px solid var(--accent); background:var(--accent); color:#fff; padding:7px 16px; border-radius:6px; font-size:12.5px; font-weight:600; transition:0.15s; }
+button.ui:hover{ background:var(--accent-dark); border-color:var(--accent-dark); }
+button.ui.ghost{ background:#fff; color:var(--accent); }
+button.ui.ghost:hover{ background:var(--accent-soft); }
+.fade{ animation:fade 0.35s ease; }
+@keyframes fade{ from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+</style>
+</head><body>
+<header class="pagenav"><div class="pagenav-inner">
+  <span class="brand">Cloud Security Fundamentals</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn" href="01-home-to-cloud.html">&larr; Prev</a>
+    <a class="navbtn disabled" href="#">Next &rarr;</a>
+  </nav>
+</div></header>
+
+<div class="header"><div class="header-inner">
+  <div class="header-eyebrow">Module 5 &nbsp;·&nbsp; Networking Layer</div>
+  <h1>Inside the VPC: <em>Routing &amp; Security</em></h1>
+  <div class="header-meta-row">
+    <span class="module-pill">Module 5</span>
+    <span class="topic-pill">Subnets · route tables</span>
+    <span class="topic-pill accent">NACLs · security groups</span>
+  </div>
+</div></div>
+
+<div class="page">
+
+  <div class="objectives">
+    <div class="obj-label">In this note</div>
+    <ul>
+      <li>Read a VPC&rsquo;s CIDR block and how subnets carve it into streets</li>
+      <li>Why a subnet is &ldquo;public&rdquo; or &ldquo;private&rdquo; entirely because of its <em>route table</em></li>
+      <li>The Internet Gateway and NAT Gateway &mdash; who gets to talk to the internet, and how</li>
+      <li>NACLs vs Security Groups: stateless street vs stateful house, and defense in depth</li>
+    </ul>
+  </div>
+
+  <section>
+    <h2><span class="num">1</span> A VPC is a gated community</h2>
+    <p class="lead">One picture carries this whole note. A VPC is a <strong>private, gated community</strong>; everything inside has a real-world double. Click each piece:</p>
+    <div class="widget" id="comm">
+      <h4>The private community</h4>
+      <div id="commStage"></div>
+      <div class="controls" style="margin:14px 0 0" id="commBtns"></div>
+      <p id="commCap" style="font-size:13px;color:var(--text-muted);margin:12px 0 0;line-height:1.6;min-height:48px"></p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> The VPC and its subnets</h2>
+    <p class="lead">A VPC owns a block of addresses &mdash; a <strong>CIDR range</strong> like <code class="inline">10.0.0.0/16</code> (65,536 addresses). Subnets carve that block into smaller streets. Click a piece of the example:</p>
+    <div class="widget" id="vpc">
+      <h4>Worked example &mdash; VPC 10.0.0.0/16</h4>
+      <div id="vpcStage"></div>
+      <div id="vpcDetail" style="background:var(--bg);border-radius:8px;padding:14px 16px;margin-top:14px;min-height:96px"></div>
+    </div>
+    <div class="notebox">
+      <div class="lbl">AWS reserves 5 IPs per subnet</div>
+      A <code class="inline">/24</code> subnet has 256 addresses but only <b>251 usable</b> &mdash; AWS keeps the first four (network, router, DNS, future) and the last (broadcast) in every subnet.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> Public or private? The route table decides</h2>
+    <p class="lead">Subnets are physically identical. A subnet is &ldquo;public&rdquo; <em>only</em> because its <strong>route table</strong> sends internet-bound traffic to the Internet Gateway. Change the route table and the subnet&rsquo;s nature flips:</p>
+    <div class="widget" id="route">
+      <h4>Same subnet, three route tables</h4>
+      <div class="controls" style="margin:0 0 14px">
+        <button class="ui" data-r="igw">0.0.0.0/0 &rarr; IGW</button>
+        <button class="ui ghost" data-r="nat">0.0.0.0/0 &rarr; NAT GW</button>
+        <button class="ui ghost" data-r="none">local only</button>
+      </div>
+      <div id="routeStage"></div>
+      <p id="routeCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:34px"></p>
+    </div>
+    <div class="keybox">
+      <div class="lbl">Public-capable &ne; publicly reachable</div>
+      A public route table only makes a subnet <b>able</b> to face the internet. A resource is actually reachable only if it <b>also</b> has a public IP <i>and</i> the NACL and Security Group allow the traffic. Routing and security are separate jobs.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> NACL vs Security Group</h2>
+    <p class="lead">Two filters guard your traffic. The <strong>NACL</strong> is the cop at the street entrance; the <strong>Security Group</strong> is the gate on each driveway. The difference that trips everyone up is <em>stateless vs stateful</em> &mdash; follow a reply and watch:</p>
+    <div class="widget" id="ss">
+      <h4>Follow a request and its reply</h4>
+      <div class="controls" style="margin:0 0 14px">
+        <button class="ui" data-s="req">1 · Request in (:443)</button>
+        <button class="ui ghost" data-s="rep">2 · Reply back out</button>
+      </div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap">
+        <div style="flex:1;min-width:240px">
+          <div style="font-size:11px;font-weight:800;color:var(--rust);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">NACL &mdash; the street cop</div>
+          <div id="naclStage"></div>
+        </div>
+        <div style="flex:1;min-width:240px">
+          <div style="font-size:11px;font-weight:800;color:var(--accent-dark);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Security Group &mdash; the driveway gate</div>
+          <div id="sgStage"></div>
+        </div>
+      </div>
+      <p id="ssCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:34px"></p>
+    </div>
+
+    <table class="compare-table">
+      <thead><tr><th>&nbsp;</th><th>NACL</th><th>Security Group</th></tr></thead>
+      <tbody>
+        <tr><td>Protects</td><td>The subnet (the street)</td><td>The instance (the house)</td></tr>
+        <tr><td>State</td><td>Stateless &mdash; allow inbound <em>and</em> return separately</td><td>Stateful &mdash; return traffic is automatic</td></tr>
+        <tr><td>Rules</td><td>Allow <em>and</em> Deny</td><td>Allow only (deny is implied)</td></tr>
+        <tr><td>Evaluation</td><td>In number order; stops at first match</td><td>All rules evaluated</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2><span class="num">5</span> Three gates, in order: defense in depth</h2>
+    <p class="lead">A packet must clear three checkpoints to reach a host: the <strong>route table</strong> (is there a path?), the <strong>NACL</strong> (does the subnet allow it?), the <strong>Security Group</strong> (does the host allow it?). Pick a journey:</p>
+    <div class="widget" id="did">
+      <h4>Can the packet get there?</h4>
+      <div class="controls" style="margin:0 0 14px">
+        <button class="ui" data-j="webok">Internet &rarr; Web server</button>
+        <button class="ui ghost" data-j="dbblock">Internet &rarr; Database</button>
+        <button class="ui ghost" data-j="webdb">Web server &rarr; Database</button>
+      </div>
+      <div id="didStage"></div>
+      <p id="didCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:34px"></p>
+    </div>
+  </section>
+
+  <div class="assessment-box">
+    <div class="assess-label">Remember</div>
+    <p>A <strong>VPC</strong> owns a <strong>CIDR</strong> block (<code class="inline">/16</code> = 65,536 addresses); <strong>subnets</strong> carve it up, and AWS reserves <strong>5 IPs</strong> per subnet. A subnet is <strong>public only because its route table</strong> points <code class="inline">0.0.0.0/0</code> at an <strong>Internet Gateway</strong> &mdash; but public-capable isn&rsquo;t publicly reachable without a public IP and permitting rules. Private subnets reach out through a <strong>NAT Gateway</strong>. Two filters enforce security: the <strong>NACL</strong> guards the subnet (stateless, ordered, allow + deny) and the <strong>Security Group</strong> guards the instance (stateful, allow-only). Together &mdash; route table, NACL, Security Group &mdash; they are <strong>defense in depth</strong>.</p>
+  </div>
+
+</div>
+
+<footer class="pagenav foot"><div class="pagenav-inner">
+  <span class="brand">Module 5 &middot; Networking Layer</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn" href="01-home-to-cloud.html">&larr; Prev</a>
+    <a class="navbtn disabled" href="#">Next &rarr;</a>
+  </nav>
+</div></footer>
+
+<script>
+/* ---------- 1. Private community analogy ---------- */
+(function(){
+  const stage=document.getElementById('commStage'),btns=document.getElementById('commBtns'),cap=document.getElementById('commCap');
+  const TERMS=[
+    ['VPC','vpc','The gated community itself &mdash; your private, isolated network. Its address range is set by the VPC&rsquo;s CIDR block.'],
+    ['Subnet','street','A street inside the community. Houses sit on streets; a street can face outward (public) or stay internal (private).'],
+    ['EC2 instance','house','A house on a street &mdash; a server. Its house number is its private IP, dictated by the subnet&rsquo;s range.'],
+    ['Route table','sign','The street signs &mdash; they tell each car (packet) which way to go, including how to leave the community.'],
+    ['NACL','cop','The cop at the street entrance. Stateless: cars must be cleared <em>in</em> and <em>out</em> separately. Guards the whole street.'],
+    ['Security Group','gate','The gate on a single driveway. Stateful: if a guest is let in, they&rsquo;re automatically let back out. Guards one house.']
+  ];
+  let sel=0;
+  function scene(){
+    let s=`<svg viewBox="0 0 560 250" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    const hl=k=>TERMS[sel][1]===k;
+    // community boundary (VPC)
+    s+=`<rect x="8" y="22" width="544" height="218" rx="14" fill="#fafaf8" stroke="${hl('vpc')?'#0E7490':'#cfd6db'}" stroke-width="${hl('vpc')?3:1.5}" stroke-dasharray="6 5"/>`;
+    s+=`<text x="22" y="40" font-size="10" font-weight="800" letter-spacing=".5" fill="${hl('vpc')?'#0B5567':'#9aa3a8'}">VPC &mdash; the gated community</text>`;
+    // outside gate to WWW (IGW)
+    s+=`<path d="M8 120 a12 12 0 0 0 -3 22" fill="none"/>`;
+    // two streets
+    function street(y,label,pub){
+      let t='';
+      const on=hl('street');
+      t+=`<rect x="34" y="${y}" width="492" height="58" rx="8" fill="#eef1f3" stroke="${on?'#0E7490':'none'}" stroke-width="${on?2.4:0}"/>`;
+      t+=`<rect x="34" y="${y+24}" width="492" height="10" fill="#d7dde1"/>`; // road
+      for(let cx=70;cx<520;cx+=34){ t+=`<rect x="${cx}" y="${y+28}" width="14" height="2.4" fill="#fff"/>`; }
+      t+=`<text x="42" y="${y+15}" font-size="9" font-weight="700" fill="#5f5e5a">${label}</text>`;
+      // street-entrance cop (NACL)
+      const cop=hl('cop');
+      t+=`<rect x="38" y="${y+18}" width="6" height="22" rx="2" fill="${cop?'#B45309':'#b9c0c6'}"/>`;
+      t+=`<circle cx="41" cy="${y+12}" r="6" fill="${cop?'#B45309':'#b9c0c6'}"/>`;
+      return t;
+    }
+    s+=street(58,'Public street (subnet 10.0.1.0/24)',true);
+    s+=street(150,'Private street (subnet 10.0.3.0/24)',false);
+    // houses (EC2) with driveway gate (SG)
+    function house(x,y,label){
+      const hh=hl('house'), gg=hl('gate');
+      let t=`<rect x="${x}" y="${y}" width="44" height="30" rx="3" fill="${hh?'#0E7490':'#ffffff'}" stroke="${hh?'#0B5567':'#9aa3a8'}" stroke-width="1.4"/>`;
+      t+=`<path d="M${x-3} ${y} L${x+22} ${y-15} L${x+47} ${y} Z" fill="${hh?'#0B5567':'#b9c0c6'}"/>`;
+      t+=`<text x="${x+22}" y="${y+19}" text-anchor="middle" font-size="8" font-weight="700" fill="${hh?'#fff':'#5f5e5a'}">${label}</text>`;
+      // driveway gate
+      t+=`<rect x="${x+14}" y="${y+34}" width="16" height="5" rx="1.5" fill="${gg?'#0E7490':'#cfd6db'}"/>`;
+      return t;
+    }
+    s+=house(150,70,'web');
+    s+=house(330,70,'web');
+    s+=house(240,162,'DB');
+    // street sign (route table)
+    const sg=hl('sign');
+    s+=`<rect x="470" y="64" width="3" height="34" fill="${sg?'#0E7490':'#b9c0c6'}"/>`;
+    s+=`<rect x="456" y="60" width="40" height="14" rx="2" fill="${sg?'#0E7490':'#b9c0c6'}"/>`;
+    s+=`<text x="476" y="70" text-anchor="middle" font-size="7" font-weight="800" fill="#fff">&rarr; IGW</text>`;
+    s+=`<rect x="470" y="156" width="3" height="34" fill="${sg?'#0E7490':'#b9c0c6'}"/>`;
+    s+=`<rect x="456" y="152" width="40" height="14" rx="2" fill="${sg?'#0E7490':'#b9c0c6'}"/>`;
+    s+=`<text x="476" y="162" text-anchor="middle" font-size="7" font-weight="800" fill="#fff">&rarr; NAT</text>`;
+    s+=`</svg>`;
+    return s;
+  }
+  btns.innerHTML=TERMS.map((t,i)=>`<button class="ui${i===0?'':' ghost'}" data-i="${i}" style="font-size:11.5px;padding:6px 11px">${t[0]}</button>`).join('');
+  function render(){
+    stage.className='fade'; stage.innerHTML=scene();
+    cap.innerHTML=`<b>${TERMS[sel][0]}</b> &mdash; ${TERMS[sel][2]}`;
+    btns.querySelectorAll('button').forEach((b,i)=>b.className='ui'+(i===sel?'':' ghost'));
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  btns.querySelectorAll('button').forEach(b=>b.onclick=()=>{sel=+b.dataset.i;render();});
+  render();
+})();
+
+/* ---------- 2. Worked VPC ---------- */
+(function(){
+  const stage=document.getElementById('vpcStage'),det=document.getElementById('vpcDetail');
+  const DATA={
+    pub:{t:'Public subnet — 10.0.1.0/24',d:'<b>256 addresses, 251 usable.</b> Public-capable: its route table sends 0.0.0.0/0 to the Internet Gateway. Hosts the <b>web server (10.0.1.10)</b> and the <b>NAT Gateway</b> that serves the private subnets.'},
+    app:{t:'Private subnet — 10.0.2.0/24',d:'<b>App tier.</b> No route to the IGW, so unreachable from the internet. Hosts the <b>app server (10.0.2.20)</b>. Reaches the internet only outbound, via the NAT Gateway.'},
+    db:{t:'Private subnet — 10.0.3.0/24',d:'<b>Data tier.</b> The most protected street. Hosts the <b>database (10.0.3.20)</b>. No inbound path from the internet at all.'},
+    igw:{t:'Internet Gateway (IGW)',d:'The community&rsquo;s one door to the public internet &mdash; a routing component, not a firewall. A subnet is &ldquo;public&rdquo; only if its route table points here.'},
+    nat:{t:'NAT Gateway',d:'Lives in the <b>public</b> subnet but serves the <b>private</b> ones &mdash; giving them <b>outbound-only</b> internet (for updates, APIs) while blocking anything inbound.'}
+  };
+  let sel='pub';
+  function render(){
+    const A='#0E7490', soft='#E7F3F6';
+    function sub(y,id,label,ip,host,priv){
+      const on=sel===id;
+      let t=`<rect x="150" y="${y}" width="356" height="52" rx="8" fill="${on?soft:'#fff'}" stroke="${priv?'#9aa3a8':A}" stroke-width="${on?2.6:1.2}" data-k="${id}" style="cursor:pointer"/>`;
+      t+=`<text x="164" y="${y+19}" font-size="10.5" font-weight="800" fill="${priv?'#5f5e5a':'#0B5567'}" style="pointer-events:none">${label}</text>`;
+      t+=`<text x="164" y="${y+34}" font-size="9" font-family="JetBrains Mono,monospace" fill="#9aa3a8" style="pointer-events:none">${ip}</text>`;
+      t+=`<rect x="372" y="${y+12}" width="118" height="28" rx="5" fill="${on?'#fff':'#f4f6f8'}" stroke="#cfd6db" stroke-width="1" style="pointer-events:none"/>`;
+      t+=`<text x="431" y="${y+30}" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1a1a18" style="pointer-events:none">${host}</text>`;
+      return t;
+    }
+    let s=`<svg viewBox="0 0 560 250" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    s+=`<rect x="120" y="14" width="430" height="226" rx="12" fill="none" stroke="${A}" stroke-width="1.6" stroke-dasharray="5 4"/>`;
+    s+=`<text x="134" y="32" font-size="9.5" font-weight="800" fill="${A}">VPC 10.0.0.0/16 &middot; 65,536 addresses</text>`;
+    // WWW + IGW
+    s+=`<path d="M30 120 a13 13 0 0 1 3 -24 a15 15 0 0 1 28 4 a11 11 0 0 1 -2 20 z" fill="#cfd6db"/><text x="45" y="110" text-anchor="middle" font-size="8.5" font-weight="800" fill="#fff">WWW</text>`;
+    s+=`<line x1="62" y1="112" x2="86" y2="112" stroke="#b9c0c6" stroke-width="1.6"/>`;
+    const ig=sel==='igw';
+    s+=`<rect x="86" y="96" width="40" height="34" rx="6" fill="${ig?'#0B5567':'#0E7490'}" stroke="${ig?'#0E7490':'none'}" stroke-width="2" data-k="igw" style="cursor:pointer"/><text x="106" y="117" text-anchor="middle" font-size="9" font-weight="800" fill="#fff" style="pointer-events:none">IGW</text>`;
+    s+=`<line x1="126" y1="112" x2="150" y2="112" stroke="#b9c0c6" stroke-width="1.6"/>`;
+    s+=sub(44,'pub','Public subnet','10.0.1.0/24','Web 10.0.1.10');
+    // NAT GW chip in public subnet
+    const ng=sel==='nat';
+    s+=`<rect x="300" y="56" width="60" height="28" rx="5" fill="${ng?'#0B5567':'#0E7490'}" stroke="${ng?'#0E7490':'none'}" stroke-width="2" data-k="nat" style="cursor:pointer"/><text x="330" y="74" text-anchor="middle" font-size="9" font-weight="800" fill="#fff" style="pointer-events:none">NAT GW</text>`;
+    s+=sub(110,'app','Private subnet','10.0.2.0/24','App 10.0.2.20',true);
+    s+=sub(176,'db','Private subnet','10.0.3.0/24','DB 10.0.3.20',true);
+    s+=`</svg>`;
+    stage.className='fade'; stage.innerHTML=s;
+    stage.querySelectorAll('[data-k]').forEach(el=>el.onclick=()=>{sel=el.dataset.k;render();});
+    det.className='fade';
+    det.innerHTML=`<div style="font-weight:800;font-size:14px;color:var(--accent-dark);margin-bottom:5px">${DATA[sel].t}</div><div style="font-size:13px;color:var(--text);line-height:1.6">${DATA[sel].d}</div>`;
+    setTimeout(()=>{stage.classList.remove('fade');det.classList.remove('fade');},360);
+  }
+  render();
+})();
+
+/* ---------- 3. Public/private by route table ---------- */
+(function(){
+  const stage=document.getElementById('routeStage'),cap=document.getElementById('routeCap');
+  let mode='igw';
+  const D={
+    igw:{kind:'PUBLIC',col:'#2e7d57',target:'Internet Gateway',
+      cap:'With <code class="inline">0.0.0.0/0 &rarr; IGW</code>, the subnet is <b>public-capable</b> &mdash; resources with a public IP can be reached from, and reach, the internet.'},
+    nat:{kind:'PRIVATE (outbound)',col:'#0E7490',target:'NAT Gateway',
+      cap:'With <code class="inline">0.0.0.0/0 &rarr; NAT GW</code>, instances can reach <b>out</b> (updates, APIs) but nothing on the internet can start a connection <b>in</b>.'},
+    none:{kind:'PRIVATE (isolated)',col:'#B45309',target:'— (no internet route)',
+      cap:'With only the <code class="inline">local</code> route, the subnet is fully <b>isolated</b> &mdash; it can talk inside the VPC and nowhere else.'}
+  };
+  function render(){
+    const d=D[mode];
+    let s=`<svg viewBox="0 0 560 150" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    // the (identical) subnet
+    s+=`<rect x="20" y="40" width="170" height="70" rx="9" fill="#eef1f3" stroke="${d.col}" stroke-width="2"/>`;
+    s+=`<text x="105" y="66" text-anchor="middle" font-size="11" font-weight="800" fill="#1a1a18">Subnet 10.0.1.0/24</text>`;
+    s+=`<text x="105" y="84" text-anchor="middle" font-size="9.5" fill="#5f5e5a">(physically identical)</text>`;
+    s+=`<rect x="58" y="92" width="94" height="12" rx="3" fill="${d.col}"/><text x="105" y="101" text-anchor="middle" font-size="8" font-weight="800" fill="#fff">${d.kind}</text>`;
+    // route table card
+    s+=`<rect x="240" y="34" width="190" height="82" rx="9" fill="#fff" stroke="#cfd6db" stroke-width="1.2"/>`;
+    s+=`<text x="252" y="52" font-size="9" font-weight="800" letter-spacing=".5" fill="#9aa3a8">ROUTE TABLE</text>`;
+    s+=`<text x="252" y="72" font-size="10" font-family="JetBrains Mono,monospace" fill="#5f5e5a">10.0.0.0/16  &rarr; local</text>`;
+    if(mode!=='none') s+=`<text x="252" y="92" font-size="10" font-family="JetBrains Mono,monospace" fill="${d.col}" font-weight="700">0.0.0.0/0   &rarr; ${mode==='igw'?'igw':'nat'}</text>`;
+    else s+=`<text x="252" y="92" font-size="10" font-family="JetBrains Mono,monospace" fill="#9aa3a8">(no default route)</text>`;
+    // target
+    s+=`<line x1="430" y1="75" x2="468" y2="75" stroke="#b9c0c6" stroke-width="1.6" ${mode==='none'?'stroke-dasharray="4 4"':''}/>`;
+    s+=`<rect x="468" y="56" width="84" height="38" rx="7" fill="${mode==='none'?'#f4f6f8':d.col}"/>`;
+    s+=`<text x="510" y="79" text-anchor="middle" font-size="9" font-weight="800" fill="${mode==='none'?'#9aa3a8':'#fff'}">${mode==='igw'?'INTERNET':mode==='nat'?'OUTBOUND':'ISOLATED'}</text>`;
+    s+=`</svg>`;
+    stage.className='fade'; stage.innerHTML=s;
+    cap.innerHTML=d.cap;
+    document.querySelectorAll('#route [data-r]').forEach(b=>b.className='ui'+(b.dataset.r===mode?'':' ghost'));
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  render();
+  document.querySelectorAll('#route [data-r]').forEach(b=>b.onclick=()=>{mode=b.dataset.r;render();});
+})();
+
+/* ---------- 4. NACL vs SG stateless/stateful ---------- */
+(function(){
+  const nacl=document.getElementById('naclStage'),sg=document.getElementById('sgStage'),cap=document.getElementById('ssCap');
+  let step='req';
+  function rule(txt,on,col){return `<div style="display:flex;align-items:center;gap:8px;background:#fff;border:1px solid ${on?col:'#e6e4dc'};border-radius:6px;padding:7px 10px;margin:6px 0;font-size:11.5px;font-family:JetBrains Mono,monospace;color:${on?'#1a1a18':'#b3b1a8'}"><span style="color:${on?col:'#cfcdc4'};font-weight:800">${on?'✓':'·'}</span>${txt}</div>`;}
+  function render(){
+    const rep=step==='rep';
+    // NACL: needs explicit inbound AND outbound. On reply, the outbound rule is what matters (stateless).
+    nacl.innerHTML =
+      `<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#9aa3a8;margin-bottom:4px">subnet · stateless</div>`+
+      rule('IN  rule 100  ALLOW :443', !rep, '#B45309')+
+      rule('OUT rule 100  ALLOW :1024-65535', rep, '#B45309')+
+      `<div style="font-size:11.5px;color:${rep?'#B45309':'#9aa3a8'};margin-top:6px;line-height:1.5">${rep?'<b>You needed a second rule.</b> Stateless: the reply leaves on an ephemeral port and is only allowed because OUT was written too.':'Inbound :443 is allowed in.'}</div>`;
+    // SG: one inbound rule; reply automatic.
+    sg.innerHTML =
+      `<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#9aa3a8;margin-bottom:4px">instance · stateful</div>`+
+      rule('IN  ALLOW :443 from anywhere', true, '#0E7490')+
+      rule('OUT  (automatic for replies)', rep, '#0E7490')+
+      `<div style="font-size:11.5px;color:${rep?'#0B5567':'#9aa3a8'};margin-top:6px;line-height:1.5">${rep?'<b>Nothing to add.</b> Stateful: because the request was allowed in, its reply is allowed out automatically.':'Inbound :443 is allowed in.'}</div>`;
+    cap.innerHTML = rep
+      ? 'Same reply, two stories. The <b>NACL</b> (stateless) blocks the return unless you wrote a matching <b>outbound</b> rule. The <b>Security Group</b> (stateful) remembers the request and lets the reply out on its own.'
+      : 'A request arrives on port 443. Both the NACL and the Security Group allow it inbound. Now press <b>Reply</b> and watch what each does with the return traffic.';
+    document.querySelectorAll('#ss [data-s]').forEach(b=>b.className='ui'+(b.dataset.s===step?'':' ghost'));
+  }
+  render();
+  document.querySelectorAll('#ss [data-s]').forEach(b=>b.onclick=()=>{step=b.dataset.s;render();});
+})();
+
+/* ---------- 5. Defense in depth path tracer ---------- */
+(function(){
+  const stage=document.getElementById('didStage'),cap=document.getElementById('didCap');
+  const J={
+    webok:{steps:[['Route table','Public subnet routes to the IGW',true],['NACL','Subnet allows :443 inbound',true],['Security Group','sg-web allows :443',true]],ok:true,
+      cap:'<b>Reaches the web server.</b> Every gate is open: a public route, a permissive NACL, and a Security Group that allows 443.'},
+    dbblock:{steps:[['Route table','Database subnet has no route from the internet',false],['NACL','— never reached',null],['Security Group','— never reached',null]],ok:false,
+      cap:'<b>Blocked at the first gate.</b> The database sits in a private subnet with no inbound internet route, so the packet can&rsquo;t even begin the journey.'},
+    webdb:{steps:[['Route table','Both subnets share the VPC&rsquo;s local route',true],['NACL','Private subnet allows the web tier&rsquo;s range',true],['Security Group','sg-db allows :3306 from sg-web',true]],ok:true,
+      cap:'<b>Reaches the database &mdash; from inside.</b> The same DB that&rsquo;s sealed off from the internet is reachable from the web tier, because internal routing and the rules permit it.'}
+  };
+  let j='webok';
+  function render(){
+    const d=J[j];
+    let s=`<svg viewBox="0 0 560 170" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    const xs=[40,200,360], w=140;
+    d.steps.forEach((st,i)=>{
+      const pass=st[2];
+      const col = pass===true?'#2e7d57':pass===false?'#c0392b':'#cfd6db';
+      const bg = pass===true?'#eaf7ef':pass===false?'#fdeceA':'#f4f6f8';
+      s+=`<rect x="${xs[i]}" y="34" width="${w}" height="74" rx="9" fill="${bg}" stroke="${col}" stroke-width="1.8"/>`;
+      s+=`<text x="${xs[i]+w/2}" y="54" text-anchor="middle" font-size="11" font-weight="800" fill="#1a1a18">${i+1}. ${st[0]}</text>`;
+      s+=`<text x="${xs[i]+w/2}" y="72" text-anchor="middle" font-size="8.5" fill="#5f5e5a"><tspan>${st[1].length>30?st[1].slice(0,30):st[1]}</tspan></text>`;
+      if(st[1].length>30) s+=`<text x="${xs[i]+w/2}" y="84" text-anchor="middle" font-size="8.5" fill="#5f5e5a">${st[1].slice(30)}</text>`;
+      // badge
+      const sym = pass===true?'✓':pass===false?'✗':'·';
+      s+=`<circle cx="${xs[i]+w/2}" cy="98" r="9" fill="#fff" stroke="${col}" stroke-width="1.8"/><text x="${xs[i]+w/2}" y="102" text-anchor="middle" font-size="11" font-weight="900" fill="${col}">${sym}</text>`;
+      if(i<2){ const lcol = d.steps[i][2]===true?'#2e7d57':'#cfd6db'; s+=`<line x1="${xs[i]+w}" y1="71" x2="${xs[i+1]}" y2="71" stroke="${lcol}" stroke-width="2" marker-end="url(#da)"/>`; }
+    });
+    s+=`<defs><marker id="da" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa3a8"/></marker></defs>`;
+    s+=`<rect x="40" y="124" width="480" height="30" rx="7" fill="${d.ok?'#eaf7ef':'#fdeceA'}" stroke="${d.ok?'#2e7d57':'#c0392b'}" stroke-width="1.4"/>`;
+    s+=`<text x="280" y="143" text-anchor="middle" font-size="11" font-weight="800" fill="${d.ok?'#2e7d57':'#c0392b'}">${d.ok?'✓ Packet reaches the host':'✗ Packet is blocked'}</text>`;
+    s+=`</svg>`;
+    stage.className='fade'; stage.innerHTML=s;
+    cap.innerHTML=d.cap;
+    document.querySelectorAll('#did [data-j]').forEach(b=>b.className='ui'+(b.dataset.j===j?'':' ghost'));
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  render();
+  document.querySelectorAll('#did [data-j]').forEach(b=>b.onclick=()=>{j=b.dataset.j;render();});
+})();
+</script>
+</body></html>
