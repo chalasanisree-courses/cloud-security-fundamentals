@@ -319,7 +319,7 @@ input[type=range]{ accent-color:var(--accent); }
     network:{old:'Switches & routers',oldsub:'wired & configured by the network team',svc:'VPC subnets & route tables',svcsub:'+ Internet Gateway as the internet on-ramp',
       cap:'Internal switching and routing become <b>VPC subnets and route tables</b>. Reaching the public internet specifically goes through an <b>Internet Gateway</b> attached to your VPC.'},
     storage:{old:'Storage arrays',oldsub:'provisioned by the storage team',svc:'Amazon S3',svcsub:'Simple Storage Service — object storage in buckets',
-      cap:'The disk arrays the storage team provisioned become <b>S3</b> &mdash; drop file objects into a bucket and never think about the underlying disks.'}
+      cap:'The disk arrays the storage team provisioned become <b>S3</b> &mdash; drop file objects into a bucket and never think about the underlying disks. (Strictly: S3 is <b>object</b> storage, a new model with no exact on-prem twin; the traditional <b>block</b> disk attached to a server maps to <b>EBS</b>, Elastic Block Store. We use both later.)'}
   };
   let r='compute';
   function card(title,sub,accent){
