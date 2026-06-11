@@ -146,7 +146,7 @@ input[type=range]{ accent-color:var(--accent); }
       <li>Identify the security equipment that forms a network perimeter &mdash; firewalls, IDS/IPS, and endpoint protection</li>
       <li>Explain the castle-and-moat model and why enterprises separate the internet from the internal network</li>
       <li>Trace how inbound and outbound traffic is inspected in a DMZ</li>
-      <li>Map the five phases of the NIST framework onto a real-world response</li>
+      <li>Map the five core Functions of the NIST Cybersecurity Framework onto a real-world response</li>
       <li>Recognize that moving to the cloud preserves &mdash; not replaces &mdash; this architecture</li>
     </ul>
   </div>
@@ -238,11 +238,15 @@ input[type=range]{ accent-color:var(--accent); }
 
   <section>
     <h2><span class="num">7</span> The NIST framework</h2>
-    <p>The <strong>NIST</strong> (National Institute of Standards and Technology) Cybersecurity Framework organizes security into <strong>five phases</strong>. Most security products on the market are built to serve one or more of them. Click each phase:</p>
+    <p>The <strong>NIST</strong> (National Institute of Standards and Technology) Cybersecurity Framework organizes security into <strong>Functions</strong> &mdash; five core ones that follow the sequence you just walked through at home. Most security products on the market are built to serve one or more of them. Click each Function:</p>
     <div class="widget" id="nist">
-      <h4>The five NIST phases</h4>
+      <h4>The five core NIST Functions</h4>
       <div id="nistRow" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px"></div>
       <div id="nistDetail" style="background:var(--bg);border-radius:8px;padding:16px 18px;min-height:96px"></div>
+    </div>
+    <div class="notebox">
+      <div class="lbl">CSF 2.0 added a sixth Function: Govern</div>
+      In 2024 NIST released <b>CSF 2.0</b>, which adds <b>Govern</b> &mdash; the organizational layer that wraps around the other five: who owns security, what the policies are, how risk decisions get made. The five Functions above are still the operational lifecycle; Govern is the management structure that directs them. If you look up the framework today, you'll see a six-part wheel.
     </div>
   </section>
 
@@ -254,7 +258,7 @@ input[type=range]{ accent-color:var(--accent); }
 
   <div class="assessment-box">
     <div class="assess-label">Remember</div>
-    <p>An enterprise is a <strong>three-tier app</strong> (web &rarr; application &rarr; database) wrapped in <strong>security equipment</strong> that forms a <strong>network perimeter</strong> &mdash; the <strong>castle-and-moat</strong> model. External traffic lands in the <strong>DMZ</strong> to be inspected before it's trusted. <strong>Network security</strong> guards the wires; <strong>endpoint security</strong> guards the machines. The <strong>NIST framework</strong> &mdash; Identify, Protect, Detect, Respond, Recover &mdash; names the full lifecycle. And moving to the cloud keeps this architecture intact.</p>
+    <p>An enterprise is a <strong>three-tier app</strong> (web &rarr; application &rarr; database) wrapped in <strong>security equipment</strong> that forms a <strong>network perimeter</strong> &mdash; the <strong>castle-and-moat</strong> model. External traffic lands in the <strong>DMZ</strong> to be inspected before it's trusted. <strong>Network security</strong> guards the wires; <strong>endpoint security</strong> guards the machines. The <strong>NIST framework</strong> &mdash; Identify, Protect, Detect, Respond, Recover (plus <strong>Govern</strong>, added in CSF 2.0) &mdash; names the full lifecycle. And moving to the cloud keeps this architecture intact.</p>
   </div>
 
 </div>
