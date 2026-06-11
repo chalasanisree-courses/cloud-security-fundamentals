@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Securing the Host &mdash; Module 6</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+* { box-sizing:border-box; margin:0; padding:0; }
+:root{
+  --slate-dark:#1A202C; --slate:#2D3748;
+  --accent:#0E7490; --accent-dark:#0B5567; --accent-soft:#CFF1F6;
+  --info:#1E40AF; --info-soft:#DBEAFE;
+  --text:#1a1a18; --text-muted:#5f5e5a; --text-light:#888780;
+  --border:rgba(0,0,0,0.09); --bg:#fafaf8; --bg-card:#fff; --bg-code:#f6f6f3; --tag-bg:#f1f0eb;
+  --rust:#B45309; --soft:#888780; --muted:#5f5e5a; --ok:#2e7d57; --bad:#c0392b;
+}
+body{ font-family:'Barlow',sans-serif; background:var(--bg); color:var(--text); line-height:1.65; min-height:100vh; }
+.pagenav{ background:var(--slate-dark); }
+.pagenav.foot{ margin-top:48px; }
+.pagenav-inner{ max-width:920px; margin:0 auto; padding:11px 32px; display:flex; justify-content:space-between; align-items:center; gap:16px; }
+.pagenav .brand{ color:rgba(255,255,255,0.45); font-size:11px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; white-space:nowrap; }
+.navbtns{ display:flex; gap:8px; }
+.navbtn{ display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#fff; background:rgba(255,255,255,0.10); border:1px solid rgba(255,255,255,0.22); border-radius:6px; padding:7px 13px; text-decoration:none; transition:0.15s; white-space:nowrap; }
+.navbtn:hover{ background:var(--accent); border-color:var(--accent); }
+.navbtn.disabled{ opacity:0.28; pointer-events:none; }
+@media(max-width:560px){ .pagenav .brand{ display:none } .pagenav-inner{ justify-content:center } }
+.header{ background:#fff; padding:56px 0 44px; border-bottom:0.5px solid var(--border); }
+.header-inner{ max-width:920px; margin:0 auto; padding:0 32px; }
+.header-eyebrow{ font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:14px; display:flex; align-items:center; gap:12px; }
+.header-eyebrow::after{ content:''; flex:1; height:0.5px; background:var(--border); max-width:120px; }
+.header h1{ font-family:'Barlow Condensed',sans-serif; font-size:clamp(34px,4.5vw,52px); font-weight:900; letter-spacing:-0.01em; line-height:1.05; color:var(--text); margin-bottom:18px; }
+.header h1 em{ font-style:normal; color:var(--accent); }
+.header-meta-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+.module-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:var(--slate); color:#fff; }
+.topic-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:#F1F5F9; color:#475569; }
+.topic-pill.accent{ background:var(--accent-soft); color:var(--accent-dark); }
+.page{ max-width:920px; margin:0 auto; padding:0 32px 48px; }
+.objectives{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--accent); border-radius:6px; padding:20px 26px; margin:34px 0 14px; }
+.obj-label{ font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:12px; }
+.objectives ul{ list-style:none; }
+.objectives ul li{ font-size:13.5px; color:var(--text); padding:4px 0 4px 20px; position:relative; line-height:1.5; }
+.objectives ul li::before{ content:'◇'; position:absolute; left:0; color:var(--accent); font-size:10px; top:8px; }
+section{ margin-top:42px; }
+section h2{ font-family:'Barlow Condensed',sans-serif; font-size:27px; font-weight:800; color:var(--text); margin-bottom:8px; display:flex; align-items:baseline; gap:18px; }
+section h2 .num{ font-family:'Barlow Condensed',sans-serif; font-size:54px; font-weight:900; color:var(--accent); letter-spacing:-0.02em; line-height:0.85; min-width:40px; }
+section .lead{ font-size:14.5px; color:var(--text-muted); line-height:1.6; margin:0 0 6px; max-width:720px; }
+section p{ font-size:14.5px; color:var(--text); line-height:1.7; margin-bottom:12px; }
+section p strong{ font-weight:700; }
+code.inline{ font-family:'JetBrains Mono',monospace; font-size:12.5px; background:var(--tag-bg); padding:1px 6px; border-radius:3px; color:var(--text); }
+.keybox{ background:var(--accent-soft); border-left:3px solid var(--accent); border-radius:0 6px 6px 0; padding:13px 18px; margin:16px 0 0; font-size:13px; line-height:1.6; color:var(--text); }
+.keybox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--accent-dark); margin-bottom:5px; }
+.keybox b{ color:var(--accent-dark); }
+.notebox{ background:#FBF3E8; border-left:3px solid var(--rust); border-radius:0 6px 6px 0; padding:13px 18px; margin:16px 0 0; font-size:13px; line-height:1.6; }
+.notebox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--rust); margin-bottom:5px; }
+.assessment-box{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--slate); border-radius:0 6px 6px 0; padding:18px 22px; margin:34px 0 0; }
+.assessment-box .assess-label{ font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); margin-bottom:8px; }
+.assessment-box p{ font-size:13px; line-height:1.65; margin:0; }
+.widget{ border:0.5px solid var(--border); border-radius:10px; padding:18px; margin:18px 0 0; background:var(--bg-card); }
+.widget h4{ margin:0 0 12px; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); font-weight:700; }
+.controls{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+button.ui{ font-family:'Barlow',sans-serif; cursor:pointer; border:1px solid var(--accent); background:var(--accent); color:#fff; padding:7px 16px; border-radius:6px; font-size:12.5px; font-weight:600; transition:0.15s; }
+button.ui:hover{ background:var(--accent-dark); border-color:var(--accent-dark); }
+button.ui.ghost{ background:#fff; color:var(--accent); }
+button.ui.ghost:hover{ background:var(--accent-soft); }
+.fade{ animation:fade 0.35s ease; }
+@keyframes fade{ from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+</style>
+</head><body>
+<header class="pagenav"><div class="pagenav-inner">
+  <span class="brand">Cloud Security Fundamentals</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn" href="01-meet-ec2.html">&larr; Prev</a>
+    <a class="navbtn disabled" href="#">Next &rarr;</a>
+  </nav>
+</div></header>
+
+<div class="header"><div class="header-inner">
+  <div class="header-eyebrow">Module 6 &nbsp;·&nbsp; Device / Host Layer</div>
+  <h1>Securing the <em>Host</em></h1>
+  <div class="header-meta-row">
+    <span class="module-pill">Module 6</span>
+    <span class="topic-pill">Host hardening</span>
+    <span class="topic-pill accent">Defense in depth</span>
+  </div>
+</div></div>
+
+<div class="page">
+
+  <div class="objectives">
+    <div class="obj-label">In this note</div>
+    <ul>
+      <li>Why the host still has to defend itself after the network lets traffic in</li>
+      <li>A server seen as a <em>stack</em> &mdash; and where each control applies on it</li>
+      <li>The four host controls: Security Group, patching, hardening, and anti-malware</li>
+      <li>How OS hardening shrinks the attack surface</li>
+    </ul>
+  </div>
+
+  <section>
+    <h2><span class="num">1</span> The network let it in. Now what?</h2>
+    <p class="lead">In <a href="../module-5/02-vpc-routing-security.html">Module 5</a> the network layer decided <em>which traffic reaches the instance</em>. But a web server <strong>must</strong> accept traffic on port 443 &mdash; so an attack riding ordinary web requests can sail right past the network. The <strong>host</strong> has to defend itself.</p>
+    <div class="keybox">
+      <div class="lbl">EC2 is the device / host layer</div>
+      This is the next ring of <b>defense in depth</b>. The network controls the door; once a request is inside, the instance&rsquo;s own controls take over. No single layer is meant to be enough on its own.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> A server is a stack &mdash; secure every layer</h2>
+    <p class="lead">A server isn&rsquo;t one thing. It&rsquo;s a <strong>stack</strong>: virtual hardware, an operating system, your application &mdash; reached over a network interface. Each layer needs its own control. Click a control to see where it applies:</p>
+    <div class="widget" id="stack">
+      <h4>Where each control protects the host</h4>
+      <div class="controls" style="margin:0 0 16px" id="stackBtns"></div>
+      <div id="stackStage"></div>
+      <p id="stackCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:48px"></p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> Hardening: shrink the attack surface</h2>
+    <p class="lead">Zoom in on one layer of the stack &mdash; the OS. Every running service is a door an attacker can try. <strong>Hardening</strong> closes the doors you don&rsquo;t need. If an instance is only a web server, it has no reason to run FTP &mdash; so turn it off:</p>
+    <div class="widget" id="harden">
+      <h4>Disable what you don&rsquo;t use</h4>
+      <div class="controls" style="margin:0 0 14px">
+        <button class="ui" data-h="open">Default &mdash; everything on</button>
+        <button class="ui ghost" data-h="hard">Hardened &mdash; web only</button>
+      </div>
+      <div id="hardStage"></div>
+      <p id="hardCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:34px"></p>
+    </div>
+  </section>
+
+  <div class="assessment-box">
+    <div class="assess-label">Remember</div>
+    <p>A server is a <strong>stack</strong> &mdash; virtual hardware, operating system, application &mdash; reached over a <strong>network interface</strong>, and every layer needs a control. The <strong>Security Group</strong> guards the network interface (AWS&rsquo;s stateful virtual firewall). <strong>Patching</strong> closes known holes in the <strong>OS and application</strong>. <strong>Hardening</strong> shrinks the OS attack surface by disabling unneeded services. <strong>Anti-malware</strong> watches the running software for what slips through. The virtual hardware itself is AWS&rsquo;s job. No single layer is enough &mdash; together they are <strong>defense in depth</strong> on the host.</p>
+  </div>
+
+</div>
+
+<footer class="pagenav foot"><div class="pagenav-inner">
+  <span class="brand">Module 6 &middot; Device / Host Layer</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn" href="01-meet-ec2.html">&larr; Prev</a>
+    <a class="navbtn disabled" href="#">Next &rarr;</a>
+  </nav>
+</div></footer>
+
+<script>
+/* ---------- 2. The host stack + where controls apply ---------- */
+(function(){
+  const btns=document.getElementById('stackBtns'),stage=document.getElementById('stackStage'),cap=document.getElementById('stackCap');
+  const C=[
+    {k:'Security Group', layers:['sg'], color:'#8E5CA8',
+      d:'AWS&rsquo;s virtual firewall on the instance&rsquo;s <b>network interface</b> &mdash; it filters which traffic ever reaches the server (stateful, allow-only; a web server can allow only HTTP/HTTPS, dropping the rest). One subtlety: it&rsquo;s enforced <b>outside</b> the guest OS, so it isn&rsquo;t a true <b>host firewall</b> &mdash; that would be iptables or Windows Firewall running <em>inside</em> the OS.'},
+    {k:'Patching', layers:['app','os'], color:'#0E7490',
+      d:'Keeps the <b>operating system and application</b> up to date, closing <b>known vulnerabilities</b> before an attacker can use them.'},
+    {k:'Hardening', layers:['os'], color:'#2D7D9A',
+      d:'Securely configures the <b>operating system</b> and disables unnecessary services &mdash; fewer running services means a smaller attack surface.'},
+    {k:'Anti-malware', layers:['app'], color:'#B45309',
+      d:'Watches the <b>running software</b> for malicious files or processes &mdash; the last catch if something gets past the other layers.'}
+  ];
+  let sel=0;
+  function svg(){
+    const on=k=>C[sel].layers.includes(k), col=C[sel].color;
+    const sgOn=on('sg');
+    const SX=234, SW=272;
+    let s=`<svg viewBox="0 0 520 250" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-width:560px;font-family:Barlow,Arial,sans-serif">`;
+    // server container + layers
+    s+=`<rect x="${SX}" y="22" width="${SW}" height="208" rx="12" fill="#fafaf8" stroke="#cfd6db" stroke-width="1.4"/>`;
+    s+=`<text x="${SX+16}" y="42" font-size="9" font-weight="800" letter-spacing=".5" fill="#9aa3a8">EC2 INSTANCE</text>`;
+    function layer(y,h,key,label,sub,locked){
+      const hot=on(key);
+      const fill=hot?col:(locked?'#f0eee8':'#eef1f3');
+      const fg=hot?'#fff':(locked?'#a8a59c':'#5f5e5a');
+      let t=`<rect x="${SX+14}" y="${y}" width="${SW-28}" height="${h}" rx="6" fill="${fill}" stroke="${hot?col:'#dcdcd6'}" stroke-width="${hot?2:1.1}"/>`;
+      t+=`<text x="${SX+30}" y="${y+(sub?h/2-2:h/2+4)}" font-size="12.5" font-weight="800" fill="${fg}">${label}</text>`;
+      if(sub) t+=`<text x="${SX+30}" y="${y+h/2+12}" font-size="8.5" fill="${hot?'rgba(255,255,255,.85)':'#a8a59c'}">${sub}</text>`;
+      if(hot) t+=`<text x="${SX+SW-14}" y="${y+h/2+4}" text-anchor="end" font-size="9" font-weight="800" fill="#fff">&#9664; protected</text>`;
+      return t;
+    }
+    s+=layer(56,50,'app','Application','your code & services');
+    s+=layer(112,50,'os','Operating System','Linux / Windows');
+    s+=layer(168,48,'hw','Virtual hardware','AWS&rsquo;s job, not yours',true);
+    // incoming network + the SG as a filter/gate ON the network-interface line
+    const niy=126;
+    s+=`<path d="M12 140 a12 12 0 0 1 3 -22 a14 14 0 0 1 26 4 a10 10 0 0 1 -2 18 z" fill="#cfd6db"/><text x="26" y="131" text-anchor="middle" font-size="7.5" font-weight="800" fill="#fff">NET</text>`;
+    s+=`<line x1="48" y1="${niy}" x2="${SX}" y2="${niy}" stroke="${sgOn?col:'#b9c0c6'}" stroke-width="2" marker-end="url(#sa)"/>`;
+    const gx=118, gw=18, gh=56, gy=niy-gh/2;
+    s+=`<rect x="${gx}" y="${gy}" width="${gw}" height="${gh}" rx="4" fill="${sgOn?col:'#fff'}" stroke="${sgOn?col:'#8a93a0'}" stroke-width="${sgOn?2:1.5}"/>`;
+    for(let i=0;i<3;i++){ const sy=gy+15+i*13; s+=`<line x1="${gx+3.5}" y1="${sy}" x2="${gx+gw-3.5}" y2="${sy}" stroke="${sgOn?'rgba(255,255,255,.85)':'#cfd6db'}" stroke-width="1.6"/>`; }
+    s+=`<text x="${gx+gw/2}" y="${gy-7}" text-anchor="middle" font-size="8" font-weight="700" fill="${sgOn?col:'#9aa3a8'}">filter</text>`;
+    s+=`<text x="${gx+gw/2}" y="${gy+gh+13}" text-anchor="middle" font-size="9" font-weight="800" fill="${sgOn?col:'#9aa3a8'}">Security Group</text>`;
+    s+=`<text x="${(gx+gw+SX)/2}" y="${niy-7}" text-anchor="middle" font-size="8" font-weight="700" fill="#9aa3a8">network interface</text>`;
+    s+=`<circle cx="${SX}" cy="${niy}" r="3" fill="${sgOn?col:'#9aa3a8'}"/>`;
+    s+=`<defs><marker id="sa" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="${sgOn?col:'#9aa3a8'}"/></marker></defs>`;
+    s+=`</svg>`;
+    return s;
+  }
+  btns.innerHTML=C.map((c,i)=>`<button class="ui${i===0?'':' ghost'}" data-i="${i}">${c.k}</button>`).join('');
+  function render(){
+    btns.querySelectorAll('button').forEach((b,i)=>b.className='ui'+(i===sel?'':' ghost'));
+    stage.className='fade'; stage.innerHTML=svg();
+    cap.innerHTML=`<b style="color:${C[sel].color}">${C[sel].k}.</b> ${C[sel].d}`;
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  btns.querySelectorAll('button').forEach(b=>b.onclick=()=>{sel=+b.dataset.i;render();});
+  render();
+})();
+
+/* ---------- 3. Hardening ---------- */
+(function(){
+  const stage=document.getElementById('hardStage'),cap=document.getElementById('hardCap');
+  let mode='open';
+  const SVC=[['HTTP','80',true],['HTTPS','443',true],['SSH','22',false],['FTP','21',false],['Telnet','23',false],['SMB','445',false]];
+  function render(){
+    const hard=mode==='hard';
+    let s='<div style="display:flex;gap:8px;flex-wrap:wrap">';
+    SVC.forEach(([n,p,web])=>{
+      const on = hard ? web : true;
+      const c = on?'#2e7d57':'#c0392b';
+      s+=`<div style="flex:1;min-width:88px;text-align:center;background:#fff;border:1.5px solid ${on?'#cfd6db':'#f0c8c2'};border-radius:8px;padding:10px 6px;opacity:${on?1:0.6}">`+
+         `<div style="font-size:12.5px;font-weight:800;color:#1a1a18">${n}</div>`+
+         `<div style="font-size:9px;font-family:JetBrains Mono,monospace;color:#9aa3a8">:${p}</div>`+
+         `<div style="font-size:9px;font-weight:800;letter-spacing:.04em;color:${c};margin-top:4px">${on?'OPEN':'CLOSED'}</div></div>`;
+    });
+    s+='</div>';
+    stage.className='fade'; stage.innerHTML=s;
+    cap.innerHTML = hard
+      ? '<b>Hardened.</b> Only the two services a web server needs stay open. SSH, FTP, Telnet, and SMB are off &mdash; four fewer doors for an attacker to try.'
+      : '<b>Default.</b> Everything is running, including services this web server never uses. Each open port is attack surface you didn&rsquo;t need to expose.';
+    document.querySelectorAll('#harden [data-h]').forEach(b=>b.className='ui'+(b.dataset.h===mode?'':' ghost'));
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  render();
+  document.querySelectorAll('#harden [data-h]').forEach(b=>b.onclick=()=>{mode=b.dataset.h;render();});
+})();
+</script>
+</body></html>

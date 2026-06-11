@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Meet EC2 &mdash; Module 6</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+* { box-sizing:border-box; margin:0; padding:0; }
+:root{
+  --slate-dark:#1A202C; --slate:#2D3748;
+  --accent:#0E7490; --accent-dark:#0B5567; --accent-soft:#CFF1F6;
+  --info:#1E40AF; --info-soft:#DBEAFE;
+  --text:#1a1a18; --text-muted:#5f5e5a; --text-light:#888780;
+  --border:rgba(0,0,0,0.09); --bg:#fafaf8; --bg-card:#fff; --bg-code:#f6f6f3; --tag-bg:#f1f0eb;
+  --rust:#B45309; --soft:#888780; --muted:#5f5e5a; --ok:#2e7d57; --bad:#c0392b;
+}
+body{ font-family:'Barlow',sans-serif; background:var(--bg); color:var(--text); line-height:1.65; min-height:100vh; }
+.pagenav{ background:var(--slate-dark); }
+.pagenav.foot{ margin-top:48px; }
+.pagenav-inner{ max-width:920px; margin:0 auto; padding:11px 32px; display:flex; justify-content:space-between; align-items:center; gap:16px; }
+.pagenav .brand{ color:rgba(255,255,255,0.45); font-size:11px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; white-space:nowrap; }
+.navbtns{ display:flex; gap:8px; }
+.navbtn{ display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#fff; background:rgba(255,255,255,0.10); border:1px solid rgba(255,255,255,0.22); border-radius:6px; padding:7px 13px; text-decoration:none; transition:0.15s; white-space:nowrap; }
+.navbtn:hover{ background:var(--accent); border-color:var(--accent); }
+.navbtn.disabled{ opacity:0.28; pointer-events:none; }
+@media(max-width:560px){ .pagenav .brand{ display:none } .pagenav-inner{ justify-content:center } }
+.header{ background:#fff; padding:56px 0 44px; border-bottom:0.5px solid var(--border); }
+.header-inner{ max-width:920px; margin:0 auto; padding:0 32px; }
+.header-eyebrow{ font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:14px; display:flex; align-items:center; gap:12px; }
+.header-eyebrow::after{ content:''; flex:1; height:0.5px; background:var(--border); max-width:120px; }
+.header h1{ font-family:'Barlow Condensed',sans-serif; font-size:clamp(34px,4.5vw,52px); font-weight:900; letter-spacing:-0.01em; line-height:1.05; color:var(--text); margin-bottom:18px; }
+.header h1 em{ font-style:normal; color:var(--accent); }
+.header-meta-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+.module-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:var(--slate); color:#fff; }
+.topic-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:#F1F5F9; color:#475569; }
+.topic-pill.accent{ background:var(--accent-soft); color:var(--accent-dark); }
+.page{ max-width:920px; margin:0 auto; padding:0 32px 48px; }
+.objectives{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--accent); border-radius:6px; padding:20px 26px; margin:34px 0 14px; }
+.obj-label{ font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:12px; }
+.objectives ul{ list-style:none; }
+.objectives ul li{ font-size:13.5px; color:var(--text); padding:4px 0 4px 20px; position:relative; line-height:1.5; }
+.objectives ul li::before{ content:'◇'; position:absolute; left:0; color:var(--accent); font-size:10px; top:8px; }
+section{ margin-top:42px; }
+section h2{ font-family:'Barlow Condensed',sans-serif; font-size:27px; font-weight:800; color:var(--text); margin-bottom:8px; display:flex; align-items:baseline; gap:18px; }
+section h2 .num{ font-family:'Barlow Condensed',sans-serif; font-size:54px; font-weight:900; color:var(--accent); letter-spacing:-0.02em; line-height:0.85; min-width:40px; }
+section .lead{ font-size:14.5px; color:var(--text-muted); line-height:1.6; margin:0 0 6px; max-width:720px; }
+section p{ font-size:14.5px; color:var(--text); line-height:1.7; margin-bottom:12px; }
+section p strong{ font-weight:700; }
+code.inline{ font-family:'JetBrains Mono',monospace; font-size:12.5px; background:var(--tag-bg); padding:1px 6px; border-radius:3px; color:var(--text); }
+.keybox{ background:var(--accent-soft); border-left:3px solid var(--accent); border-radius:0 6px 6px 0; padding:13px 18px; margin:16px 0 0; font-size:13px; line-height:1.6; color:var(--text); }
+.keybox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--accent-dark); margin-bottom:5px; }
+.keybox b{ color:var(--accent-dark); }
+.notebox{ background:#FBF3E8; border-left:3px solid var(--rust); border-radius:0 6px 6px 0; padding:13px 18px; margin:16px 0 0; font-size:13px; line-height:1.6; }
+.notebox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--rust); margin-bottom:5px; }
+.assessment-box{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--slate); border-radius:0 6px 6px 0; padding:18px 22px; margin:34px 0 0; }
+.assessment-box .assess-label{ font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); margin-bottom:8px; }
+.assessment-box p{ font-size:13px; line-height:1.65; margin:0; }
+.widget{ border:0.5px solid var(--border); border-radius:10px; padding:18px; margin:18px 0 0; background:var(--bg-card); }
+.widget h4{ margin:0 0 12px; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); font-weight:700; }
+.controls{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+button.ui{ font-family:'Barlow',sans-serif; cursor:pointer; border:1px solid var(--accent); background:var(--accent); color:#fff; padding:7px 16px; border-radius:6px; font-size:12.5px; font-weight:600; transition:0.15s; }
+button.ui:hover{ background:var(--accent-dark); border-color:var(--accent-dark); }
+button.ui.ghost{ background:#fff; color:var(--accent); }
+button.ui.ghost:hover{ background:var(--accent-soft); }
+.fade{ animation:fade 0.35s ease; }
+@keyframes fade{ from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+.chips{ display:flex; gap:6px; flex-wrap:wrap; }
+</style>
+</head><body>
+<header class="pagenav"><div class="pagenav-inner">
+  <span class="brand">Cloud Security Fundamentals</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn disabled" href="#">&larr; Prev</a>
+    <a class="navbtn" href="02-host-security.html">Next &rarr;</a>
+  </nav>
+</div></header>
+
+<div class="header"><div class="header-inner">
+  <div class="header-eyebrow">Module 6 &nbsp;·&nbsp; Device / Host Layer</div>
+  <h1>Meet <em>EC2</em> &mdash; Virtual Servers</h1>
+  <div class="header-meta-row">
+    <span class="module-pill">Module 6</span>
+    <span class="topic-pill">Device layer</span>
+    <span class="topic-pill accent">Compute · EC2</span>
+  </div>
+</div></div>
+
+<div class="page">
+
+  <div class="objectives">
+    <div class="obj-label">In this note</div>
+    <ul>
+      <li>What an EC2 instance is &mdash; and why it&rsquo;s built to be disposable</li>
+      <li>How an <em>instance type</em> describes hardware (and how to read <code class="inline">m6i.large</code>)</li>
+      <li>What an <em>AMI</em> bakes in &mdash; the software and security baseline</li>
+      <li>Instance store vs EBS storage, and scaling up vs scaling out</li>
+    </ul>
+  </div>
+
+  <section>
+    <h2><span class="num">1</span> A server you can throw away</h2>
+    <p class="lead">An <strong>EC2 instance</strong> is an on-demand virtual server in AWS. It behaves like any real machine &mdash; CPU, memory, storage, networking, an OS &mdash; but with one change of mindset: it&rsquo;s <strong>easy to create and easy to destroy</strong>.</p>
+    <p>The instance runs on real physical hardware in an AWS data center, but you never touch that hardware. You declare the <strong>performance you need</strong>; AWS finds a physical host that fits and places your virtual machine there.</p>
+    <div class="widget">
+      <h4>You choose performance &mdash; AWS places the machine</h4>
+      <svg viewBox="0 0 560 158" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">
+        <rect x="8" y="56" width="132" height="46" rx="8" fill="#eef1f3"/>
+        <text x="74" y="76" text-anchor="middle" font-size="9" font-weight="700" fill="#5f5e5a">YOU CHOOSE</text>
+        <text x="74" y="93" text-anchor="middle" font-size="13" font-weight="700" font-family="JetBrains Mono,monospace" fill="#0B5567">m6i.large</text>
+        <text x="170" y="73" text-anchor="middle" font-size="8.5" font-weight="700" fill="#9aa3a8">AWS places it</text>
+        <line x1="142" y1="79" x2="198" y2="79" stroke="#9aa3a8" stroke-width="1.6" marker-end="url(#pa)"/>
+        <defs><marker id="pa" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa3a8"/></marker></defs>
+        <rect x="206" y="12" width="346" height="134" rx="12" fill="none" stroke="#0E7490" stroke-width="1.4" stroke-dasharray="5 4"/>
+        <text x="220" y="30" font-size="9" font-weight="800" letter-spacing=".5" fill="#0B5567">AWS DATA CENTER</text>
+        <rect x="300" y="42" width="238" height="96" rx="8" fill="#f4f6f8" stroke="#cfd6db" stroke-width="1"/>
+        <text x="315" y="58" font-size="9" font-weight="700" fill="#5f5e5a">Physical host</text>
+        <rect x="312" y="64" width="214" height="20" rx="4" fill="#0E7490"/><text x="322" y="78" font-size="10" font-weight="700" fill="#fff">Your EC2 &mdash; m6i.large</text>
+        <rect x="312" y="88" width="214" height="20" rx="4" fill="#e7ecee"/><text x="322" y="102" font-size="10" font-weight="600" fill="#9aa3a8">another tenant&rsquo;s VM</text>
+        <rect x="312" y="112" width="214" height="20" rx="4" fill="#e7ecee"/><text x="322" y="126" font-size="10" font-weight="600" fill="#9aa3a8">another tenant&rsquo;s VM</text>
+      </svg>
+    </div>
+    <div class="keybox">
+      <div class="lbl">Cattle, not pets</div>
+      Traditional servers were <b>pets</b> &mdash; named, nursed, kept alive for years. Cloud instances are <b>cattle</b>: <b>ephemeral</b>, spun up when needed and terminated when not. This single idea drives everything else &mdash; scaling, patching by replacement, and where you&rsquo;re allowed to keep data.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> Instance types: choosing hardware</h2>
+    <p class="lead">You don&rsquo;t pick a physical server &mdash; you pick an <strong>instance type</strong>, which encodes a hardware class and a size. Decode the name, then pick by workload:</p>
+    <div class="widget" id="type">
+      <h4>Reading an instance type</h4>
+      <div id="nameStage" style="margin-bottom:6px"></div>
+      <p id="nameCap" style="font-size:13px;color:var(--text-muted);margin:8px 0 0;line-height:1.6;min-height:34px"></p>
+      <div style="border-top:0.5px solid var(--border);margin:16px 0 12px"></div>
+      <div style="font-size:11px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Pick a family by workload</div>
+      <div class="chips" id="famBtns"></div>
+      <p id="famCap" style="font-size:13px;color:var(--text-muted);margin:10px 0 0;line-height:1.6;min-height:34px"></p>
+    </div>
+    <div class="notebox">
+      <div class="lbl">Watch the letters</div>
+      The same letters do different jobs depending on <b>position</b>. As a <b>leading family</b> letter, <code class="inline">i</code> = storage-optimized and <code class="inline">g</code> = GPU. But the letter <b>after the generation</b> is the <b>processor</b>: in <code class="inline">m6i</code> that <code class="inline">i</code> means <b>Intel</b> (<code class="inline">a</code> = AMD, <code class="inline">g</code> = Graviton) &mdash; not storage. Read the position, not just the letter.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> The AMI: your software baseline</h2>
+    <p class="lead">The instance type is the hardware. The <strong>AMI</strong> (Amazon Machine Image) is the <strong>software</strong> &mdash; a template AWS boots from. Click what it carries:</p>
+    <div class="widget" id="ami">
+      <h4>What an AMI bakes in &mdash; click a layer</h4>
+      <div id="amiStage"></div>
+      <p id="amiCap" style="font-size:13px;color:var(--text-muted);margin:12px 0 0;line-height:1.6;min-height:34px"></p>
+    </div>
+    <div class="keybox">
+      <div class="lbl">An AMI is a starting security posture</div>
+      Because every instance launched from an AMI is <b>identical</b>, a hardened, patched AMI means every server starts <b>secure and consistent</b> &mdash; and you can launch a hundred of them in seconds.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> Storage: what survives?</h2>
+    <p class="lead">EC2 has two storage models that differ in one critical way &mdash; <strong>does the data outlive the instance?</strong> Run the lifecycle and watch:</p>
+    <div class="widget" id="store">
+      <h4>Instance store vs EBS</h4>
+      <div class="controls" style="margin:0 0 14px">
+        <button class="ui" data-a="reboot">Reboot</button>
+        <button class="ui ghost" data-a="stop">Stop</button>
+        <button class="ui ghost" data-a="terminate">Terminate</button>
+      </div>
+      <div id="storeStage"></div>
+      <p id="storeCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:34px"></p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">5</span> Scaling: up vs out</h2>
+    <p class="lead">Traffic spikes. You have two ways to cope &mdash; make the server <strong>bigger</strong>, or add <strong>more</strong> servers. The cloud strongly favors the second:</p>
+    <div class="widget" id="scale">
+      <h4>Vertical vs horizontal scaling</h4>
+      <div class="controls" style="margin:0 0 14px">
+        <button class="ui" data-s="vert">Vertical &mdash; scale up</button>
+        <button class="ui ghost" data-s="horiz">Horizontal &mdash; scale out</button>
+      </div>
+      <div id="scaleStage"></div>
+      <p id="scaleCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:34px"></p>
+    </div>
+    <div class="notebox">
+      <div class="lbl">Monitor first</div>
+      You decide by <b>watching metrics</b> &mdash; CPU utilization, network, disk. High CPU on a busy web server is the signal to scale. Scaling <b>out</b> with an <b>Auto Scaling Group</b> adds capacity without disrupting the instances already running.
+    </div>
+  </section>
+
+  <div class="assessment-box">
+    <div class="assess-label">Remember</div>
+    <p>An <strong>EC2 instance</strong> is an on-demand virtual server, built to be <strong>ephemeral</strong> &mdash; cattle, not pets. You choose an <strong>instance type</strong> (<code class="inline">m6i.large</code> = family · generation · processor · size), not the physical hardware. An <strong>AMI</strong> is the software template &mdash; OS, config, and a security baseline &mdash; so every launch is identical. Storage is either <strong>instance store</strong> (fast, local, lost on stop/terminate) or <strong>EBS</strong> (network-attached, persistent). And you scale either <strong>up</strong> (bigger instance, needs a restart) or <strong>out</strong> (more instances via an Auto Scaling Group) &mdash; the cloud prefers out.</p>
+  </div>
+
+</div>
+
+<footer class="pagenav foot"><div class="pagenav-inner">
+  <span class="brand">Module 6 &middot; Device / Host Layer</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn disabled" href="#">&larr; Prev</a>
+    <a class="navbtn" href="02-host-security.html">Next &rarr;</a>
+  </nav>
+</div></footer>
+
+<script>
+/* ---------- 2a. Instance name decoder ---------- */
+(function(){
+  const stage=document.getElementById('nameStage'),cap=document.getElementById('nameCap');
+  const PARTS=[
+    ['m','Family','General-purpose family &mdash; a balanced mix of CPU and memory.','#0E7490'],
+    ['6','Generation','The 6th generation of this family &mdash; newer is faster and cheaper per unit.','#2D7D9A'],
+    ['i','Processor','Intel CPU. (<code class="inline">a</code> = AMD, <code class="inline">g</code> = AWS Graviton.)','#8E5CA8'],
+    ['large','Size','The capacity tier &mdash; vCPU and memory. Bigger sizes: xlarge, 2xlarge, &hellip;','#B45309']
+  ];
+  let sel=0;
+  function render(){
+    let s='<div style="display:flex;gap:6px;align-items:flex-end;flex-wrap:wrap;font-family:JetBrains Mono,monospace">';
+    PARTS.forEach((p,i)=>{
+      const on=i===sel;
+      s+=`<button data-i="${i}" style="cursor:pointer;border:none;background:${on?p[3]:'#eef1f3'};color:${on?'#fff':'#5f5e5a'};font-family:JetBrains Mono,monospace;font-size:20px;font-weight:700;padding:8px 12px;border-radius:7px;transition:.15s">${p[0]}</button>`;
+      if(i===2) s+=`<span style="font-size:20px;font-weight:700;color:#cfcdc4;padding-bottom:6px">.</span>`;
+    });
+    s+='</div>';
+    stage.innerHTML=s;
+    stage.querySelectorAll('button').forEach(b=>b.onclick=()=>{sel=+b.dataset.i;render();});
+    cap.className='fade'; cap.innerHTML=`<b style="color:${PARTS[sel][3]}">${PARTS[sel][1]}</b> &mdash; ${PARTS[sel][2]}`;
+    setTimeout(()=>cap.classList.remove('fade'),360);
+  }
+  render();
+})();
+
+/* ---------- 2b. Family picker ---------- */
+(function(){
+  const btns=document.getElementById('famBtns'),cap=document.getElementById('famCap');
+  const FAM=[
+    ['t','Burstable','Low or variable workloads &mdash; dev/test, small sites. Cheap, with CPU that bursts when needed.'],
+    ['m','General purpose','A balanced default &mdash; web and app servers with steady CPU and memory needs.'],
+    ['c','Compute optimized','CPU-intensive work &mdash; batch processing, gaming servers, scientific compute.'],
+    ['r','Memory optimized','Memory-hungry work &mdash; in-memory caches and large databases.'],
+    ['i','Storage optimized','High local disk throughput (IOPS) &mdash; big data and transactional databases.'],
+    ['g','GPU','Graphics and ML acceleration &mdash; rendering, training, inference.']
+  ];
+  let sel=1;
+  btns.innerHTML=FAM.map((f,i)=>`<button class="ui${i===sel?'':' ghost'}" data-i="${i}" style="font-family:JetBrains Mono,monospace;font-weight:700;padding:7px 14px">${f[0]}</button>`).join('');
+  function render(){
+    btns.querySelectorAll('button').forEach((b,i)=>b.className='ui'+(i===sel?'':' ghost'));
+    cap.className='fade'; cap.innerHTML=`<b>${FAM[sel][0]} &mdash; ${FAM[sel][1]}.</b> ${FAM[sel][2]}`;
+    setTimeout(()=>cap.classList.remove('fade'),360);
+  }
+  btns.querySelectorAll('button').forEach(b=>b.onclick=()=>{sel=+b.dataset.i;render();});
+  render();
+})();
+
+/* ---------- 3. AMI ---------- */
+(function(){
+  const stage=document.getElementById('amiStage'),cap=document.getElementById('amiCap');
+  const ITEMS=[
+    ['Operating system','Linux or Windows &mdash; the base OS the instance boots into.'],
+    ['Initial configuration','Users, settings, and system tuning applied at first boot.'],
+    ['Pre-installed software','Optional &mdash; your app, agents, runtimes baked in ahead of time.'],
+    ['Security baseline','Patches applied and services hardened, so every launch starts secure.']
+  ];
+  let sel=0;
+  function brace(x,y0,y1,w,tip){
+    const ym=(y0+y1)/2,q=(y1-y0)/4;
+    return `<path d="M ${x} ${y0} Q ${x+w} ${y0} ${x+w} ${y0+q} L ${x+w} ${ym-q} Q ${x+w} ${ym} ${x+w+tip} ${ym} Q ${x+w} ${ym} ${x+w} ${ym+q} L ${x+w} ${y1-q} Q ${x+w} ${y1} ${x} ${y1}" fill="none" stroke="#9aa3a8" stroke-width="1.8"/>`;
+  }
+  function render(){
+    const bx=8,bw=156,bh=32,gap=8,y0=14;
+    let s=`<svg viewBox="0 0 560 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    // content layers (clickable) — these ARE the AMI
+    ITEMS.forEach((it,i)=>{
+      const y=y0+i*(bh+gap), on=i===sel;
+      s+=`<rect x="${bx}" y="${y}" width="${bw}" height="${bh}" rx="6" fill="${on?'#0E7490':'#fff'}" stroke="${on?'#0B5567':'#cfd6db'}" stroke-width="1.4" data-i="${i}" style="cursor:pointer"/>`;
+      s+=`<text x="${bx+13}" y="${y+bh/2+4}" font-size="11" font-weight="700" fill="${on?'#fff':'#0B5567'}" style="pointer-events:none">${it[0]}</text>`;
+    });
+    const yb1=y0+4*(bh+gap)-gap, ym=(y0+yb1)/2;
+    // brace grouping the layers
+    const brx=bx+bw+6;
+    s+=brace(brx,y0,yb1,10,9);
+    const tipx=brx+10+9;
+    // AMI box (what the layers bundle into)
+    const ax=198,aw=82,ah=52,ay=ym-ah/2;
+    s+=`<line x1="${tipx}" y1="${ym}" x2="${ax}" y2="${ym}" stroke="#9aa3a8" stroke-width="1.6"/>`;
+    s+=`<rect x="${ax}" y="${ay}" width="${aw}" height="${ah}" rx="9" fill="#0E7490"/>`;
+    s+=`<text x="${ax+aw/2}" y="${ym-1}" text-anchor="middle" font-size="15" font-weight="800" fill="#fff">AMI</text>`;
+    s+=`<text x="${ax+aw/2}" y="${ym+14}" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.85)">the template</text>`;
+    s+=`<text x="${(brx+ax)/2+6}" y="${y0-2}" text-anchor="middle" font-size="8.5" font-weight="700" fill="#9aa3a8">bundled into</text>`;
+    // fan out to identical instances
+    const ix=406,iw=120,ih=32;
+    [ym-58,ym,ym+58].forEach((iy,k)=>{
+      s+=`<line x1="${ax+aw}" y1="${ym}" x2="${ix}" y2="${iy}" stroke="#cfd6db" stroke-width="1.6"/>`;
+      s+=`<rect x="${ix}" y="${iy-ih/2}" width="${iw}" height="${ih}" rx="6" fill="#eef1f3"/>`;
+      s+=`<text x="${ix+iw/2}" y="${iy+4}" text-anchor="middle" font-size="10" font-weight="700" fill="#5f5e5a">instance ${k+1}</text>`;
+    });
+    s+=`<text x="${ix+iw/2}" y="${ym-74}" text-anchor="middle" font-size="8.5" font-weight="700" fill="#9aa3a8">identical launches</text>`;
+    s+=`</svg>`;
+    stage.className='fade'; stage.innerHTML=s;
+    stage.querySelectorAll('[data-i]').forEach(el=>el.onclick=()=>{sel=+el.dataset.i;render();});
+    cap.innerHTML=`<b>${ITEMS[sel][0]}.</b> ${ITEMS[sel][1]} Every instance launched from this AMI starts with it, identically.`;
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  render();
+})();
+
+/* ---------- 4. Storage lifecycle ---------- */
+(function(){
+  const stage=document.getElementById('storeStage'),cap=document.getElementById('storeCap');
+  let act='reboot';
+  const SURV={reboot:[true,true],stop:[false,true],terminate:[false,true]};
+  const CAP={
+    reboot:'A <b>reboot</b> is just a restart &mdash; the instance keeps its host, so <b>both</b> instance store and EBS survive.',
+    stop:'On <b>stop</b>, the instance gives up its physical host. <b>Instance store is wiped</b>; EBS is network-attached, so it persists.',
+    terminate:'On <b>terminate</b>, the instance is gone for good. <b>Instance store is lost</b>; EBS volumes persist independently (and can be re-attached elsewhere).'
+  };
+  function vol(label,sub,alive){
+    const c=alive?'#2e7d57':'#c0392b';
+    return `<div style="flex:1;min-width:200px;background:#fff;border:1.5px solid ${c};border-radius:9px;padding:14px 16px">`+
+      `<div style="font-size:13.5px;font-weight:800;color:#1a1a18">${label}</div>`+
+      `<div style="font-size:11.5px;color:var(--text-muted);margin:2px 0 10px">${sub}</div>`+
+      `<div style="display:inline-flex;align-items:center;gap:7px;background:${alive?'#eaf7ef':'#fdecea'};color:${c};font-size:11.5px;font-weight:800;padding:5px 11px;border-radius:20px"><span style="font-size:13px">${alive?'✓':'✗'}</span> ${alive?'DATA SURVIVES':'DATA LOST'}</div></div>`;
+  }
+  function render(){
+    const sv=SURV[act];
+    stage.className='fade';
+    stage.innerHTML=`<div style="display:flex;gap:12px;flex-wrap:wrap">`+
+      vol('Instance store','local disk, attached to the host',sv[0])+
+      vol('EBS volume','network-attached block storage',sv[1])+`</div>`;
+    cap.innerHTML=CAP[act];
+    document.querySelectorAll('#store [data-a]').forEach(b=>b.className='ui'+(b.dataset.a===act?'':' ghost'));
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  render();
+  document.querySelectorAll('#store [data-a]').forEach(b=>b.onclick=()=>{act=b.dataset.a;render();});
+})();
+
+/* ---------- 5. Scaling ---------- */
+(function(){
+  const stage=document.getElementById('scaleStage'),cap=document.getElementById('scaleCap');
+  let mode='vert';
+  function box(x,y,w,h,label){return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="6" fill="#0E7490"/><text x="${x+w/2}" y="${y+h/2+4}" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">${label}</text>`;}
+  function render(){
+    let s=`<svg viewBox="0 0 520 170" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    s+=`<text x="90" y="20" text-anchor="middle" font-size="10" font-weight="800" fill="#9aa3a8">BEFORE</text>`;
+    s+=box(60,60,60,44,'t3.small');
+    s+=`<text x="260" y="92" text-anchor="middle" font-size="22" font-weight="900" fill="#0E7490">&rarr;</text>`;
+    s+=`<text x="260" y="40" text-anchor="middle" font-size="10" font-weight="700" fill="#B45309">traffic spike</text>`;
+    s+=`<text x="410" y="20" text-anchor="middle" font-size="10" font-weight="800" fill="#9aa3a8">AFTER</text>`;
+    if(mode==='vert'){
+      s+=box(360,40,100,84,'t3.large');
+      s+=`<text x="410" y="142" text-anchor="middle" font-size="9.5" fill="#5f5e5a">one bigger instance</text>`;
+    } else {
+      for(let i=0;i<4;i++){ s+=box(330+i*44,60,38,44,''); s+=`<text x="${349+i*44}" y="86" text-anchor="middle" font-size="8" font-weight="700" fill="#fff">t3</text>`; }
+      s+=`<text x="410" y="142" text-anchor="middle" font-size="9.5" fill="#5f5e5a">more instances (Auto Scaling Group)</text>`;
+    }
+    s+=`</svg>`;
+    stage.className='fade'; stage.innerHTML=s;
+    cap.innerHTML = mode==='vert'
+      ? '<b>Vertical &mdash; scale up.</b> Swap the single instance for a larger type. Simple, but it has a ceiling, and changing size means <b>stopping and restarting</b> the instance.'
+      : '<b>Horizontal &mdash; scale out.</b> Add more instances behind the same service, managed by an <b>Auto Scaling Group</b>. No ceiling, and new capacity arrives without disrupting the running instances.';
+    document.querySelectorAll('#scale [data-s]').forEach(b=>b.className='ui'+(b.dataset.s===mode?'':' ghost'));
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  render();
+  document.querySelectorAll('#scale [data-s]').forEach(b=>b.onclick=()=>{mode=b.dataset.s;render();});
+})();
+</script>
+</body></html>
