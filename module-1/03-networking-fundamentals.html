@@ -149,7 +149,7 @@ input[type=range]{ accent-color:var(--accent); }
 
   <section>
     <h2><span class="num">1</span> Where we are</h2>
-    <p>The previous two notes covered <em>why</em> the internet matters &mdash; its history, and the shift to enterprise and cloud computing. This note is about <em>how</em> the internet actually works, and how data moves over the internet &mdash; the mechanics every later security topic builds on.</p>
+    <p>We've discussed the evolution of the internet and met its protocols &mdash; TCP/IP, then HTTP. This note is about how those protocols actually <em>work</em>: how devices find each other and communicate over the internet &mdash; the mechanics every later security topic builds on.</p>
     <p>The internet took off because of two standard protocols: <strong>TCP</strong> (Transmission Control Protocol) and <strong>IP</strong> (Internet Protocol). This lecture follows one ordinary action &mdash; typing <code class="inline">example.com</code> into a browser &mdash; all the way down the <strong>TCP/IP stack</strong> and across the internet to a server, then back. Understanding this path is the prerequisite for everything we secure later: firewalls, VPCs, TLS, and more all operate on the mechanics below.</p>
     <div class="keybox">
       <div class="lbl">The client&#8209;server model</div>
@@ -187,16 +187,16 @@ input[type=range]{ accent-color:var(--accent); }
 
   <section>
     <h2><span class="num">4</span> Finding your own addresses</h2>
-    <p>You can inspect your machine's addresses from a terminal &mdash; <span class="kbd">ipconfig</span> on Windows, <span class="kbd">ifconfig</span> on macOS/Linux:</p>
+    <p>You can inspect your machine's addresses from a terminal &mdash; <span class="kbd">ipconfig</span> on Windows, <span class="kbd">ifconfig</span> on macOS, <span class="kbd">ip addr</span> on modern Linux:</p>
     <div class="code-label">Terminal &mdash; ifconfig (macOS)</div>
 <pre><code>en0:  <span class="code-comment">(Wi-Fi interface)</span>
   ether   10:bd:3a:7e:4d:3f          <span class="code-comment"># MAC address (physical, fixed)</span>
   inet    <span class="code-key">192.168.1.165</span>             <span class="code-comment"># IPv4 address (given by your router)</span>
   inet6   fe80::1c3a:...             <span class="code-comment"># IPv6 address</span></code></pre>
-    <p>Every device on your home network shares the same network prefix and gets a different host number: your Mac <code class="inline">192.168.1.165</code>, your phone <code class="inline">192.168.1.250</code>, the router <code class="inline">192.168.1.254</code>.</p>
+    <p>Every device on your home network shares the same network prefix and gets a different host number: your Mac <code class="inline">192.168.1.165</code>, your phone <code class="inline">192.168.1.246</code>, the router <code class="inline">192.168.1.254</code>.</p>
     <div class="keybox">
       <div class="lbl">IP routes across networks; MAC routes within one</div>
-      Leave home and join the Starbucks Wi&#8209;Fi: your <b>MAC stays the same</b> (it's the physical address of your network card), but you get a <b>new IP</b> from the Starbucks router (assigned automatically by <b>DHCP</b>, the Dynamic Host Configuration Protocol). MAC = which device on this local network. IP = how to cross between networks. (See it live: switch your laptop to a phone hotspot &mdash; the phone becomes the router and hands out a new IP, while your MAC is unchanged.)
+      Leave home and join the Starbucks Wi&#8209;Fi: your <b>MAC stays the same</b> (it's the physical address of your network card), but you get a <b>new IP</b> from the Starbucks router (assigned automatically by <b>DHCP</b>, the Dynamic Host Configuration Protocol). MAC = which device on this local network. IP = how to cross between networks. (See it live: switch your laptop to a phone hotspot &mdash; the phone becomes the router and hands out a new IP, while your MAC is unchanged.) One modern wrinkle: phones now <b>randomize</b> their Wi&#8209;Fi MAC per network by default (iOS&nbsp;14+, Android&nbsp;10+) &mdash; precisely <em>because</em> a fixed MAC lets networks track your device. The exception proves the rule: MAC is your identity on the local network.
     </div>
     <div class="notebox">
       <div class="lbl">&ldquo;MAC&rdquo; here = Media Access Control</div>
@@ -346,7 +346,7 @@ function renderHops(){
   }).join('<span style="color:#cdd6da;align-self:center">&rarr;</span>');
   const h=HOPS[hop];
   pktEl.innerHTML=`<div style="color:var(--soft);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">At hop ${hop+1}: ${h.n}</div>
-    <div>Destination IP: <span style="color:var(--ok)">93.184.216.34</span> <span style="color:var(--soft)">(never changes)</span></div>
+    <div>Destination IP: <span style="color:var(--ok)">203.0.113.10</span> <span style="color:var(--soft)">(never changes)</span></div>
     <div>Next-hop MAC: <span style="color:var(--rust)">${h.mac}</span></div>`;
 }
 document.getElementById('hopNext').onclick=()=>{if(hop<HOPS.length-1){hop++;renderHops();pktEl.classList.remove('fade');void pktEl.offsetWidth;pktEl.classList.add('fade');}};
@@ -419,12 +419,12 @@ hsSetup();
 /* ---------- Wireshark PCAP ---------- */
 const PKTS=[
  {no:1,src:"192.168.1.165",dst:"8.8.8.8",proto:"DNS",info:"Standard query A example.com",c:"#5b7c8d"},
- {no:2,src:"8.8.8.8",dst:"192.168.1.165",proto:"DNS",info:"Response A 93.184.216.34",c:"#5b7c8d"},
- {no:3,src:"192.168.1.165",dst:"93.184.216.34",proto:"TCP",info:"SYN",c:"#0E7490"},
- {no:4,src:"93.184.216.34",dst:"192.168.1.165",proto:"TCP",info:"SYN, ACK",c:"#0E7490"},
- {no:5,src:"192.168.1.165",dst:"93.184.216.34",proto:"TCP",info:"ACK",c:"#0E7490"},
- {no:6,src:"192.168.1.165",dst:"93.184.216.34",proto:"HTTP",info:"GET / → 301 redirect to HTTPS",c:"#9a7b3f"},
- {no:7,src:"192.168.1.165",dst:"93.184.216.34",proto:"TLS",info:"GET / over HTTPS (port 443)",c:"#2e7d57"},
+ {no:2,src:"8.8.8.8",dst:"192.168.1.165",proto:"DNS",info:"Response A 203.0.113.10",c:"#5b7c8d"},
+ {no:3,src:"192.168.1.165",dst:"203.0.113.10",proto:"TCP",info:"SYN",c:"#0E7490"},
+ {no:4,src:"203.0.113.10",dst:"192.168.1.165",proto:"TCP",info:"SYN, ACK",c:"#0E7490"},
+ {no:5,src:"192.168.1.165",dst:"203.0.113.10",proto:"TCP",info:"ACK",c:"#0E7490"},
+ {no:6,src:"192.168.1.165",dst:"203.0.113.10",proto:"HTTP",info:"GET / → 301 redirect to HTTPS",c:"#9a7b3f"},
+ {no:7,src:"192.168.1.165",dst:"203.0.113.10",proto:"TLS",info:"GET / over HTTPS (port 443)",c:"#2e7d57"},
 ];
 document.getElementById('pcapList').innerHTML=
  `<div style="font-family:monospace;font-size:.8rem;border:1px solid var(--rule);border-radius:8px;overflow:hidden">
