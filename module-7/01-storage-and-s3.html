@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Storage &amp; S3 &mdash; Module 7</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+* { box-sizing:border-box; margin:0; padding:0; }
+:root{
+  --slate-dark:#1A202C; --slate:#2D3748;
+  --accent:#0E7490; --accent-dark:#0B5567; --accent-soft:#CFF1F6;
+  --info:#1E40AF; --info-soft:#DBEAFE;
+  --text:#1a1a18; --text-muted:#5f5e5a; --text-light:#888780;
+  --border:rgba(0,0,0,0.09); --bg:#fafaf8; --bg-card:#fff; --bg-code:#f6f6f3; --tag-bg:#f1f0eb;
+  --rust:#B45309; --soft:#888780; --muted:#5f5e5a; --ok:#2e7d57; --bad:#c0392b;
+}
+body{ font-family:'Barlow',sans-serif; background:var(--bg); color:var(--text); line-height:1.65; min-height:100vh; }
+.pagenav{ background:var(--slate-dark); }
+.pagenav.foot{ margin-top:48px; }
+.pagenav-inner{ max-width:920px; margin:0 auto; padding:11px 32px; display:flex; justify-content:space-between; align-items:center; gap:16px; }
+.pagenav .brand{ color:rgba(255,255,255,0.45); font-size:11px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; white-space:nowrap; }
+.navbtns{ display:flex; gap:8px; }
+.navbtn{ display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#fff; background:rgba(255,255,255,0.10); border:1px solid rgba(255,255,255,0.22); border-radius:6px; padding:7px 13px; text-decoration:none; transition:0.15s; white-space:nowrap; }
+.navbtn:hover{ background:var(--accent); border-color:var(--accent); }
+.navbtn.disabled{ opacity:0.28; pointer-events:none; }
+@media(max-width:560px){ .pagenav .brand{ display:none } .pagenav-inner{ justify-content:center } }
+.header{ background:#fff; padding:56px 0 44px; border-bottom:0.5px solid var(--border); }
+.header-inner{ max-width:920px; margin:0 auto; padding:0 32px; }
+.header-eyebrow{ font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:14px; display:flex; align-items:center; gap:12px; }
+.header-eyebrow::after{ content:''; flex:1; height:0.5px; background:var(--border); max-width:120px; }
+.header h1{ font-family:'Barlow Condensed',sans-serif; font-size:clamp(34px,4.5vw,52px); font-weight:900; letter-spacing:-0.01em; line-height:1.05; color:var(--text); margin-bottom:18px; }
+.header h1 em{ font-style:normal; color:var(--accent); }
+.header-meta-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+.module-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:var(--slate); color:#fff; }
+.topic-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:#F1F5F9; color:#475569; }
+.topic-pill.accent{ background:var(--accent-soft); color:var(--accent-dark); }
+.page{ max-width:920px; margin:0 auto; padding:0 32px 48px; }
+.objectives{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--accent); border-radius:6px; padding:20px 26px; margin:34px 0 14px; }
+.obj-label{ font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:12px; }
+.objectives ul{ list-style:none; }
+.objectives ul li{ font-size:13.5px; color:var(--text); padding:4px 0 4px 20px; position:relative; line-height:1.5; }
+.objectives ul li::before{ content:'◇'; position:absolute; left:0; color:var(--accent); font-size:10px; top:8px; }
+section{ margin-top:42px; }
+section h2{ font-family:'Barlow Condensed',sans-serif; font-size:27px; font-weight:800; color:var(--text); margin-bottom:8px; display:flex; align-items:baseline; gap:18px; }
+section h2 .num{ font-family:'Barlow Condensed',sans-serif; font-size:54px; font-weight:900; color:var(--accent); letter-spacing:-0.02em; line-height:0.85; min-width:40px; }
+section .lead{ font-size:14.5px; color:var(--text-muted); line-height:1.6; margin:0 0 6px; max-width:720px; }
+section p{ font-size:14.5px; color:var(--text); line-height:1.7; margin-bottom:12px; }
+section p strong{ font-weight:700; }
+code.inline{ font-family:'JetBrains Mono',monospace; font-size:12.5px; background:var(--tag-bg); padding:1px 6px; border-radius:3px; color:var(--text); }
+.keybox{ background:var(--accent-soft); border-left:3px solid var(--accent); border-radius:0 6px 6px 0; padding:13px 18px; margin:16px 0 0; font-size:13px; line-height:1.6; color:var(--text); }
+.keybox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--accent-dark); margin-bottom:5px; }
+.keybox b{ color:var(--accent-dark); }
+.notebox{ background:#FBF3E8; border-left:3px solid var(--rust); border-radius:0 6px 6px 0; padding:13px 18px; margin:16px 0 0; font-size:13px; line-height:1.6; }
+.notebox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--rust); margin-bottom:5px; }
+.assessment-box{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--slate); border-radius:0 6px 6px 0; padding:18px 22px; margin:34px 0 0; }
+.assessment-box .assess-label{ font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); margin-bottom:8px; }
+.assessment-box p{ font-size:13px; line-height:1.65; margin:0; }
+.widget{ border:0.5px solid var(--border); border-radius:10px; padding:18px; margin:18px 0 0; background:var(--bg-card); }
+.widget h4{ margin:0 0 12px; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); font-weight:700; }
+.controls{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+button.ui{ font-family:'Barlow',sans-serif; cursor:pointer; border:1px solid var(--accent); background:var(--accent); color:#fff; padding:7px 16px; border-radius:6px; font-size:12.5px; font-weight:600; transition:0.15s; }
+button.ui:hover{ background:var(--accent-dark); border-color:var(--accent-dark); }
+button.ui.ghost{ background:#fff; color:var(--accent); }
+button.ui.ghost:hover{ background:var(--accent-soft); }
+.fade{ animation:fade 0.35s ease; }
+@keyframes fade{ from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+</style>
+</head><body>
+<header class="pagenav"><div class="pagenav-inner">
+  <span class="brand">Cloud Security Fundamentals</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn disabled" href="#">&larr; Prev</a>
+    <a class="navbtn" href="02-s3-security.html">Next &rarr;</a>
+  </nav>
+</div></header>
+
+<div class="header"><div class="header-inner">
+  <div class="header-eyebrow">Module 7 &nbsp;·&nbsp; Data Layer</div>
+  <h1>Storage in the Cloud &amp; <em>Amazon S3</em></h1>
+  <div class="header-meta-row">
+    <span class="module-pill">Module 7</span>
+    <span class="topic-pill">Data layer</span>
+    <span class="topic-pill accent">Object storage · S3</span>
+  </div>
+</div></div>
+
+<div class="page">
+
+  <div class="objectives">
+    <div class="obj-label">In this note</div>
+    <ul>
+      <li>The data layer&rsquo;s question: where does application data live, and how is it protected?</li>
+      <li>Three kinds of cloud storage &mdash; <em>block</em>, <em>file</em>, and <em>object</em> (EBS, EFS, S3)</li>
+      <li>What makes S3 different: buckets, objects, and an API instead of a filesystem</li>
+      <li>Why S3 is <em>shared</em> infrastructure that lives outside your VPC</li>
+    </ul>
+  </div>
+
+  <section>
+    <h2><span class="num">1</span> The data layer</h2>
+    <p class="lead">We&rsquo;ve secured how traffic <a href="../module-5/02-vpc-routing-security.html">reaches systems</a> (network) and how the <a href="../module-6/02-host-security.html">servers themselves are hardened</a> (device). This layer asks a different question: <strong>where does the application&rsquo;s data live, and how do we protect the data itself?</strong></p>
+    <div class="keybox">
+      <div class="lbl">Why a separate layer</div>
+      Network and host controls guard the <b>paths to</b> data. The data layer guards the <b>data itself</b> &mdash; so that even if a server or network control fails, the stored information is still defended. In AWS, the core data-layer service is <b>Amazon S3</b>.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> Block, file, or object?</h2>
+    <p class="lead">Applications pick storage by how they need to use it. AWS offers three shapes &mdash; and the difference is the <strong>unit</strong> each one stores. Click through:</p>
+    <div class="widget" id="store">
+      <h4>Three kinds of cloud storage</h4>
+      <div class="controls" style="margin:0 0 14px">
+        <button class="ui" data-s="block">Block &mdash; EBS</button>
+        <button class="ui ghost" data-s="file">File &mdash; EFS</button>
+        <button class="ui ghost" data-s="object">Object &mdash; S3</button>
+      </div>
+      <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start">
+        <div id="storeSvg" style="flex:1;min-width:230px"></div>
+        <div style="flex:1.1;min-width:230px"><div id="storeDetail"></div></div>
+      </div>
+    </div>
+    <div class="keybox">
+      <div class="lbl">The one-line distinction</div>
+      <b>EBS works with blocks, EFS works with files, S3 works with objects.</b> EBS is a disk for one server; EFS is a shared filesystem several servers mount; S3 is an API you send whole objects to.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> S3 is a shared kitchen&rsquo;s refrigerator</h2>
+    <p class="lead">The cleanest way to picture S3: AWS is a <strong>shared commercial kitchen</strong>. Click each piece to see what it maps to:</p>
+    <div class="widget" id="kit">
+      <h4>The shared-kitchen analogy</h4>
+      <div id="kitStage"></div>
+      <div class="controls" style="margin:14px 0 0" id="kitBtns"></div>
+      <p id="kitCap" style="font-size:13px;color:var(--text-muted);margin:12px 0 0;line-height:1.6;min-height:48px"></p>
+    </div>
+    <div class="notebox">
+      <div class="lbl">S3 lives outside your VPC</div>
+      The refrigerator isn&rsquo;t inside any one kitchen &mdash; it&rsquo;s <b>shared infrastructure</b> the whole facility uses. Likewise S3 is a <b>regional service that lives outside your VPC</b>; your apps reach it over the <b>S3 API</b>, not by mounting a disk. (A VPC endpoint can give a private path <i>to</i> S3, but it never puts S3 <i>inside</i> your VPC.)
+    </div>
+  </section>
+
+  <div class="assessment-box">
+    <div class="assess-label">Remember</div>
+    <p>The <strong>data layer</strong> protects the data itself, not just the paths to it &mdash; in AWS, that&rsquo;s <strong>Amazon S3</strong>. Storage comes in three shapes by <strong>unit</strong>: <strong>block</strong> (EBS, a disk for one server), <strong>file</strong> (EFS, a shared filesystem), and <strong>object</strong> (S3, whole objects via an API). S3 keeps <strong>objects</strong> inside <strong>buckets</strong> and has no filesystem to mount. And like a shared refrigerator in a commercial kitchen, S3 is <strong>shared infrastructure outside your VPC</strong>, reached over its API.</p>
+  </div>
+
+</div>
+
+<footer class="pagenav foot"><div class="pagenav-inner">
+  <span class="brand">Module 7 &middot; Data Layer</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn disabled" href="#">&larr; Prev</a>
+    <a class="navbtn" href="02-s3-security.html">Next &rarr;</a>
+  </nav>
+</div></footer>
+
+<script>
+/* ---------- 2. Block / file / object ---------- */
+(function(){
+  const svgBox=document.getElementById('storeSvg'),det=document.getElementById('storeDetail');
+  const D={
+    block:{svc:'Amazon EBS',unit:'a block (raw disk)',col:'#0E7490',
+      behaves:'Behaves like a <b>disk attached to one server</b>. The operating system formats it and manages the filesystem.',
+      use:'OS disks, databases, app state tied to a single server.'},
+    file:{svc:'Amazon EFS',unit:'a file',col:'#8E5CA8',
+      behaves:'A <b>shared filesystem</b> that many servers can mount at once. The service manages the filesystem for you.',
+      use:'Shared files and apps that expect a normal filesystem across servers.'},
+    object:{svc:'Amazon S3',unit:'an object',col:'#B45309',
+      behaves:'Stores <b>whole objects</b>, not files in a filesystem. You read and write them through an <b>API</b> &mdash; nothing to mount.',
+      use:'Images, videos, backups, and application data.'}
+  };
+  let sel='block';
+  function diagram(){
+    const d=D[sel];
+    let s=`<svg viewBox="0 0 280 150" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    if(sel==='block'){
+      s+=`<rect x="40" y="20" width="80" height="42" rx="6" fill="#2D3748"/><text x="80" y="45" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">Server</text>`;
+      s+=`<line x1="80" y1="62" x2="80" y2="84" stroke="#9aa3a8" stroke-width="2"/>`;
+      s+=`<ellipse cx="80" cy="98" rx="34" ry="9" fill="${d.col}"/><rect x="46" y="98" width="68" height="26" fill="${d.col}"/><ellipse cx="80" cy="124" rx="34" ry="9" fill="${d.col}"/><text x="80" y="116" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">EBS disk</text>`;
+      s+=`<text x="200" y="75" text-anchor="middle" font-size="10" fill="#5f5e5a">one server,</text><text x="200" y="89" text-anchor="middle" font-size="10" fill="#5f5e5a">one disk</text>`;
+    } else if(sel==='file'){
+      for(let i=0;i<3;i++){ s+=`<rect x="${20+i*54}" y="18" width="44" height="30" rx="5" fill="#2D3748"/><text x="${42+i*54}" y="37" text-anchor="middle" font-size="8" font-weight="700" fill="#fff">srv ${i+1}</text><line x1="${42+i*54}" y1="48" x2="140" y2="84" stroke="#cfd6db" stroke-width="1.6"/>`; }
+      s+=`<rect x="78" y="86" width="124" height="44" rx="8" fill="${d.col}"/><text x="140" y="106" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">EFS</text><text x="140" y="120" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.85)">shared filesystem</text>`;
+    } else {
+      s+=`<rect x="26" y="58" width="70" height="34" rx="6" fill="#2D3748"/><text x="61" y="79" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">App</text>`;
+      s+=`<text x="140" y="68" text-anchor="middle" font-size="9" font-weight="700" fill="#9aa3a8">API call</text>`;
+      s+=`<line x1="96" y1="75" x2="186" y2="75" stroke="#9aa3a8" stroke-width="1.8" marker-end="url(#oa)"/><defs><marker id="oa" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa3a8"/></marker></defs>`;
+      s+=`<path d="M190 60 h70 v54 a35 8 0 0 1 -70 0 z" fill="${d.col}"/><ellipse cx="225" cy="60" rx="35" ry="8" fill="${d.col}" stroke="#fff" stroke-width="1"/><text x="225" y="92" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">S3</text>`;
+      [210,225,240].forEach(cx=>{ s+=`<circle cx="${cx}" cy="104" r="4" fill="rgba(255,255,255,.9)"/>`; });
+    }
+    s+=`</svg>`;
+    return s;
+  }
+  function render(){
+    const d=D[sel];
+    svgBox.className='fade'; svgBox.innerHTML=diagram();
+    det.innerHTML=`<div style="font-family:'Barlow Condensed';font-weight:900;font-size:24px;color:${d.col};line-height:1">${d.svc}</div>`+
+      `<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-light);margin:2px 0 10px">stores ${d.unit}</div>`+
+      `<p style="font-size:13px;line-height:1.6;color:var(--text);margin:0 0 8px">${d.behaves}</p>`+
+      `<p style="font-size:12.5px;line-height:1.55;color:var(--text-muted);margin:0"><b>Used for:</b> ${d.use}</p>`;
+    document.querySelectorAll('#store [data-s]').forEach(b=>b.className='ui'+(b.dataset.s===sel?'':' ghost'));
+    setTimeout(()=>svgBox.classList.remove('fade'),360);
+  }
+  render();
+  document.querySelectorAll('#store [data-s]').forEach(b=>b.onclick=()=>{sel=b.dataset.s;render();});
+})();
+
+/* ---------- 3. Shared kitchen analogy ---------- */
+(function(){
+  const stage=document.getElementById('kitStage'),btns=document.getElementById('kitBtns'),cap=document.getElementById('kitCap');
+  const TERMS=[
+    ['Kitchen facility','fac','The whole shared commercial kitchen building &mdash; this is <b>AWS</b> itself, the provider everyone rents from.'],
+    ['Kitchen stall','vpc','A rented kitchen stall, walled off from the others &mdash; your <b>VPC</b>, your private space.'],
+    ['Stove','ec2','The stoves and ovens where the cooking happens &mdash; your <b>EC2 instances</b>, where applications run.'],
+    ['Refrigerator','s3','The shared walk-in refrigerator &mdash; <b>S3</b>. It belongs to no single stall; every kitchen uses it.'],
+    ['Bin','bucket','A labelled bin or shelf inside the fridge &mdash; an <b>S3 bucket</b>, a named container for your data.'],
+    ['Dish','object','The ingredients and dishes stored in a bin &mdash; the <b>S3 objects</b>: your images, videos, backups.']
+  ];
+  let sel=3;
+  function scene(){
+    const hl=k=>TERMS[sel][1]===k;
+    let s=`<svg viewBox="0 0 560 230" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    // facility
+    s+=`<rect x="8" y="20" width="544" height="200" rx="13" fill="#fafaf8" stroke="${hl('fac')?'#0E7490':'#cfd6db'}" stroke-width="${hl('fac')?3:1.4}" stroke-dasharray="6 5"/>`;
+    s+=`<text x="22" y="38" font-size="10" font-weight="800" fill="${hl('fac')?'#0B5567':'#9aa3a8'}">SHARED COMMERCIAL KITCHEN &mdash; AWS</text>`;
+    // two VPC stalls
+    function stall(x,label){
+      const v=hl('vpc'), e=hl('ec2');
+      let t=`<rect x="${x}" y="56" width="150" height="150" rx="9" fill="#fff" stroke="${v?'#0E7490':'#d7dde1'}" stroke-width="${v?2.4:1.2}"/>`;
+      t+=`<text x="${x+12}" y="74" font-size="10" font-weight="800" fill="${v?'#0B5567':'#9aa3a8'}">${label}</text>`;
+      // stove (EC2)
+      t+=`<rect x="${x+34}" y="96" width="82" height="64" rx="7" fill="${e?'#0E7490':'#eef1f3'}" stroke="${e?'#0B5567':'#cfd6db'}" stroke-width="1.3"/>`;
+      t+=`<circle cx="${x+54}" cy="118" r="7" fill="${e?'rgba(255,255,255,.85)':'#cfd6db'}"/><circle cx="${x+96}" cy="118" r="7" fill="${e?'rgba(255,255,255,.85)':'#cfd6db'}"/>`;
+      t+=`<text x="${x+75}" y="150" text-anchor="middle" font-size="9" font-weight="700" fill="${e?'#fff':'#9aa3a8'}">EC2 stove</text>`;
+      return t;
+    }
+    s+=stall(26,'VPC 1');
+    s+=stall(192,'VPC 2');
+    // shared refrigerator (S3) — outside the stalls
+    const fr=hl('s3'), bn=hl('bucket'), ob=hl('object');
+    s+=`<rect x="392" y="50" width="146" height="158" rx="10" fill="${fr?'#B45309':'#fff'}" stroke="${fr?'#7d3a06':'#B45309'}" stroke-width="${fr?2.6:1.6}"/>`;
+    s+=`<text x="465" y="70" text-anchor="middle" font-size="11" font-weight="800" fill="${fr?'#fff':'#B45309'}">S3 &mdash; shared fridge</text>`;
+    // bins (buckets) with dishes (objects)
+    [86,150].forEach((by,bi)=>{
+      s+=`<rect x="406" y="${by}" width="118" height="46" rx="6" fill="${bn?'#FBE8D2':'#f4f1ec'}" stroke="${bn?'#B45309':'#dccdbb'}" stroke-width="${bn?1.8:1}"/>`;
+      s+=`<text x="414" y="${by+15}" font-size="8.5" font-weight="800" fill="${bn?'#7d3a06':'#a8896a'}">bucket ${bi+1}</text>`;
+      [430,452,474,496].forEach(cx=>{ s+=`<circle cx="${cx}" cy="${by+32}" r="6" fill="${ob?'#B45309':'#d8c4ad'}"/>`; });
+    });
+    // arrows stove -> fridge (apps use S3)
+    s+=`<line x1="270" y1="128" x2="390" y2="128" stroke="#cfd6db" stroke-width="1.6" stroke-dasharray="5 4"/>`;
+    s+=`</svg>`;
+    return s;
+  }
+  btns.innerHTML=TERMS.map((t,i)=>`<button class="ui${i===sel?'':' ghost'}" data-i="${i}" style="font-size:11.5px;padding:6px 11px">${t[0]}</button>`).join('');
+  function render(){
+    stage.className='fade'; stage.innerHTML=scene();
+    cap.innerHTML=`<b>${TERMS[sel][0]}</b> &mdash; ${TERMS[sel][2]}`;
+    btns.querySelectorAll('button').forEach((b,i)=>b.className='ui'+(i===sel?'':' ghost'));
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  btns.querySelectorAll('button').forEach(b=>b.onclick=()=>{sel=+b.dataset.i;render();});
+  render();
+})();
+</script>
+</body></html>

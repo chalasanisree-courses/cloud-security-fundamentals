@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Securing S3 &mdash; Module 7</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+* { box-sizing:border-box; margin:0; padding:0; }
+:root{
+  --slate-dark:#1A202C; --slate:#2D3748;
+  --accent:#0E7490; --accent-dark:#0B5567; --accent-soft:#CFF1F6;
+  --info:#1E40AF; --info-soft:#DBEAFE;
+  --text:#1a1a18; --text-muted:#5f5e5a; --text-light:#888780;
+  --border:rgba(0,0,0,0.09); --bg:#fafaf8; --bg-card:#fff; --bg-code:#f6f6f3; --tag-bg:#f1f0eb;
+  --rust:#B45309; --soft:#888780; --muted:#5f5e5a; --ok:#2e7d57; --bad:#c0392b;
+}
+body{ font-family:'Barlow',sans-serif; background:var(--bg); color:var(--text); line-height:1.65; min-height:100vh; }
+.pagenav{ background:var(--slate-dark); }
+.pagenav.foot{ margin-top:48px; }
+.pagenav-inner{ max-width:920px; margin:0 auto; padding:11px 32px; display:flex; justify-content:space-between; align-items:center; gap:16px; }
+.pagenav .brand{ color:rgba(255,255,255,0.45); font-size:11px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; white-space:nowrap; }
+.navbtns{ display:flex; gap:8px; }
+.navbtn{ display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#fff; background:rgba(255,255,255,0.10); border:1px solid rgba(255,255,255,0.22); border-radius:6px; padding:7px 13px; text-decoration:none; transition:0.15s; white-space:nowrap; }
+.navbtn:hover{ background:var(--accent); border-color:var(--accent); }
+.navbtn.disabled{ opacity:0.28; pointer-events:none; }
+@media(max-width:560px){ .pagenav .brand{ display:none } .pagenav-inner{ justify-content:center } }
+.header{ background:#fff; padding:56px 0 44px; border-bottom:0.5px solid var(--border); }
+.header-inner{ max-width:920px; margin:0 auto; padding:0 32px; }
+.header-eyebrow{ font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:14px; display:flex; align-items:center; gap:12px; }
+.header-eyebrow::after{ content:''; flex:1; height:0.5px; background:var(--border); max-width:120px; }
+.header h1{ font-family:'Barlow Condensed',sans-serif; font-size:clamp(34px,4.5vw,52px); font-weight:900; letter-spacing:-0.01em; line-height:1.05; color:var(--text); margin-bottom:18px; }
+.header h1 em{ font-style:normal; color:var(--accent); }
+.header-meta-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+.module-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:var(--slate); color:#fff; }
+.topic-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:#F1F5F9; color:#475569; }
+.topic-pill.accent{ background:var(--accent-soft); color:var(--accent-dark); }
+.page{ max-width:920px; margin:0 auto; padding:0 32px 48px; }
+.objectives{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--accent); border-radius:6px; padding:20px 26px; margin:34px 0 14px; }
+.obj-label{ font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:12px; }
+.objectives ul{ list-style:none; }
+.objectives ul li{ font-size:13.5px; color:var(--text); padding:4px 0 4px 20px; position:relative; line-height:1.5; }
+.objectives ul li::before{ content:'◇'; position:absolute; left:0; color:var(--accent); font-size:10px; top:8px; }
+section{ margin-top:42px; }
+section h2{ font-family:'Barlow Condensed',sans-serif; font-size:27px; font-weight:800; color:var(--text); margin-bottom:8px; display:flex; align-items:baseline; gap:18px; }
+section h2 .num{ font-family:'Barlow Condensed',sans-serif; font-size:54px; font-weight:900; color:var(--accent); letter-spacing:-0.02em; line-height:0.85; min-width:40px; }
+section .lead{ font-size:14.5px; color:var(--text-muted); line-height:1.6; margin:0 0 6px; max-width:720px; }
+section p{ font-size:14.5px; color:var(--text); line-height:1.7; margin-bottom:12px; }
+section p strong{ font-weight:700; }
+code.inline{ font-family:'JetBrains Mono',monospace; font-size:12.5px; background:var(--tag-bg); padding:1px 6px; border-radius:3px; color:var(--text); }
+.keybox{ background:var(--accent-soft); border-left:3px solid var(--accent); border-radius:0 6px 6px 0; padding:13px 18px; margin:16px 0 0; font-size:13px; line-height:1.6; color:var(--text); }
+.keybox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--accent-dark); margin-bottom:5px; }
+.keybox b{ color:var(--accent-dark); }
+.notebox{ background:#FBF3E8; border-left:3px solid var(--rust); border-radius:0 6px 6px 0; padding:13px 18px; margin:16px 0 0; font-size:13px; line-height:1.6; }
+.notebox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--rust); margin-bottom:5px; }
+.assessment-box{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--slate); border-radius:0 6px 6px 0; padding:18px 22px; margin:34px 0 0; }
+.assessment-box .assess-label{ font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); margin-bottom:8px; }
+.assessment-box p{ font-size:13px; line-height:1.65; margin:0; }
+.widget{ border:0.5px solid var(--border); border-radius:10px; padding:18px; margin:18px 0 0; background:var(--bg-card); }
+.widget h4{ margin:0 0 12px; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); font-weight:700; }
+.controls{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+button.ui{ font-family:'Barlow',sans-serif; cursor:pointer; border:1px solid var(--accent); background:var(--accent); color:#fff; padding:7px 16px; border-radius:6px; font-size:12.5px; font-weight:600; transition:0.15s; }
+button.ui:hover{ background:var(--accent-dark); border-color:var(--accent-dark); }
+button.ui.ghost{ background:#fff; color:var(--accent); }
+button.ui.ghost:hover{ background:var(--accent-soft); }
+.fade{ animation:fade 0.35s ease; }
+@keyframes fade{ from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+</style>
+</head><body>
+<header class="pagenav"><div class="pagenav-inner">
+  <span class="brand">Cloud Security Fundamentals</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn" href="01-storage-and-s3.html">&larr; Prev</a>
+    <a class="navbtn disabled" href="#">Next &rarr;</a>
+  </nav>
+</div></header>
+
+<div class="header"><div class="header-inner">
+  <div class="header-eyebrow">Module 7 &nbsp;·&nbsp; Data Layer</div>
+  <h1>Securing <em>S3</em></h1>
+  <div class="header-meta-row">
+    <span class="module-pill">Module 7</span>
+    <span class="topic-pill">Encryption</span>
+    <span class="topic-pill accent">Access control</span>
+  </div>
+</div></div>
+
+<div class="page">
+
+  <div class="objectives">
+    <div class="obj-label">In this note</div>
+    <ul>
+      <li>The two data-layer concerns: <em>access control</em> and <em>encryption</em></li>
+      <li>Encryption in motion (TLS) and at rest (server-side, client-side, and the keys)</li>
+      <li>The access-control tools: bucket policies, ACLs (legacy), and Block Public Access</li>
+      <li>How S3 actually decides whether a request is allowed</li>
+    </ul>
+  </div>
+
+  <section>
+    <h2><span class="num">1</span> Two questions about your data</h2>
+    <p class="lead">Securing data at rest comes down to two questions, and each has its own control:</p>
+    <div class="widget" id="two">
+      <h4>Access control vs encryption</h4>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <div style="flex:1;min-width:230px;background:var(--bg);border-radius:9px;padding:15px 17px;border-left:3px solid #0E7490">
+          <div style="font-family:'Barlow Condensed';font-weight:800;font-size:20px;color:#0B5567">Access control</div>
+          <div style="font-size:12.5px;color:var(--text-muted);margin-top:4px;line-height:1.55"><b>Who is allowed to reach the data?</b> Keeps the wrong people out in the first place.</div>
+        </div>
+        <div style="flex:1;min-width:230px;background:var(--bg);border-radius:9px;padding:15px 17px;border-left:3px solid #B45309">
+          <div style="font-family:'Barlow Condensed';font-weight:800;font-size:20px;color:#7d3a06">Encryption</div>
+          <div style="font-size:12.5px;color:var(--text-muted);margin-top:4px;line-height:1.55"><b>What if someone gets the data anyway?</b> Makes it unreadable without the key.</div>
+        </div>
+      </div>
+    </div>
+    <div class="keybox">
+      <div class="lbl">Two layers, one idea</div>
+      <b>Access control prevents access; encryption limits the damage if access control fails.</b> They&rsquo;re defense in depth for the data itself &mdash; you want both.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> Encryption: in motion and at rest</h2>
+    <p class="lead">Data is exposed in two places &mdash; while it <strong>travels</strong> to S3, and while it <strong>sits</strong> on disk. Each gets its own encryption. Click through:</p>
+    <div class="widget" id="enc">
+      <h4>Where encryption happens</h4>
+      <div class="controls" style="margin:0 0 14px">
+        <button class="ui" data-e="transit">In motion (TLS)</button>
+        <button class="ui ghost" data-e="server">At rest &mdash; server-side</button>
+        <button class="ui ghost" data-e="client">At rest &mdash; client-side</button>
+      </div>
+      <div id="encStage"></div>
+      <p id="encCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:48px"></p>
+    </div>
+    <div class="notebox">
+      <div class="lbl">Encrypted by default since 2023</div>
+      You no longer have to turn it on: since <b>January 2023</b>, S3 applies <b>server-side encryption to every new object automatically</b>. Data is never unencrypted at rest by default. The choice that remains is <b>key management</b> &mdash; who holds the key decides who can decrypt: S3 can manage keys for you, or you can control them yourself with KMS or your own keys.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> Access control: who gets in</h2>
+    <p class="lead">Three tools decide who can read or write an object. Bucket policies do the everyday work; ACLs are legacy; and Block Public Access is the guardrail that catches mistakes. Run a request through them:</p>
+    <div class="widget" id="acl">
+      <h4>Will the request reach the object?</h4>
+      <div class="controls" style="margin:0 0 14px" id="aclBtns"></div>
+      <div id="aclStage"></div>
+      <p id="aclCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:48px"></p>
+    </div>
+    <div class="notebox">
+      <div class="lbl">The safe defaults (since April 2023)</div>
+      New buckets now ship locked down: <b>Block Public Access is ON</b> and <b>ACLs are disabled</b> (access is managed by <b>bucket policies and IAM</b>). Treat <b>bucket policies as the primary tool</b> and ACLs as a legacy mechanism you usually leave off. Most famous S3 leaks were buckets accidentally left open <i>before</i> these defaults existed.
+    </div>
+  </section>
+
+  <div class="assessment-box">
+    <div class="assess-label">Remember</div>
+    <p>Data-layer security has two jobs: <strong>access control</strong> (keep the wrong people out) and <strong>encryption</strong> (make stolen data useless) &mdash; access control prevents access, encryption limits the damage if it fails. S3 encrypts data <strong>in motion with TLS</strong> and, since 2023, <strong>at rest by default</strong>; the real choice is <strong>key management</strong>. Access is decided by <strong>bucket policies</strong> (the primary tool), legacy <strong>ACLs</strong>, and the <strong>Block Public Access</strong> guardrail. The rule: <strong>deny by default</strong>, allow only if a policy grants it and nothing explicitly denies it &mdash; an <strong>explicit deny always wins</strong>, and Block Public Access blocks anonymous public access no matter what the policies say.</p>
+  </div>
+
+</div>
+
+<footer class="pagenav foot"><div class="pagenav-inner">
+  <span class="brand">Module 7 &middot; Data Layer</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn" href="01-storage-and-s3.html">&larr; Prev</a>
+    <a class="navbtn disabled" href="#">Next &rarr;</a>
+  </nav>
+</div></footer>
+
+<script>
+/* ---------- 2. Encryption ---------- */
+(function(){
+  const stage=document.getElementById('encStage'),cap=document.getElementById('encCap');
+  let mode='transit';
+  function lock(x,y,c){return `<rect x="${x-7}" y="${y-2}" width="14" height="11" rx="2" fill="${c}"/><path d="M${x-4} ${y-2} v-3 a4 4 0 0 1 8 0 v3" fill="none" stroke="${c}" stroke-width="1.8"/>`;}
+  function render(){
+    let s=`<svg viewBox="0 0 520 170" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    // app and S3
+    s+=`<rect x="20" y="62" width="92" height="46" rx="8" fill="#2D3748"/><text x="66" y="89" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">App</text>`;
+    s+=`<path d="M404 64 h84 v54 a42 8 0 0 1 -84 0 z" fill="#B45309"/><ellipse cx="446" cy="64" rx="42" ry="8" fill="#B45309" stroke="#fff" stroke-width="1"/><text x="446" y="98" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">S3</text>`;
+    const T='#0E7490', R='#B45309';
+    // the wire
+    const transit=mode==='transit';
+    s+=`<line x1="112" y1="85" x2="404" y2="85" stroke="${transit?T:'#cfd6db'}" stroke-width="${transit?3:2}" ${transit?'':'stroke-dasharray="5 4"'}/>`;
+    if(transit){
+      s+=lock(258,79,T);
+      s+=`<text x="258" y="110" text-anchor="middle" font-size="10" font-weight="800" fill="${T}">TLS &mdash; encrypted in transit</text>`;
+    }
+    if(mode==='server'){
+      // object arrives plain, S3 encrypts on disk
+      s+=`<rect x="190" y="74" width="40" height="22" rx="4" fill="#e7ecee"/><text x="210" y="89" text-anchor="middle" font-size="9" font-weight="700" fill="#5f5e5a">object</text>`;
+      s+=`<text x="300" y="70" text-anchor="middle" font-size="9" font-weight="700" fill="#9aa3a8">S3 encrypts on write</text>`;
+      s+=lock(446,118,'#fff');
+      s+=`<text x="446" y="150" text-anchor="middle" font-size="10" font-weight="800" fill="${R}">encrypted at rest (SSE)</text>`;
+    }
+    if(mode==='client'){
+      // app encrypts before upload
+      s+=lock(66,118,T);
+      s+=`<text x="66" y="142" text-anchor="middle" font-size="9" font-weight="800" fill="${T}">app encrypts first</text>`;
+      s+=`<rect x="188" y="74" width="46" height="22" rx="4" fill="#1A202C"/><text x="211" y="89" text-anchor="middle" font-size="8.5" font-weight="700" fill="#7CF2C0">cipher</text>`;
+      s+=lock(446,118,'#fff');
+      s+=`<text x="446" y="150" text-anchor="middle" font-size="9.5" font-weight="800" fill="${R}">+ SSE = double</text>`;
+    }
+    s+=`</svg>`;
+    stage.className='fade'; stage.innerHTML=s;
+    const CAP={
+      transit:'<b>In motion.</b> Data moving between your app and S3 travels the network &mdash; even inside AWS. <b>TLS</b> (HTTPS) encrypts that hop so it can&rsquo;t be intercepted or modified on the way.',
+      server:'<b>At rest &mdash; server-side.</b> S3 encrypts each object as it&rsquo;s written to disk and decrypts on read. If someone got at the raw storage, they&rsquo;d find only ciphertext. This is on by default for every new object.',
+      client:'<b>At rest &mdash; client-side.</b> Your app encrypts the data <i>before</i> uploading, so S3 only ever sees ciphertext &mdash; it can&rsquo;t read your data at all. S3 still adds its own encryption on top, giving you <b>double encryption</b>.'
+    };
+    cap.innerHTML=CAP[mode];
+    document.querySelectorAll('#enc [data-e]').forEach(b=>b.className='ui'+(b.dataset.e===mode?'':' ghost'));
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  render();
+  document.querySelectorAll('#enc [data-e]').forEach(b=>b.onclick=()=>{mode=b.dataset.e;render();});
+})();
+
+/* ---------- 3. Access control decision ---------- */
+(function(){
+  const btns=document.getElementById('aclBtns'),stage=document.getElementById('aclStage'),cap=document.getElementById('aclCap');
+  // scenarios: who is asking + what the policy says
+  const SC=[
+    {k:'Anonymous (public)', bpa:'block', policy:'(a bucket policy allows public read)', allow:false,
+      reason:'<b>Blocked by Block Public Access.</b> The request is anonymous &mdash; public internet access. Block Public Access overrides any policy that would allow it, so the data stays private. This is the guardrail that stops accidental leaks.'},
+    {k:'Authenticated &mdash; allowed', bpa:'pass', policy:'bucket policy: ALLOW this user', allow:true,
+      reason:'<b>Allowed.</b> A known, authenticated user, and the bucket policy grants access with no deny anywhere. Block Public Access doesn&rsquo;t apply &mdash; it only blocks <i>public</i> access, not legitimate authenticated access.'},
+    {k:'Authenticated &mdash; explicit deny', bpa:'pass', policy:'bucket policy: DENY this user', allow:false,
+      reason:'<b>Denied.</b> Even though the user is authenticated, the bucket policy has an <b>explicit deny</b> for them &mdash; and an explicit deny always wins, over any allow.'},
+    {k:'Authenticated &mdash; no permission', bpa:'pass', policy:'no rule grants this user', allow:false,
+      reason:'<b>Denied by default.</b> Nothing explicitly allows this user, so S3 falls back to its default: <b>deny</b>. Access must be granted on purpose &mdash; silence means no.'}
+  ];
+  let sel=0;
+  function gate(label,state){
+    // state: 'block'(red stop), 'pass'(green), 'deny'(red), 'na'(grey)
+    const map={block:['#c0392b','&#10007;','#fdecea'],pass:['#2e7d57','&#10003;','#eaf7ef'],deny:['#c0392b','&#10007;','#fdecea'],na:['#9aa3a8','&middot;','#f4f6f8']};
+    const [c,sym,bg]=map[state];
+    return `<div style="flex:1;min-width:150px;background:${bg};border:1.5px solid ${c};border-radius:8px;padding:11px 13px">`+
+      `<div style="font-size:12.5px;font-weight:800;color:#1a1a18">${label}</div>`+
+      `<div style="font-size:14px;font-weight:900;color:${c};margin-top:4px">${sym}</div></div>`;
+  }
+  btns.innerHTML=SC.map((s,i)=>`<button class="ui${i===0?'':' ghost'}" data-i="${i}" style="font-size:11.5px;padding:6px 11px">${s.k}</button>`).join('');
+  function render(){
+    const s=SC[sel];
+    // gate states
+    const bpaState = s.bpa==='block'?'block':'pass';
+    const polState = s.bpa==='block' ? 'na' : (s.allow?'pass':'deny');
+    let g=`<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:stretch">`+
+      gate('1 · Block Public Access', bpaState)+
+      `<div style="display:flex;align-items:center;font-size:18px;color:#cfd6db;font-weight:900">&rarr;</div>`+
+      gate('2 · Bucket policy / IAM', polState)+
+      `<div style="display:flex;align-items:center;font-size:18px;color:#cfd6db;font-weight:900">&rarr;</div>`+
+      gate(s.allow?'Object reached':'Object protected', s.allow?'pass':'deny')+`</div>`;
+    g+=`<div style="font-size:11px;color:var(--text-muted);margin-top:10px">Policy in effect: <code class="inline">${s.policy}</code></div>`;
+    stage.className='fade'; stage.innerHTML=g;
+    cap.innerHTML=s.reason;
+    btns.querySelectorAll('button').forEach((b,i)=>b.className='ui'+(i===sel?'':' ghost'));
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  btns.querySelectorAll('button').forEach(b=>b.onclick=()=>{sel=+b.dataset.i;render();});
+  render();
+})();
+</script>
+</body></html>
