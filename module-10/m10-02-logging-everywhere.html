@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Visibility Across Every Layer &mdash; Module 10</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+* { box-sizing:border-box; margin:0; padding:0; }
+:root{
+  --slate-dark:#1A202C; --slate:#2D3748;
+  --accent:#0E7490; --accent-dark:#0B5567; --accent-soft:#CFF1F6;
+  --info:#1E40AF; --info-soft:#DBEAFE;
+  --text:#1a1a18; --text-muted:#5f5e5a; --text-light:#888780;
+  --border:rgba(0,0,0,0.09); --bg:#fafaf8; --bg-card:#fff; --bg-code:#f6f6f3; --tag-bg:#f1f0eb;
+  --rust:#B45309; --soft:#888780; --muted:#5f5e5a; --ok:#2e7d57; --bad:#c0392b;
+}
+body{ font-family:'Barlow',sans-serif; background:var(--bg); color:var(--text); line-height:1.65; min-height:100vh; }
+.pagenav{ background:var(--slate-dark); }
+.pagenav.foot{ margin-top:48px; }
+.pagenav-inner{ max-width:920px; margin:0 auto; padding:11px 32px; display:flex; justify-content:space-between; align-items:center; gap:16px; }
+.pagenav .brand{ color:rgba(255,255,255,0.45); font-size:11px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; white-space:nowrap; }
+.navbtns{ display:flex; gap:8px; }
+.navbtn{ display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#fff; background:rgba(255,255,255,0.10); border:1px solid rgba(255,255,255,0.22); border-radius:6px; padding:7px 13px; text-decoration:none; transition:0.15s; white-space:nowrap; }
+.navbtn:hover{ background:var(--accent); border-color:var(--accent); }
+.navbtn.disabled{ opacity:0.28; pointer-events:none; }
+@media(max-width:560px){ .pagenav .brand{ display:none } .pagenav-inner{ justify-content:center } }
+.header{ background:#fff; padding:56px 0 44px; border-bottom:0.5px solid var(--border); }
+.header-inner{ max-width:920px; margin:0 auto; padding:0 32px; }
+.header-eyebrow{ font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:14px; display:flex; align-items:center; gap:12px; }
+.header-eyebrow::after{ content:''; flex:1; height:0.5px; background:var(--border); max-width:120px; }
+.header h1{ font-family:'Barlow Condensed',sans-serif; font-size:clamp(34px,4.5vw,52px); font-weight:900; letter-spacing:-0.01em; line-height:1.05; color:var(--text); margin-bottom:18px; }
+.header h1 em{ font-style:normal; color:var(--accent); }
+.header-meta-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+.module-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:var(--slate); color:#fff; }
+.topic-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:#F1F5F9; color:#475569; }
+.topic-pill.accent{ background:var(--accent-soft); color:var(--accent-dark); }
+.page{ max-width:920px; margin:0 auto; padding:0 32px 48px; }
+.objectives{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--accent); border-radius:6px; padding:20px 26px; margin:34px 0 14px; }
+.obj-label{ font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:12px; }
+.objectives ul{ list-style:none; }
+.objectives ul li{ font-size:13.5px; color:var(--text); padding:4px 0 4px 20px; position:relative; line-height:1.5; }
+.objectives ul li::before{ content:'◇'; position:absolute; left:0; color:var(--accent); font-size:10px; top:8px; }
+section{ margin-top:42px; }
+section h2{ font-family:'Barlow Condensed',sans-serif; font-size:27px; font-weight:800; color:var(--text); margin-bottom:8px; display:flex; align-items:baseline; gap:18px; }
+section h2 .num{ font-family:'Barlow Condensed',sans-serif; font-size:54px; font-weight:900; color:var(--accent); letter-spacing:-0.02em; line-height:0.85; min-width:40px; }
+section .lead{ font-size:14.5px; color:var(--text-muted); line-height:1.6; margin:0 0 6px; max-width:720px; }
+section p{ font-size:14.5px; color:var(--text); line-height:1.7; margin-bottom:12px; }
+section p strong{ font-weight:700; }
+code.inline{ font-family:'JetBrains Mono',monospace; font-size:12.5px; background:var(--tag-bg); padding:1px 6px; border-radius:3px; color:var(--text); }
+.keybox{ background:var(--accent-soft); border-left:3px solid var(--accent); border-radius:0 6px 6px 0; padding:13px 18px; margin:16px 0 0; font-size:13px; line-height:1.6; color:var(--text); }
+.keybox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--accent-dark); margin-bottom:5px; }
+.keybox b{ color:var(--accent-dark); }
+.notebox{ background:#FBF3E8; border-left:3px solid var(--rust); border-radius:0 6px 6px 0; padding:13px 18px; margin:16px 0 0; font-size:13px; line-height:1.6; }
+.notebox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--rust); margin-bottom:5px; }
+.assessment-box{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--slate); border-radius:0 6px 6px 0; padding:18px 22px; margin:34px 0 0; }
+.assessment-box .assess-label{ font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); margin-bottom:8px; }
+.assessment-box p{ font-size:13px; line-height:1.65; margin:0; }
+.widget{ border:0.5px solid var(--border); border-radius:10px; padding:18px; margin:18px 0 0; background:var(--bg-card); }
+.widget h4{ margin:0 0 12px; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); font-weight:700; }
+.controls{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+button.ui{ font-family:'Barlow',sans-serif; cursor:pointer; border:1px solid var(--accent); background:var(--accent); color:#fff; padding:7px 16px; border-radius:6px; font-size:12.5px; font-weight:600; transition:0.15s; }
+button.ui:hover{ background:var(--accent-dark); border-color:var(--accent-dark); }
+button.ui.ghost{ background:#fff; color:var(--accent); }
+button.ui.ghost:hover{ background:var(--accent-soft); }
+.fade{ animation:fade 0.35s ease; }
+@keyframes fade{ from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+</style>
+</head><body>
+<header class="pagenav"><div class="pagenav-inner">
+  <span class="brand">Cloud Security Fundamentals</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn" href="01-cloudwatch-cloudtrail.html">&larr; Prev</a>
+    <a class="navbtn disabled" href="#">Next &rarr;</a>
+  </nav>
+</div></header>
+
+<div class="header"><div class="header-inner">
+  <div class="header-eyebrow">Module 10 &nbsp;·&nbsp; Cross-Cutting · Visibility</div>
+  <h1>Visibility Across <em>Every Layer</em></h1>
+  <div class="header-meta-row">
+    <span class="module-pill">Module 10</span>
+    <span class="topic-pill">Cross-cutting</span>
+    <span class="topic-pill accent">Log sources</span>
+  </div>
+</div></div>
+
+<div class="page">
+
+  <div class="objectives">
+    <div class="obj-label">In this note</div>
+    <ul>
+      <li>Why logging isn&rsquo;t a layer &mdash; it&rsquo;s visibility that cuts <em>through</em> every layer</li>
+      <li>The log source for each layer: identity, network, device, application, data</li>
+      <li>Why a gap in one layer&rsquo;s logs becomes a blind spot</li>
+    </ul>
+  </div>
+
+  <section>
+    <h2><span class="num">1</span> Logging is vertical, not horizontal</h2>
+    <p class="lead">Every other module so far has been a <em>layer</em> of defense in depth &mdash; network, device, data, identity. Logging is different: it&rsquo;s not one of the rings, it&rsquo;s the <strong>visibility that runs through all of them</strong>. Each layer keeps its own kind of log. Click a layer:</p>
+    <div class="widget" id="stack">
+      <h4>One log source per layer</h4>
+      <div id="stackStage"></div>
+      <div class="controls" style="margin:14px 0 0" id="stackBtns"></div>
+      <p id="stackCap" style="font-size:13px;color:var(--text-muted);margin:12px 0 0;line-height:1.6;min-height:48px"></p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> A gap in one layer is a blind spot</h2>
+    <p class="lead">The layers only give you the full story <em>together</em>. Drop one and you lose the answer it held. Follow a single suspicious request and toggle whether you kept the application logs:</p>
+    <div class="widget" id="gap">
+      <h4>Network logs alone aren&rsquo;t enough</h4>
+      <div class="controls" style="margin:0 0 14px">
+        <button class="ui" data-g="net">Network logs only</button>
+        <button class="ui ghost" data-g="both">Network + application logs</button>
+      </div>
+      <div id="gapStage"></div>
+      <p id="gapCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:48px"></p>
+    </div>
+    <div class="keybox">
+      <div class="lbl">The takeaway</div>
+      No single log tells the whole story. With network logs but no application logs, you can see traffic <b>reached</b> the server but have no idea whether it <b>errored, was rejected, or quietly succeeded</b>. Real investigations stitch layers together &mdash; which is why you collect them all.
+    </div>
+  </section>
+
+  <div class="assessment-box">
+    <div class="assess-label">Remember</div>
+    <p>Logging is <strong>not a layer &mdash; it&rsquo;s the vertical visibility</strong> that cuts through every layer of defense in depth. Each layer has its own log source: <strong>identity</strong> &rarr; CloudTrail (who signed in, who assumed a role), <strong>network</strong> &rarr; VPC Flow Logs (traffic to your interfaces), <strong>device</strong> &rarr; system logs (who ran <code class="inline">sudo</code>), <strong>application</strong> &rarr; app logs (NGINX 404s and errors), <strong>data</strong> &rarr; S3 access logs (who touched the files). You need them <strong>all</strong>: a gap in one layer is a blind spot &mdash; network logs without application logs show traffic arriving but never tell you what the server did with it.</p>
+  </div>
+
+</div>
+
+<footer class="pagenav foot"><div class="pagenav-inner">
+  <span class="brand">Module 10 &middot; Logging &amp; Auditing</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn" href="01-cloudwatch-cloudtrail.html">&larr; Prev</a>
+    <a class="navbtn disabled" href="#">Next &rarr;</a>
+  </nav>
+</div></footer>
+
+<script>
+/* ---------- 1. Visibility stack ---------- */
+(function(){
+  const stage=document.getElementById('stackStage'),btns=document.getElementById('stackBtns'),cap=document.getElementById('stackCap');
+  const L=[
+    ['Identity','#8E5CA8','CloudTrail','Records who signs in and who assumes which roles &mdash; the API activity behind every action.'],
+    ['Network','#1E40AF','VPC Flow Logs','Record the traffic going to and from your network interfaces &mdash; which IPs reached which ports.'],
+    ['Device','#0E7490','System logs','OS-level events on the host &mdash; who ran a command, who used <code class="inline">sudo</code>, what processes started.'],
+    ['Application','#2e7d57','Application logs','What the software itself did &mdash; the NGINX line per request, a 404, an &ldquo;invalid input&rdquo; error.'],
+    ['Data','#B45309','S3 access logs','Who actually touched the files &mdash; the read or write on each object at the data layer.']
+  ];
+  let sel=0;
+  function render(){
+    let s=`<svg viewBox="0 0 520 230" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    // vertical LOGGING thread
+    s+=`<rect x="14" y="14" width="40" height="202" rx="8" fill="#1A202C"/>`;
+    s+=`<text x="34" y="118" text-anchor="middle" font-size="12" font-weight="900" fill="#fff" transform="rotate(-90 34 118)" letter-spacing="2">LOGGING</text>`;
+    L.forEach((l,i)=>{
+      const y=16+i*40, on=i===sel;
+      s+=`<rect x="66" y="${y}" width="290" height="34" rx="7" fill="${on?l[1]:'#eef1f3'}" stroke="${on?l[1]:'#dcdcd6'}" stroke-width="${on?2:1.1}" data-i="${i}" style="cursor:pointer"/>`;
+      s+=`<text x="80" y="${y+22}" font-size="12.5" font-weight="800" fill="${on?'#fff':'#5f5e5a'}" style="pointer-events:none">${l[0]} layer</text>`;
+      // connector + log source
+      s+=`<line x1="356" y1="${y+17}" x2="386" y2="${y+17}" stroke="${on?l[1]:'#cfd6db'}" stroke-width="1.6"/>`;
+      s+=`<rect x="386" y="${y+3}" width="120" height="28" rx="6" fill="${on?'#fff':'#f4f6f8'}" stroke="${on?l[1]:'#dcdcd6'}" stroke-width="1.1" data-i="${i}" style="cursor:pointer"/>`;
+      s+=`<text x="446" y="${y+21}" text-anchor="middle" font-size="10.5" font-weight="700" fill="${on?l[1]:'#9aa3a8'}" style="pointer-events:none">${l[2]}</text>`;
+    });
+    s+=`</svg>`;
+    stage.className='fade'; stage.innerHTML=s;
+    stage.querySelectorAll('[data-i]').forEach(e=>e.onclick=()=>{sel=+e.dataset.i;render();});
+    btns.querySelectorAll('button').forEach((b,i)=>b.className='ui'+(i===sel?'':' ghost'));
+    cap.innerHTML=`<b style="color:${L[sel][1]}">${L[sel][0]} &rarr; ${L[sel][2]}.</b> ${L[sel][3]}`;
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  btns.innerHTML=L.map((l,i)=>`<button class="ui${i===0?'':' ghost'}" data-i="${i}">${l[0]}</button>`).join('');
+  btns.querySelectorAll('button').forEach(b=>b.onclick=()=>{sel=+b.dataset.i;render();});
+  render();
+})();
+
+/* ---------- 2. The gap ---------- */
+(function(){
+  const stage=document.getElementById('gapStage'),cap=document.getElementById('gapCap');
+  let g='net';
+  function row(q,known,detail){
+    const c=known?'#2e7d57':'#c0392b';
+    return `<div style="display:flex;gap:11px;align-items:flex-start;background:var(--bg);border-radius:8px;padding:11px 13px;margin-bottom:7px">`+
+      `<span style="color:${c};font-size:14px;font-weight:900;flex-shrink:0">${known?'&#10003;':'?'}</span>`+
+      `<div><b style="font-size:13px">${q}</b><div style="font-size:12px;color:var(--text-muted);line-height:1.5;margin-top:1px">${detail}</div></div></div>`;
+  }
+  function render(){
+    const both=g==='both';
+    let h=row('Did traffic reach the server?', true, 'VPC Flow Logs show the request hit the web server&rsquo;s interface on port 443.');
+    h+=row('Did the server error or succeed?', both, both?'Application logs show a 500 error &mdash; the request was malformed and the app failed.':'Unknown. Without application logs, you only see the packet arrive &mdash; never what happened next.');
+    h+=row('Was the request malicious?', both, both?'The app log shows the payload that triggered the error &mdash; now you can investigate.':'Unknown. The network log can&rsquo;t tell a normal request from an attack inside it.');
+    stage.className='fade'; stage.innerHTML=h;
+    cap.innerHTML = both
+      ? '<b style="color:#2e7d57">Full picture.</b> Network <i>and</i> application logs together tell you the request arrived, what the server did with it, and whether it was an attack. This is how real investigations work.'
+      : '<b style="color:#c0392b">Blind.</b> With only network logs, you know <i>something</i> arrived &mdash; but not whether it errored, succeeded, or was an attack. Two of the three questions are unanswerable.';
+    document.querySelectorAll('#gap [data-g]').forEach(b=>b.className='ui'+(b.dataset.g===g?'':' ghost'));
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  render();
+  document.querySelectorAll('#gap [data-g]').forEach(b=>b.onclick=()=>{g=b.dataset.g;render();});
+})();
+</script>
+</body></html>

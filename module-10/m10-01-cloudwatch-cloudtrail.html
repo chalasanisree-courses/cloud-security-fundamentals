@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CloudWatch &amp; CloudTrail &mdash; Module 10</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+* { box-sizing:border-box; margin:0; padding:0; }
+:root{
+  --slate-dark:#1A202C; --slate:#2D3748;
+  --accent:#0E7490; --accent-dark:#0B5567; --accent-soft:#CFF1F6;
+  --info:#1E40AF; --info-soft:#DBEAFE;
+  --text:#1a1a18; --text-muted:#5f5e5a; --text-light:#888780;
+  --border:rgba(0,0,0,0.09); --bg:#fafaf8; --bg-card:#fff; --bg-code:#f6f6f3; --tag-bg:#f1f0eb;
+  --rust:#B45309; --soft:#888780; --muted:#5f5e5a; --ok:#2e7d57; --bad:#c0392b;
+}
+body{ font-family:'Barlow',sans-serif; background:var(--bg); color:var(--text); line-height:1.65; min-height:100vh; }
+.pagenav{ background:var(--slate-dark); }
+.pagenav.foot{ margin-top:48px; }
+.pagenav-inner{ max-width:920px; margin:0 auto; padding:11px 32px; display:flex; justify-content:space-between; align-items:center; gap:16px; }
+.pagenav .brand{ color:rgba(255,255,255,0.45); font-size:11px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; white-space:nowrap; }
+.navbtns{ display:flex; gap:8px; }
+.navbtn{ display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#fff; background:rgba(255,255,255,0.10); border:1px solid rgba(255,255,255,0.22); border-radius:6px; padding:7px 13px; text-decoration:none; transition:0.15s; white-space:nowrap; }
+.navbtn:hover{ background:var(--accent); border-color:var(--accent); }
+.navbtn.disabled{ opacity:0.28; pointer-events:none; }
+@media(max-width:560px){ .pagenav .brand{ display:none } .pagenav-inner{ justify-content:center } }
+.header{ background:#fff; padding:56px 0 44px; border-bottom:0.5px solid var(--border); }
+.header-inner{ max-width:920px; margin:0 auto; padding:0 32px; }
+.header-eyebrow{ font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:14px; display:flex; align-items:center; gap:12px; }
+.header-eyebrow::after{ content:''; flex:1; height:0.5px; background:var(--border); max-width:120px; }
+.header h1{ font-family:'Barlow Condensed',sans-serif; font-size:clamp(34px,4.5vw,52px); font-weight:900; letter-spacing:-0.01em; line-height:1.05; color:var(--text); margin-bottom:18px; }
+.header h1 em{ font-style:normal; color:var(--accent); }
+.header-meta-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+.module-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:var(--slate); color:#fff; }
+.topic-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:#F1F5F9; color:#475569; }
+.topic-pill.accent{ background:var(--accent-soft); color:var(--accent-dark); }
+.page{ max-width:920px; margin:0 auto; padding:0 32px 48px; }
+.objectives{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--accent); border-radius:6px; padding:20px 26px; margin:34px 0 14px; }
+.obj-label{ font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:12px; }
+.objectives ul{ list-style:none; }
+.objectives ul li{ font-size:13.5px; color:var(--text); padding:4px 0 4px 20px; position:relative; line-height:1.5; }
+.objectives ul li::before{ content:'◇'; position:absolute; left:0; color:var(--accent); font-size:10px; top:8px; }
+section{ margin-top:42px; }
+section h2{ font-family:'Barlow Condensed',sans-serif; font-size:27px; font-weight:800; color:var(--text); margin-bottom:8px; display:flex; align-items:baseline; gap:18px; }
+section h2 .num{ font-family:'Barlow Condensed',sans-serif; font-size:54px; font-weight:900; color:var(--accent); letter-spacing:-0.02em; line-height:0.85; min-width:40px; }
+section .lead{ font-size:14.5px; color:var(--text-muted); line-height:1.6; margin:0 0 6px; max-width:720px; }
+section p{ font-size:14.5px; color:var(--text); line-height:1.7; margin-bottom:12px; }
+section p strong{ font-weight:700; }
+code.inline{ font-family:'JetBrains Mono',monospace; font-size:12.5px; background:var(--tag-bg); padding:1px 6px; border-radius:3px; color:var(--text); }
+.keybox{ background:var(--accent-soft); border-left:3px solid var(--accent); border-radius:0 6px 6px 0; padding:13px 18px; margin:16px 0 0; font-size:13px; line-height:1.6; color:var(--text); }
+.keybox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--accent-dark); margin-bottom:5px; }
+.keybox b{ color:var(--accent-dark); }
+.notebox{ background:#FBF3E8; border-left:3px solid var(--rust); border-radius:0 6px 6px 0; padding:13px 18px; margin:16px 0 0; font-size:13px; line-height:1.6; }
+.notebox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--rust); margin-bottom:5px; }
+.assessment-box{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--slate); border-radius:0 6px 6px 0; padding:18px 22px; margin:34px 0 0; }
+.assessment-box .assess-label{ font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); margin-bottom:8px; }
+.assessment-box p{ font-size:13px; line-height:1.65; margin:0; }
+.widget{ border:0.5px solid var(--border); border-radius:10px; padding:18px; margin:18px 0 0; background:var(--bg-card); }
+.widget h4{ margin:0 0 12px; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); font-weight:700; }
+.controls{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+button.ui{ font-family:'Barlow',sans-serif; cursor:pointer; border:1px solid var(--accent); background:var(--accent); color:#fff; padding:7px 16px; border-radius:6px; font-size:12.5px; font-weight:600; transition:0.15s; }
+button.ui:hover{ background:var(--accent-dark); border-color:var(--accent-dark); }
+button.ui.ghost{ background:#fff; color:var(--accent); }
+button.ui.ghost:hover{ background:var(--accent-soft); }
+.fade{ animation:fade 0.35s ease; }
+@keyframes fade{ from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+input[type=range]{ accent-color:var(--accent); }
+</style>
+</head><body>
+<header class="pagenav"><div class="pagenav-inner">
+  <span class="brand">Cloud Security Fundamentals</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn disabled" href="#">&larr; Prev</a>
+    <a class="navbtn" href="02-logging-everywhere.html">Next &rarr;</a>
+  </nav>
+</div></header>
+
+<div class="header"><div class="header-inner">
+  <div class="header-eyebrow">Module 10 &nbsp;·&nbsp; Cross-Cutting · Visibility</div>
+  <h1><em>CloudWatch</em> &amp; <em>CloudTrail</em></h1>
+  <div class="header-meta-row">
+    <span class="module-pill">Module 10</span>
+    <span class="topic-pill">Logging · monitoring</span>
+    <span class="topic-pill accent">Auditing</span>
+  </div>
+</div></div>
+
+<div class="page">
+
+  <div class="objectives">
+    <div class="obj-label">In this note</div>
+    <ul>
+      <li>Two different questions: &ldquo;how is the app behaving?&rdquo; vs &ldquo;how are people behaving?&rdquo;</li>
+      <li>CloudWatch &mdash; metrics, logs, and alarms for operational health</li>
+      <li>CloudTrail &mdash; the audit trail of who did what, and why compliance needs it</li>
+      <li>The data-events trap: the read-only attacker default CloudTrail can&rsquo;t see</li>
+    </ul>
+  </div>
+
+  <section>
+    <h2><span class="num">1</span> Two very different questions</h2>
+    <p class="lead">&ldquo;Logging&rdquo; covers two jobs that sound similar but answer opposite questions. AWS splits them into two services. Flip between them:</p>
+    <div class="widget" id="vs">
+      <h4>CloudWatch vs CloudTrail</h4>
+      <div class="controls" style="margin:0 0 14px">
+        <button class="ui" data-s="cw">CloudWatch</button>
+        <button class="ui ghost" data-s="ct">CloudTrail</button>
+      </div>
+      <div id="vsStage"></div>
+    </div>
+    <div class="keybox">
+      <div class="lbl">The one-line split</div>
+      <b>CloudWatch watches the application; CloudTrail watches the people.</b> &ldquo;Is the server running slowly?&rdquo; is a CloudWatch question. &ldquo;Did Bob delete the database?&rdquo; is a CloudTrail question.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> CloudWatch: is everything healthy?</h2>
+    <p class="lead">CloudWatch collects <strong>logs</strong> (an NGINX line per request: client IP, status code, latency) and <strong>metrics</strong> (numbers like CPU %). You set a <strong>baseline</strong> for normal and an <strong>alarm</strong> for when a metric crosses a threshold. Drag the CPU:</p>
+    <div class="widget" id="alarm">
+      <h4>An alarm at 80% CPU</h4>
+      <div class="controls" style="margin:0 0 8px">
+        <span style="font-size:12.5px;color:var(--text-muted)">CPU utilization:</span>
+        <input type="range" id="cpuRange" min="0" max="100" value="35" style="flex:1;min-width:160px">
+        <span id="cpuVal" style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;color:var(--accent)">35%</span>
+      </div>
+      <div id="alarmStage"></div>
+      <p id="alarmCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:34px"></p>
+    </div>
+    <div class="notebox">
+      <div class="lbl">Logs are for defense too</div>
+      The NGINX log isn&rsquo;t just for troubleshooting a crash. If you spot a <b>single IP sending thousands of requests</b>, that&rsquo;s a denial-of-service attempt &mdash; the log tells you exactly which IP to block.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> CloudTrail: who did what?</h2>
+    <p class="lead">CloudTrail records <strong>user activity</strong> &mdash; every API call &mdash; as an audit trail. When something goes wrong, it answers four questions:</p>
+    <div class="widget" id="trail">
+      <h4>An audit-trail entry</h4>
+      <div id="trailStage"></div>
+    </div>
+    <div class="keybox">
+      <div class="lbl">Why this is a legal requirement</div>
+      Regulations like <b>HIPAA</b> (health records), <b>PCI&nbsp;DSS</b> (card data), and <b>GDPR</b> (personal data) require you to <b>prove</b> who accessed sensitive data. Without an audit trail to show inspectors, an organisation can face large fines. (Note: CloudTrail <i>enables</i> that proof &mdash; turning it on isn&rsquo;t the same as being compliant.)
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> The data-events trap</h2>
+    <p class="lead">Here&rsquo;s the blind spot every student must know. CloudTrail does <strong>not</strong> record everything by default. Choose what the attacker does:</p>
+    <div class="widget" id="trap">
+      <h4>Will default CloudTrail catch it?</h4>
+      <div class="controls" style="margin:0 0 14px">
+        <button class="ui" data-a="mgmt">Delete the table</button>
+        <button class="ui ghost" data-a="data">Download the customer list</button>
+      </div>
+      <div id="trapStage"></div>
+      <p id="trapCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:48px"></p>
+    </div>
+    <div class="notebox">
+      <div class="lbl">What &ldquo;logged by default&rdquo; really means</div>
+      <b>Management events</b> (actions that change your environment&rsquo;s structure &mdash; <code class="inline">CreateBucket</code>, <code class="inline">DeleteTable</code>, <code class="inline">AddUser</code>) appear in CloudTrail&rsquo;s free <b>90-day Event history</b>. <b>Data events</b> (high-volume reads <i>inside</i> a resource &mdash; <code class="inline">GetObject</code>, <code class="inline">GetItem</code>) are <b>off by default</b> and cost extra to enable. So a thief who only <i>reads</i> your data can be invisible.
+    </div>
+  </section>
+
+  <div class="assessment-box">
+    <div class="assess-label">Remember</div>
+    <p>Two services, two questions. <strong>CloudWatch</strong> watches the <strong>application</strong> &mdash; logs and metrics for operational health, with <strong>alarms</strong> that fire when a metric (like CPU&nbsp;&gt;&nbsp;80%) crosses a threshold and can notify a person or take action. <strong>CloudTrail</strong> watches the <strong>people</strong> &mdash; an audit trail of who did what, when, and from where, the backbone of <strong>compliance</strong> (HIPAA, PCI DSS, GDPR). The trap: CloudTrail logs <strong>management events</strong> by default (in the 90-day history) but <strong>not data events</strong> &mdash; so a read-only attacker who never changes structure can slip by unless you&rsquo;ve explicitly enabled data-event logging.</p>
+  </div>
+
+</div>
+
+<footer class="pagenav foot"><div class="pagenav-inner">
+  <span class="brand">Module 10 &middot; Logging &amp; Auditing</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn disabled" href="#">&larr; Prev</a>
+    <a class="navbtn" href="02-logging-everywhere.html">Next &rarr;</a>
+  </nav>
+</div></footer>
+
+<script>
+/* ---------- 1. CloudWatch vs CloudTrail ---------- */
+(function(){
+  const stage=document.getElementById('vsStage');
+  let s='cw';
+  const D={
+    cw:{name:'Amazon CloudWatch',col:'#0E7490',q:'&ldquo;Is the server running slowly?&rdquo;',
+      rows:[['Focus','The application &amp; infrastructure'],['Data','Performance metrics &amp; error logs'],['Goal','Operational health'],['Example','CPU spikes to 95%; latency climbs']]},
+    ct:{name:'AWS CloudTrail',col:'#B45309',q:'&ldquo;Did Bob delete the database?&rdquo;',
+      rows:[['Focus','The user &amp; their actions'],['Data','API history &amp; user activity'],['Goal','Security &amp; compliance'],['Example','Alice ran DeleteTable at 3:02am']]}
+  };
+  function render(){
+    const d=D[s];
+    let h=`<div style="background:var(--bg);border-radius:9px;padding:16px 18px;border-left:3px solid ${d.col}">`+
+      `<div style="font-family:'Barlow Condensed';font-weight:900;font-size:24px;color:${d.col}">${d.name}</div>`+
+      `<div style="font-size:15px;font-weight:700;color:var(--text);margin:4px 0 12px">${d.q}</div>`;
+    d.rows.forEach(r=>{ h+=`<div style="display:flex;gap:12px;padding:5px 0;border-top:0.5px solid var(--border)"><span style="flex:0 0 80px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--text-light);padding-top:2px">${r[0]}</span><span style="font-size:13.5px;color:var(--text)">${r[1]}</span></div>`; });
+    h+='</div>';
+    stage.className='fade'; stage.innerHTML=h;
+    document.querySelectorAll('#vs [data-s]').forEach(b=>b.className='ui'+(b.dataset.s===s?'':' ghost'));
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  render();
+  document.querySelectorAll('#vs [data-s]').forEach(b=>b.onclick=()=>{s=b.dataset.s;render();});
+})();
+
+/* ---------- 2. CloudWatch alarm ---------- */
+(function(){
+  const range=document.getElementById('cpuRange'),val=document.getElementById('cpuVal'),stage=document.getElementById('alarmStage'),cap=document.getElementById('alarmCap');
+  function render(){
+    const v=+range.value, alarm=v>80;
+    val.textContent=v+'%';
+    const c=alarm?'#c0392b':'#2e7d57';
+    let s=`<svg viewBox="0 0 520 96" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    // track
+    s+=`<rect x="14" y="34" width="424" height="22" rx="11" fill="#eef1f3"/>`;
+    s+=`<rect x="14" y="34" width="${424*v/100}" height="22" rx="11" fill="${c}"/>`;
+    // threshold marker at 80%
+    const tx=14+424*0.8;
+    s+=`<line x1="${tx}" y1="26" x2="${tx}" y2="64" stroke="#1A202C" stroke-width="1.6" stroke-dasharray="3 3"/>`;
+    s+=`<text x="${tx}" y="20" text-anchor="middle" font-size="9" font-weight="800" fill="#1A202C">threshold 80%</text>`;
+    // status badge
+    s+=`<rect x="448" y="30" width="62" height="30" rx="8" fill="${alarm?'#fdecea':'#eaf7ef'}" stroke="${c}" stroke-width="1.5"/><text x="479" y="49" text-anchor="middle" font-size="11" font-weight="900" fill="${c}">${alarm?'ALARM':'OK'}</text>`;
+    s+=`<text x="14" y="82" font-size="10" fill="#5f5e5a">metric: CPU utilization</text>`;
+    s+=`</svg>`;
+    stage.innerHTML=s;
+    cap.innerHTML = alarm
+      ? '<b style="color:#c0392b">ALARM.</b> CPU is above the 80% threshold. CloudWatch fires the alarm &mdash; it can page a developer <i>and</i>/or trigger an automated action, like adding instances or restarting the server.'
+      : '<b style="color:#2e7d57">OK.</b> CPU is within normal range. The alarm stays quiet. Push it past 80% to watch it trip.';
+  }
+  render();
+  range.oninput=render;
+})();
+
+/* ---------- 3. Audit-trail entry ---------- */
+(function(){
+  const stage=document.getElementById('trailStage');
+  const rows=[['Who','User <b>Alice</b>'],['What','<code class="inline">DeleteTable</code> on CustomerDB'],['When','2025-06-09 03:02:14 UTC'],['Where','source IP 203.0.113.47']];
+  let h=`<div style="font-family:JetBrains Mono,monospace;background:#1A202C;border-radius:9px;padding:14px 16px">`;
+  rows.forEach(r=>{ h+=`<div style="display:flex;gap:10px;padding:4px 0"><span style="flex:0 0 56px;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#7CF2C0;padding-top:2px">${r[0]}</span><span style="font-size:12.5px;color:#e7ecee">${r[1]}</span></div>`; });
+  h+=`</div>`;
+  stage.innerHTML=h;
+})();
+
+/* ---------- 4. Data-events trap ---------- */
+(function(){
+  const stage=document.getElementById('trapStage'),cap=document.getElementById('trapCap');
+  let a='mgmt';
+  function render(){
+    const mgmt=a==='mgmt';
+    const caught=mgmt;
+    let s=`<svg viewBox="0 0 520 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    // attacker
+    s+=`<circle cx="40" cy="62" r="18" fill="#2D3748"/><text x="40" y="67" text-anchor="middle" font-size="15" fill="#fff">&#128520;</text>`;
+    // action label
+    s+=`<rect x="120" y="44" width="170" height="36" rx="8" fill="#fff" stroke="#cfd6db" stroke-width="1.3"/>`;
+    s+=`<text x="205" y="60" text-anchor="middle" font-size="11" font-weight="800" fill="#1a1a18">${mgmt?'DeleteTable':'GetObject'}</text>`;
+    s+=`<text x="205" y="73" text-anchor="middle" font-size="8.5" fill="#5f5e5a">${mgmt?'management event':'data event'}</text>`;
+    s+=`<line x1="58" y1="62" x2="118" y2="62" stroke="#9aa3a8" stroke-width="1.6" marker-end="url(#tra)"/>`;
+    s+=`<line x1="290" y1="62" x2="346" y2="62" stroke="#9aa3a8" stroke-width="1.6" marker-end="url(#tra)"/>`;
+    // CloudTrail
+    const c=caught?'#2e7d57':'#c0392b';
+    s+=`<rect x="350" y="36" width="156" height="52" rx="9" fill="${caught?'#eaf7ef':'#fdecea'}" stroke="${c}" stroke-width="1.6"/>`;
+    s+=`<text x="428" y="56" text-anchor="middle" font-size="11" font-weight="800" fill="#1a1a18">CloudTrail (default)</text>`;
+    s+=`<text x="428" y="74" text-anchor="middle" font-size="11" font-weight="900" fill="${c}">${caught?'&#10003; recorded':'&#10007; silent'}</text>`;
+    s+=`<defs><marker id="tra" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#7a8589"/></marker></defs>`;
+    s+=`</svg>`;
+    stage.className='fade'; stage.innerHTML=s;
+    cap.innerHTML = mgmt
+      ? '<b style="color:#2e7d57">Caught.</b> Deleting the table is a <b>management event</b> &mdash; it changes your environment&rsquo;s structure, so default CloudTrail records it. You&rsquo;ll see Alice did it.'
+      : '<b style="color:#c0392b">Silent.</b> Downloading the customer list is a <b>data event</b> &mdash; off by default. The thief reads every record and never changes a thing, so standard CloudTrail shows <b>nothing</b> unless you enabled data-event logging.';
+    document.querySelectorAll('#trap [data-a]').forEach(b=>b.className='ui'+(b.dataset.a===a?'':' ghost'));
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  render();
+  document.querySelectorAll('#trap [data-a]').forEach(b=>b.onclick=()=>{a=b.dataset.a;render();});
+})();
+</script>
+</body></html>
