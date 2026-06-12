@@ -158,54 +158,64 @@ input[type=range]{ accent-color:var(--accent); }
   </section>
 
   <section>
-    <h2><span class="num">2</span> Resolving the name &amp; building the packet</h2>
-    <p>Say you open <code class="inline">example.com</code> &mdash; a site whose server lives in <strong>Bulgaria</strong>. The internet finds machines by <strong>IP number</strong>, not by name, so your browser's very first step is a <strong>DNS resolution</strong> (Domain Name System) to turn <code class="inline">example.com</code> into an IP address:</p>
-    <div class="widget"><h4>DNS resolution: name → IP</h4><svg viewBox="0 0 690 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif"><defs><marker id="dnsA" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa3a8"/></marker></defs><rect x="30" y="52" width="160" height="52" rx="8" fill="#2D3748"/><text x="110" y="75" fill="#fff" font-size="12.5" font-weight="700" text-anchor="middle">Your browser</text><text x="110" y="93" fill="#cbd5e0" font-size="9.5" font-weight="500" text-anchor="middle">wants example.com</text><rect x="290" y="52" width="150" height="52" rx="8" fill="#0E7490"/><text x="365" y="75" fill="#fff" font-size="12.5" font-weight="700" text-anchor="middle">DNS resolver</text><text x="365" y="93" fill="#d4eef4" font-size="9.5" font-weight="500" text-anchor="middle">name → number</text><rect x="540" y="52" width="120" height="52" rx="8" fill="#fff" stroke="#cfd6da" stroke-width="1"/><text x="600" y="72" fill="#5f5e5a" font-size="10" font-weight="600" text-anchor="middle">IP address</text><text x="600" y="92" fill="#1a1a18" font-size="11" font-weight="700" text-anchor="middle" font-family="'JetBrains Mono',monospace">203.0.113.10</text><line x1="192" y1="78" x2="288" y2="78" stroke="#9aa3a8" stroke-width="2" marker-end="url(#dnsA)"/><text x="240" y="68" fill="#5f5e5a" font-size="10" font-weight="600" text-anchor="middle">example.com ?</text><line x1="442" y1="78" x2="538" y2="78" stroke="#9aa3a8" stroke-width="2" marker-end="url(#dnsA)"/><text x="491" y="68" fill="#5f5e5a" font-size="10" font-weight="600" text-anchor="middle">here it is</text></svg></div>
-    <div class="notebox"><div class="lbl">Why this matters for security</div>Everything downstream trusts this name&rarr;IP answer. Poison it and users are silently sent to an attacker &mdash; a <b>DNS spoofing</b> attack, where the lookup returns a bad IP address. We cover it in Module 2.</div>
-    <p>Now your client builds a packet &mdash; notice how the addresses pair up, and the one field it can't fill yet:</p>
-    <div class="widget" id="pkt"><h4>Anatomy of a packet</h4><svg viewBox="0 0 700 122" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif"><g class="pkt-seg" data-seg="msg" tabindex="0" role="button" style="cursor:pointer"><rect x="30" y="48" width="90" height="46" rx="5" fill="#1a1a18" stroke="#ffffff" stroke-width="1"/><text x="75" y="76" fill="#fff" font-size="12" font-weight="800" text-anchor="middle" pointer-events="none">MSG</text></g><g class="pkt-seg" data-seg="src-ip" tabindex="0" role="button" style="cursor:pointer"><rect x="120" y="48" width="110" height="46" rx="5" fill="#4FA82E" stroke="#ffffff" stroke-width="1"/><text x="175" y="76" fill="#fff" font-size="12" font-weight="800" text-anchor="middle" pointer-events="none">SRC IP</text></g><g class="pkt-seg" data-seg="src-mac" tabindex="0" role="button" style="cursor:pointer"><rect x="230" y="48" width="115" height="46" rx="5" fill="#4FA82E" stroke="#ffffff" stroke-width="1"/><text x="287.5" y="76" fill="#fff" font-size="12" font-weight="800" text-anchor="middle" pointer-events="none">SRC MAC</text></g><g class="pkt-seg" data-seg="dest-ip" tabindex="0" role="button" style="cursor:pointer"><rect x="345" y="48" width="110" height="46" rx="5" fill="#9B2FAE" stroke="#ffffff" stroke-width="1"/><text x="400" y="76" fill="#fff" font-size="12" font-weight="800" text-anchor="middle" pointer-events="none">DEST IP</text></g><g class="pkt-seg" data-seg="dest-mac" tabindex="0" role="button" style="cursor:pointer"><rect x="455" y="48" width="130" height="46" rx="5" fill="#E8731C" stroke="#ffffff" stroke-width="1"/><text x="520" y="76" fill="#fff" font-size="12" font-weight="800" text-anchor="middle" pointer-events="none">DEST MAC</text></g><text x="520" y="110" fill="#E8731C" font-size="9.5" font-weight="700" text-anchor="middle" pointer-events="none">↻ rewritten each hop</text></svg><p id="pktCap" style="font-size:13px;color:var(--text-muted);margin:12px 0 0;line-height:1.6"><b>Click any field</b> to see what it carries. <span style="color:#4FA82E;font-weight:700">Green</span> = source &middot; <span style="color:#9B2FAE;font-weight:700">purple</span> = destination IP (constant) &middot; <span style="color:#E8731C;font-weight:700">orange</span> = destination MAC (rewritten each hop).</p></div>
-    <p>That missing field is the <strong>destination MAC</strong>: the Bulgaria server isn't on your local network, so the packet is handed to the <strong>next hop</strong> (your router). From there it's <strong>routed</strong> across the internet &mdash; the next section &mdash; with the MAC rewritten at each hop (how each hop discovers the next MAC is the ARP story in Section 9).</p>
-  </section>
-
-  <section>
-    <h2><span class="num">3</span> IP routing is like the postal service</h2>
-    <p>Now the packet exists, addressed to that Bulgaria server's IP &mdash; how does it actually get there? <strong>IP routing</strong> works hop by hop: no single point knows the whole path, each stop only knows its <strong>next hop</strong>. Just like a letter from San Jose to Sofia, every facility that doesn't know how to reach the destination forwards it to the next stop up the chain, until one does. Step through it:</p>
-    <div class="widget" id="postal">
-      <h4>Packet journey &mdash; next-hop forwarding</h4>
-      <div id="hops" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px"></div>
-      <div id="packet" style="font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--bg-code);border:0.5px solid var(--border);border-radius:6px;padding:12px 14px"></div>
-      <div class="controls">
-        <button class="ui" id="hopNext">Next hop &rarr;</button>
-        <button class="ui ghost" id="hopReset">Reset</button>
-      </div>
+    <h2><span class="num">2</span> The journey of a packet</h2>
+    <p>Say you open <code class="inline">example.com</code> &mdash; a site whose server lives in <strong>Bulgaria</strong>. <strong>IP routing</strong> works just like the postal service: no single stop knows the whole path; each one only knows its <strong>next hop</strong>, the way a letter from San Jose reaches Sofia via San Francisco, Washington D.C., and London. Watch the whole journey &mdash; from the DNS lookup that starts it, to the packet changing as it travels:</p>
+    <div class="widget" id="journey">
+      <h4>The whole journey &mdash; DNS lookup, then hop by hop to Bulgaria</h4>
+      <svg viewBox="0 0 700 218" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">
+        <defs><marker id="jA" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa3a8"/></marker></defs>
+        <!-- DNS resolver, perpendicular above the client -->
+        <rect id="jDNS" x="30" y="14" width="132" height="46" rx="8" fill="#0E7490" stroke="transparent" stroke-width="2.5"/>
+        <text x="96" y="34" fill="#fff" font-size="12" font-weight="800" text-anchor="middle">DNS resolver</text>
+        <text x="96" y="50" fill="#d4eef4" font-size="9" text-anchor="middle">name &rarr; number</text>
+        <line id="jDnsLink" x1="96" y1="64" x2="96" y2="128" stroke="#cfd6da" stroke-width="2"/>
+        <text id="jDnsLbl" x="106" y="100" fill="#B45309" font-size="10.5" font-weight="700"></text>
+        <!-- horizontal leg -->
+        <rect id="jClient" x="30" y="132" width="132" height="54" rx="8" fill="#2D3748" stroke="transparent" stroke-width="2.5"/>
+        <text x="96" y="155" fill="#fff" font-size="12.5" font-weight="800" text-anchor="middle">Your browser</text>
+        <text x="96" y="172" fill="#cbd5e0" font-size="9" text-anchor="middle">client &middot; San Jose</text>
+        <rect id="jR1" x="216" y="142" width="86" height="36" rx="18" fill="#f3f5f6" stroke="#cfd6da" stroke-width="2"/>
+        <text x="259" y="164" fill="#2D3748" font-size="10.5" font-weight="700" text-anchor="middle">home router</text>
+        <rect id="jR2" x="336" y="142" width="86" height="36" rx="18" fill="#f3f5f6" stroke="#cfd6da" stroke-width="2"/>
+        <text x="379" y="164" fill="#2D3748" font-size="10.5" font-weight="700" text-anchor="middle">ISP router</text>
+        <rect id="jR3" x="456" y="142" width="64" height="36" rx="18" fill="#f3f5f6" stroke="#cfd6da" stroke-width="2"/>
+        <text x="488" y="164" fill="#2D3748" font-size="10.5" font-weight="700" text-anchor="middle">&hellip;</text>
+        <rect id="jServer" x="554" y="132" width="128" height="54" rx="8" fill="#2D3748" stroke="transparent" stroke-width="2.5"/>
+        <text x="618" y="155" fill="#fff" font-size="12.5" font-weight="800" text-anchor="middle">Server</text>
+        <text x="618" y="172" fill="#cbd5e0" font-size="9" text-anchor="middle">203.0.113.10 &middot; Bulgaria</text>
+        <line x1="164" y1="160" x2="212" y2="160" stroke="#9aa3a8" stroke-width="2" marker-end="url(#jA)"/>
+        <line x1="304" y1="160" x2="332" y2="160" stroke="#9aa3a8" stroke-width="2" marker-end="url(#jA)"/>
+        <line x1="424" y1="160" x2="452" y2="160" stroke="#9aa3a8" stroke-width="2" marker-end="url(#jA)"/>
+        <line x1="522" y1="160" x2="550" y2="160" stroke="#9aa3a8" stroke-width="2" marker-end="url(#jA)"/>
+        <circle id="jPkt" cx="96" cy="120" r="7" fill="#B45309" stroke="#fff" stroke-width="2" opacity="0"/>
+        <text x="30" y="208" fill="#5f5e5a" font-size="10" font-weight="600">The &hellip; stop stands for the long middle of the trip: San Francisco &rarr; Washington D.C. &rarr; London &rarr; Bulgaria.</text>
+      </svg>
+      <div id="jPanel" style="font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--bg-code);border:0.5px solid var(--border);border-radius:6px;padding:12px 14px;margin-top:12px"></div>
+      <div class="controls"><button class="ui" id="jNext">Next step &rarr;</button><button class="ui ghost" id="jReset">Reset</button></div>
+      <p id="jCap" style="font-size:13px;color:var(--text-muted);margin:12px 0 0;line-height:1.65"></p>
     </div>
     <div class="notebox">
       <div class="lbl">The crucial detail</div>
       At every hop the <strong>destination IP stays the same</strong> (it's the final address), but the <strong>MAC address is rewritten</strong> to point at the <em>next</em> machine in the chain. IP says where it's ultimately going; MAC says the very next physical step.
     </div>
+    <div class="notebox"><div class="lbl">Why this matters for security</div>Everything downstream trusts this name&rarr;IP answer. Poison it and users are silently sent to an attacker &mdash; a <b>DNS spoofing</b> attack, where the lookup returns a bad IP address. We cover it in Module 2.</div>
   </section>
 
-  <section>
-    <h2><span class="num">4</span> Finding your own addresses</h2>
-    <p>You can inspect your machine's addresses from a terminal &mdash; <span class="kbd">ipconfig</span> on Windows, <span class="kbd">ifconfig</span> on macOS, <span class="kbd">ip addr</span> on modern Linux:</p>
-    <div class="code-label">Terminal &mdash; ifconfig (macOS)</div>
-<pre><code>en0:  <span class="code-comment">(Wi-Fi interface)</span>
-  ether   10:bd:3a:7e:4d:3f          <span class="code-comment"># MAC address (physical, fixed)</span>
-  inet    <span class="code-key">192.168.1.165</span>             <span class="code-comment"># IPv4 address (given by your router)</span>
-  inet6   fe80::1c3a:...             <span class="code-comment"># IPv6 address</span></code></pre>
-    <p>Every device on your home network shares the same network prefix and gets a different host number: your Mac <code class="inline">192.168.1.165</code>, your phone <code class="inline">192.168.1.246</code>, the router <code class="inline">192.168.1.254</code>.</p>
+<section>
+    <h2><span class="num">3</span> The traveler &mdash; inside the packet</h2>
+    <p>So what exactly is making this journey? A <strong>packet</strong>: a small envelope of data. The message rides in the middle, wrapped in the addresses that get it delivered &mdash; click each field:</p>
+    <div class="widget" id="pkt"><h4>Anatomy of a packet</h4><svg viewBox="0 0 700 122" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif"><g class="pkt-seg" data-seg="msg" tabindex="0" role="button" style="cursor:pointer"><rect x="30" y="48" width="90" height="46" rx="5" fill="#1a1a18" stroke="#ffffff" stroke-width="1"/><text x="75" y="76" fill="#fff" font-size="12" font-weight="800" text-anchor="middle" pointer-events="none">MSG</text></g><g class="pkt-seg" data-seg="src-ip" tabindex="0" role="button" style="cursor:pointer"><rect x="120" y="48" width="110" height="46" rx="5" fill="#4FA82E" stroke="#ffffff" stroke-width="1"/><text x="175" y="76" fill="#fff" font-size="12" font-weight="800" text-anchor="middle" pointer-events="none">SRC IP</text></g><g class="pkt-seg" data-seg="src-mac" tabindex="0" role="button" style="cursor:pointer"><rect x="230" y="48" width="115" height="46" rx="5" fill="#4FA82E" stroke="#ffffff" stroke-width="1"/><text x="287.5" y="76" fill="#fff" font-size="12" font-weight="800" text-anchor="middle" pointer-events="none">SRC MAC</text></g><g class="pkt-seg" data-seg="dest-ip" tabindex="0" role="button" style="cursor:pointer"><rect x="345" y="48" width="110" height="46" rx="5" fill="#9B2FAE" stroke="#ffffff" stroke-width="1"/><text x="400" y="76" fill="#fff" font-size="12" font-weight="800" text-anchor="middle" pointer-events="none">DEST IP</text></g><g class="pkt-seg" data-seg="dest-mac" tabindex="0" role="button" style="cursor:pointer"><rect x="455" y="48" width="130" height="46" rx="5" fill="#E8731C" stroke="#ffffff" stroke-width="1"/><text x="520" y="76" fill="#fff" font-size="12" font-weight="800" text-anchor="middle" pointer-events="none">DEST MAC</text></g><text x="520" y="110" fill="#E8731C" font-size="9.5" font-weight="700" text-anchor="middle" pointer-events="none">↻ rewritten each hop</text></svg><p id="pktCap" style="font-size:13px;color:var(--text-muted);margin:12px 0 0;line-height:1.6"><b>Click any field</b> to see what it carries. <span style="color:#4FA82E;font-weight:700">Green</span> = source &middot; <span style="color:#9B2FAE;font-weight:700">purple</span> = destination IP (constant) &middot; <span style="color:#E8731C;font-weight:700">orange</span> = destination MAC (rewritten each hop).</p></div>
+    <p>The destination <strong>IP</strong> is the final address (constant, like the street address on the envelope); the destination <strong>MAC</strong> is only ever the <em>next local step</em>, rewritten at every hop &mdash; exactly what you watched in the journey above.</p>
+    <p>Both addresses are on your own machine right now. Your laptop's network card has a <strong>MAC address</strong> burned into it &mdash; something like <code class="inline">10:bd:3a:7e:4d:3f</code> &mdash; its permanent physical identity. And your router has handed it an <strong>IP address</strong> &mdash; something like <code class="inline">192.168.1.165</code> &mdash; its address on this network. (The lecture demo shows how to look up your own.)</p>
+    <p>Every device on your home network shares the same network prefix and gets a different host number: your laptop <code class="inline">192.168.1.165</code>, your phone <code class="inline">192.168.1.246</code>, the router <code class="inline">192.168.1.254</code>.</p>
     <div class="keybox">
       <div class="lbl">IP routes across networks; MAC routes within one</div>
       Leave home and join the Starbucks Wi&#8209;Fi: your <b>MAC stays the same</b> (it's the physical address of your network card), but you get a <b>new IP</b> from the Starbucks router (assigned automatically by <b>DHCP</b>, the Dynamic Host Configuration Protocol). MAC = which device on this local network. IP = how to cross between networks. (See it live: switch your laptop to a phone hotspot &mdash; the phone becomes the router and hands out a new IP, while your MAC is unchanged.) One modern wrinkle: phones now <b>randomize</b> their Wi&#8209;Fi MAC per network by default (iOS&nbsp;14+, Android&nbsp;10+) &mdash; precisely <em>because</em> a fixed MAC lets networks track your device. The exception proves the rule: MAC is your identity on the local network.
     </div>
     <div class="notebox">
       <div class="lbl">&ldquo;MAC&rdquo; here = Media Access Control</div>
-      A <b>MAC address</b> is the fixed physical address burned into a device's network card &mdash; <em>Media Access Control</em>. It has nothing to do with an Apple <em>Mac</em> computer, even though the demo happens to use one. MAC addresses operate at the Network Access layer (TCP/IP) / Data Link layer, Layer&nbsp;2 (OSI).
+      A <b>MAC address</b> is the fixed physical address burned into a device's network card &mdash; <em>Media Access Control</em>. It has nothing to do with an Apple <em>Mac</em> computer. MAC addresses operate at the Network Access layer (TCP/IP) / Data Link layer, Layer&nbsp;2 (OSI).
     </div>
-  </section>
-
-  <section>
-    <h2><span class="num">5</span> IPv4 vs IPv6, and NAT</h2>
     <div class="widget" id="ipv">
       <h4>Address space</h4>
       <div class="controls" style="margin-top:0;margin-bottom:16px">
@@ -217,8 +227,8 @@ input[type=range]{ accent-color:var(--accent); }
     <p>Because IPv4 ran short, your home router performs <strong>NAT</strong> (Network Address Translation): every device on your private network shares one <strong>public IP</strong> on the way out. Load <code class="inline">showmyip.com</code> and you'll see something like <code class="inline">104.56.116.217</code> &mdash; not your private <code class="inline">192.168.x.x</code>. NAT exists for two reasons: it <strong>conserves scarce IPv4 addresses</strong> (many devices behind one public IP), and it adds a measure of <strong>security</strong> by hiding your internal addresses.</p>
   </section>
 
-  <section>
-    <h2><span class="num">6</span> The transport layer &mdash; the handshake</h2>
+<section>
+    <h2><span class="num">4</span> Establishing the session &mdash; the TCP handshake</h2>
     <p>Before any web page is fetched, the client and server must agree to talk. That's the <strong>TCP three&#8209;way handshake</strong>:</p>
     <div class="widget" id="hs">
       <h4>Three-way handshake</h4>
@@ -232,24 +242,19 @@ input[type=range]{ accent-color:var(--accent); }
       <div class="lbl">TCP and IP: a division of labor</div>
       <b>IP delivers, but doesn't guarantee.</b> IP is connectionless and unreliable by itself &mdash; it just forwards packets hop by hop, with no promise they arrive, arrive intact, or arrive in order. <b>TCP guarantees, but doesn't move packets.</b> Riding on top of IP, TCP adds the session (the handshake), correct ordering, and retransmission of anything lost. IP moves the packets; TCP makes the conversation reliable.
     </div>
-    <p><strong>Not everything needs TCP's guarantees.</strong> <strong>UDP</strong> (User Datagram Protocol) is the fast, connectionless alternative &mdash; no handshake, no retransmission. <strong>DNS</strong> lookups, video streaming, and voice calls use UDP, where speed matters more than perfect delivery.</p>
-  </section>
-
-  <section>
-    <h2><span class="num">7</span> Seeing it for real &mdash; Wireshark</h2>
+    <p>(Not everything needs TCP's guarantees &mdash; <strong>UDP</strong> is the fast, no-handshake alternative used by DNS lookups and video streaming.)</p>
+    <h3>Seeing it for real &mdash; Wireshark</h3>
     <p><strong>Wireshark</strong> captures the actual packets &mdash; and on a server with no GUI, <code class="inline">tcpdump</code> does the same job from the command line. Typing <code class="inline">example.com</code> produces this sequence:</p>
     <div class="widget" id="pcap"><h4>Packet capture (PCAP)</h4><div id="pcapList"></div></div>
+    <p style="font-size:12.5px;color:var(--text-muted)">In the recorded demo you'll see example.com's real public IP &mdash; real addresses change over time (example.com's did in 2024), so these notes use a fixed documentation address, <code class="inline">203.0.113.10</code>, throughout.</p>
     <p>Note the redirect: typing plain <code class="inline">example.com</code> hits HTTP first, then gets redirected to <strong>HTTPS on port 443</strong> &mdash; the secure protocol.</p>
   </section>
 
-  <section>
-    <h2><span class="num">8</span> The stack &mdash; TCP/IP vs OSI</h2>
+<section>
+    <h2><span class="num">5</span> The stack &mdash; layers, routing, and switching</h2>
     <div class="widget"><h4>TCP/IP model vs OSI model</h4><svg viewBox="0 0 700 360" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif"><rect x="8" y="12" width="684" height="336" rx="12" fill="#163B5C"/><rect x="40" y="28" width="220" height="30" rx="5" fill="#16263c"/><text x="150" y="48" fill="#ffffff" font-size="13" font-weight="800" text-anchor="middle" font-family="Barlow,Arial,sans-serif">TCP/IP Model</text><rect x="440" y="28" width="220" height="30" rx="5" fill="#1C7293"/><text x="550" y="48" fill="#ffffff" font-size="13" font-weight="800" text-anchor="middle" font-family="Barlow,Arial,sans-serif">OSI Model</text><rect x="40" y="72" width="220" height="90" rx="6" fill="#5BA83E"/><text x="150" y="112" fill="#16314a" font-size="14" font-weight="800" text-anchor="middle" font-family="Barlow,Arial,sans-serif">Application</text><text x="150" y="131" fill="#16314a" font-size="10.5" font-weight="500" text-anchor="middle" font-family="Barlow,Arial,sans-serif">HTTP GET</text><text x="247" y="84" fill="#16314a" font-size="9" font-weight="700" text-anchor="end" font-family="Barlow,Arial,sans-serif">L5–7</text><rect x="40" y="174" width="220" height="44" rx="6" fill="#7FB2E5"/><text x="150" y="194" fill="#16314a" font-size="13" font-weight="800" text-anchor="middle" font-family="Barlow,Arial,sans-serif">Transport</text><text x="150" y="210" fill="#16314a" font-size="9.5" font-weight="500" text-anchor="middle" font-family="Barlow,Arial,sans-serif">TCP handshake</text><text x="247" y="186" fill="#16314a" font-size="9" font-weight="700" text-anchor="end" font-family="Barlow,Arial,sans-serif">L4</text><rect x="40" y="226" width="220" height="44" rx="6" fill="#2E86C8"/><text x="150" y="246" fill="#16314a" font-size="13" font-weight="800" text-anchor="middle" font-family="Barlow,Arial,sans-serif">Internet</text><text x="150" y="262" fill="#16314a" font-size="9.5" font-weight="500" text-anchor="middle" font-family="Barlow,Arial,sans-serif">IP routing</text><text x="247" y="238" fill="#16314a" font-size="9" font-weight="700" text-anchor="end" font-family="Barlow,Arial,sans-serif">L3</text><rect x="40" y="278" width="220" height="62" rx="6" fill="#F2C13D"/><text x="150" y="306" fill="#16314a" font-size="13" font-weight="800" text-anchor="middle" font-family="Barlow,Arial,sans-serif">Network Access</text><text x="150" y="324" fill="#16314a" font-size="9.5" font-weight="500" text-anchor="middle" font-family="Barlow,Arial,sans-serif">MAC / Ethernet</text><text x="247" y="290" fill="#16314a" font-size="9" font-weight="700" text-anchor="end" font-family="Barlow,Arial,sans-serif">L2</text><rect x="440" y="72" width="220" height="28" rx="5" fill="#5BA83E"/><text x="550" y="91" fill="#16314a" font-size="12" font-weight="700" text-anchor="middle" font-family="Barlow,Arial,sans-serif">Application</text><rect x="440" y="104" width="220" height="28" rx="5" fill="#5BA83E"/><text x="550" y="123" fill="#16314a" font-size="12" font-weight="700" text-anchor="middle" font-family="Barlow,Arial,sans-serif">Presentation</text><rect x="440" y="136" width="220" height="28" rx="5" fill="#5BA83E"/><text x="550" y="155" fill="#16314a" font-size="12" font-weight="700" text-anchor="middle" font-family="Barlow,Arial,sans-serif">Session</text><rect x="440" y="174" width="220" height="44" rx="6" fill="#7FB2E5"/><text x="550" y="201" fill="#16314a" font-size="12" font-weight="700" text-anchor="middle" font-family="Barlow,Arial,sans-serif">Transport</text><rect x="440" y="226" width="220" height="44" rx="6" fill="#2E86C8"/><text x="550" y="253" fill="#16314a" font-size="12" font-weight="700" text-anchor="middle" font-family="Barlow,Arial,sans-serif">Network</text><rect x="440" y="278" width="220" height="28" rx="5" fill="#F2C13D"/><text x="550" y="297" fill="#16314a" font-size="12" font-weight="700" text-anchor="middle" font-family="Barlow,Arial,sans-serif">Data Link</text><rect x="440" y="312" width="220" height="28" rx="5" fill="#F2C13D"/><text x="550" y="331" fill="#16314a" font-size="12" font-weight="700" text-anchor="middle" font-family="Barlow,Arial,sans-serif">Physical</text><line x1="270" y1="117" x2="430" y2="117" stroke="#ffffff" stroke-width="2"/><path d="M270 117 l9 -5 v10 z" fill="#fff"/><path d="M430 117 l-9 -5 v10 z" fill="#fff"/><line x1="270" y1="196" x2="430" y2="196" stroke="#ffffff" stroke-width="2"/><path d="M270 196 l9 -5 v10 z" fill="#fff"/><path d="M430 196 l-9 -5 v10 z" fill="#fff"/><line x1="270" y1="248" x2="430" y2="248" stroke="#ffffff" stroke-width="2"/><path d="M270 248 l9 -5 v10 z" fill="#fff"/><path d="M430 248 l-9 -5 v10 z" fill="#fff"/><line x1="270" y1="307" x2="430" y2="307" stroke="#ffffff" stroke-width="2"/><path d="M270 307 l9 -5 v10 z" fill="#fff"/><path d="M430 307 l-9 -5 v10 z" fill="#fff"/></svg></div>
     <p>OSI is a 7&#8209;layer <em>theoretical</em> model; in practice we work with the 4&#8209;layer TCP/IP stack.</p>
-  </section>
-
-  <section>
-    <h2><span class="num">9</span> Routing vs switching: Layer 3 and Layer 2</h2>
+    <h3>Routing vs switching: Layer 3 and Layer 2</h3>
     <p>The hop&#8209;by&#8209;hop journey earlier happens <strong>across networks</strong>, using IP addresses. That's <strong>routing</strong> &mdash; the IP protocol, at the <strong>Internet layer</strong> (TCP/IP) / <strong>Network layer, Layer&nbsp;3</strong> (OSI).</p>
     <p>But two devices on the <strong>same</strong> local network &mdash; your computer and a smart TV on the same Wi&#8209;Fi &mdash; don't need to cross any network. Delivery is by MAC address using the Ethernet protocol. That's <strong>switching</strong>, at the <strong>Network Access layer</strong> (TCP/IP) / <strong>Data Link layer, Layer&nbsp;2</strong> (OSI).</p>
     <table class="compare-table">
@@ -259,25 +264,11 @@ input[type=range]{ accent-color:var(--accent); }
         <tr><td>Switching <span style="font-weight:400;color:var(--text-muted)">&mdash; within the local network</span></td><td>MAC address</td><td>Ethernet</td><td>Layer 2 (Network Access / Data Link)</td></tr>
       </tbody>
     </table>
-    <h3>How does a device learn a neighbor's MAC? ARP</h3>
-    <p>To switch a frame to the TV, your computer needs the TV's <strong>MAC</strong> &mdash; but it only knows the TV's <strong>IP</strong>. It discovers the MAC with <strong>ARP (Address Resolution Protocol)</strong>: it broadcasts to everyone on the subnet asking &ldquo;who has this IP?&rdquo;, and the matching device replies with its MAC. Step through it:</p>
-    <div class="widget" id="arp">
-      <h4>ARP &mdash; finding a neighbor's MAC</h4>
-      <div id="arpStage"></div>
-      <div class="controls"><button class="ui" id="arpNext">Next step &rarr;</button><button class="ui ghost" id="arpReset">Reset</button></div>
-      <p id="arpCaption" style="font-size:13px;color:var(--text-muted);margin:12px 0 0;line-height:1.6"></p>
-    </div>
-    <p>One nuance: if the destination is on <strong>another</strong> network, your computer can't ARP for it &mdash; the destination isn't local. Instead it ARPs for the <strong>default gateway</strong> (your router) and hands the packet there. So ARP always resolves the <em>next local hop</em>: the destination device when it's local, or the gateway when the destination is remote.</p>
-    <h3>Reporting problems: ICMP</h3>
-    <p>Not every packet carries application data. <strong>ICMP (Internet Control Message Protocol)</strong> is a Layer&nbsp;3 protocol for <strong>control and error messages</strong> about IP communication &mdash; carried inside IP packets, so it travels across routers and networks. It powers two everyday tools: <code class="inline">ping</code> (an ICMP echo request and reply &mdash; &ldquo;can I reach this host?&rdquo;) and <code class="inline">traceroute</code> (which reads ICMP time&#8209;exceeded messages to map each hop along the path). ICMP carries no application data; it just lets devices report conditions and verify connectivity.</p>
-    <div class="keybox">
-      <div class="lbl">ARP vs ICMP &mdash; don't confuse them</div>
-      <b>ARP</b> prepares an IP packet for <em>local</em> delivery (find the MAC for the next hop). <b>ICMP</b> is an IP&#8209;level message that <em>reports</em> network conditions (ping, traceroute). One resolves addresses; the other reports status.
-    </div>
+    <p style="font-size:13px;color:var(--text-muted)">How a device discovers a neighbor's MAC (a protocol called ARP) and how networks report errors (ICMP, behind <code class="inline">ping</code>) are details we'll pick up when we need them &mdash; the layer split above is what to remember.</p>
   </section>
 
-  <section>
-    <h2><span class="num">10</span> Subnets and CIDR</h2>
+<section>
+    <h2><span class="num">6</span> Subnets and CIDR</h2>
     <p>A <strong>subnet mask</strong> says how many bits of an address are the <strong>network</strong> portion and how many are the <strong>host</strong> portion. A mask of <code class="inline">255.255.255.0</code> means the first 24 bits are network and the last 8 are host &mdash; written in CIDR as <code class="inline">/24</code>. That's why every device on the home network shares <code class="inline">192.168.1.</code> and only the last number changes.</p>
     <p>An IPv4 address is <strong>32 bits</strong> (four 8&#8209;bit octets). Host bits = <code class="inline">32 &minus; prefix</code>. Drag the slider to explore &mdash; this recreates the <code class="inline">cidr.xyz</code> demo:</p>
     <div class="widget" id="cidr">
@@ -303,7 +294,7 @@ input[type=range]{ accent-color:var(--accent); }
 
   <div class="assessment-box">
     <div class="assess-label">Remember</div>
-    <p>Establish a session first (the TCP handshake), then route packets hop by hop (IP), resolve names with DNS, and deliver within the local network by MAC. <strong>TCP = a reliable conversation; IP = step&#8209;by&#8209;step delivery.</strong></p>
+    <p><strong>DNS</strong> finds the address, <strong>TCP</strong> establishes the session, <strong>IP</strong> routes the packets hop by hop, and <strong>MAC</strong> handles each local step along the way. <strong>TCP = a reliable conversation; IP = step&#8209;by&#8209;step delivery.</strong></p>
     <p>Next, the course begins layering security onto exactly these communications &mdash; Module 2, Securing Internet Communications (encryption, hashing, and digital certificates).</p>
   </div>
 
@@ -326,32 +317,54 @@ input[type=range]{ accent-color:var(--accent); }
   chev.textContent=open?'▶':'▼';
 }
 
-/* ---------- Postal / next-hop ---------- */
-const HOPS=[
-  {n:"Your computer (San Jose)",mac:"10:bd:3a:7e:4d:3f &rarr; <b>router</b>"},
-  {n:"Home router",mac:"rewritten &rarr; <b>ISP router</b>"},
-  {n:"ISP router (San Francisco)",mac:"rewritten &rarr; <b>next router</b>"},
-  {n:"Backbone router (Washington, D.C.)",mac:"rewritten &rarr; <b>international hub</b>"},
-  {n:"International hub (London)",mac:"rewritten &rarr; <b>Bulgaria router</b>"},
-  {n:"Destination server (Sofia)",mac:"final delivery &mdash; arrived"}
-];
-let hop=0;
-const hopsEl=document.getElementById('hops'),pktEl=document.getElementById('packet');
-function renderHops(){
-  hopsEl.innerHTML=HOPS.map((h,i)=>{
-    const done=i<hop, cur=i===hop;
-    const bg=cur?"#0E7490":done?"#cfe0e8":"#eef3f5";
-    const fg=cur?"#fff":done?"#0B5567":"#9aabb2";
-    return `<span style="background:${bg};color:${fg};border-radius:20px;padding:4px 11px;font-size:.76rem;font-weight:700">${i+1}</span>`;
-  }).join('<span style="color:#cdd6da;align-self:center">&rarr;</span>');
-  const h=HOPS[hop];
-  pktEl.innerHTML=`<div style="color:var(--soft);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">At hop ${hop+1}: ${h.n}</div>
-    <div>Destination IP: <span style="color:var(--ok)">203.0.113.10</span> <span style="color:var(--soft)">(never changes)</span></div>
-    <div>Next-hop MAC: <span style="color:var(--rust)">${h.mac}</span></div>`;
-}
-document.getElementById('hopNext').onclick=()=>{if(hop<HOPS.length-1){hop++;renderHops();pktEl.classList.remove('fade');void pktEl.offsetWidth;pktEl.classList.add('fade');}};
-document.getElementById('hopReset').onclick=()=>{hop=0;renderHops();};
-renderHops();
+/* ---------- The journey: DNS + hop-by-hop ---------- */
+(function(){
+  const NODES={dns:'jDNS',client:'jClient',r1:'jR1',r2:'jR2',r3:'jR3',server:'jServer'};
+  const DOT={client:[96,120],r1:[259,128],r2:[379,128],r3:[488,128],server:[618,120]};
+  const MACS={r1:'b8:27:eb:5a:11:01 (home router)',r2:'00:1a:2b:3c:44:02 (ISP router)',
+              r3:'52:54:00:9d:77:03 (next router)',server:'1e:54:25:7e:d2:3e (the server \u2014 final!)'};
+  function panel(dmac, flash){
+    if(!dmac) return '<span style="color:var(--text-light)">no packet yet \u2014 the browser doesn\u2019t know where to send one</span>';
+    const row=(k,v,f)=>`<div><span style="color:var(--soft)">${k}</span>  <span style="${f?'background:#FBF3E8;color:#B45309;font-weight:700;border-radius:3px;padding:0 4px':''}">${v}</span></div>`;
+    return row('MSG      ','GET / (fetch the page)')+
+           row('SRC IP   ','192.168.1.165')+
+           row('SRC MAC  ','10:bd:3a:7e:4d:3f')+
+           row('DEST IP  ','203.0.113.10  \u2190 never changes')+
+           row('DEST MAC ',dmac,flash);
+  }
+  const STEPS=[
+    {cap:'You type <b>example.com</b>. Before anything can travel, the browser needs the server\u2019s <b>IP address</b> \u2014 the internet routes by number, not by name.',focus:'client',dot:null,dmac:null,lbl:''},
+    {cap:'<b>\u2460 DNS query.</b> The browser asks the <b>DNS resolver</b>: \u201cwho is example.com?\u201d \u2014 a quick side-trip before the real journey.',focus:'dns',dot:null,dmac:null,lbl:'example.com ?'},
+    {cap:'<b>\u2461 DNS answer:</b> <b>203.0.113.10</b>. Now the browser knows where it\u2019s going. (This answer is trusted blindly \u2014 see the security note below.)',focus:'dns',dot:null,dmac:null,lbl:'203.0.113.10'},
+    {cap:'<b>The packet is built.</b> The browser fills in everything it knows. It <i>can\u2019t</i> know the server\u2019s MAC \u2014 Bulgaria isn\u2019t on this network \u2014 so the destination MAC is simply its <b>next hop</b>: the home router.',focus:'client',dot:'client',dmac:MACS.r1,flash:true,lbl:''},
+    {cap:'<b>At the home router.</b> It can\u2019t deliver to Bulgaria directly either \u2014 so it rewrites the destination MAC to <i>its</i> next hop, the ISP router, and forwards. The destination <b>IP is untouched</b>.',focus:'r1',dot:'r1',dmac:MACS.r2,flash:true,lbl:''},
+    {cap:'<b>At the ISP router.</b> Same move: MAC rewritten to the next stop. Hop by hop, the packet crosses the backbone \u2014 San Francisco, D.C., London.',focus:'r2',dot:'r2',dmac:MACS.r3,flash:true,lbl:''},
+    {cap:'<b>The last router</b> sits on the server\u2019s own local network in Bulgaria \u2014 so at last it can write the <b>server\u2019s real MAC</b>.',focus:'r3',dot:'r3',dmac:MACS.server,flash:true,lbl:''},
+    {cap:'<b>Delivered.</b> Across the whole journey the destination <b>IP never changed</b> (the final address) while the destination <b>MAC changed at every hop</b> (the very next step). That\u2019s IP routing.',focus:'server',dot:'server',dmac:MACS.server,flash:false,lbl:''}
+  ];
+  let st=0;
+  const cap=document.getElementById('jCap'), pan=document.getElementById('jPanel'),
+        dot=document.getElementById('jPkt'), lbl=document.getElementById('jDnsLbl'),
+        link=document.getElementById('jDnsLink');
+  function render(){
+    const s=STEPS[st];
+    Object.entries(NODES).forEach(([k,id])=>{
+      const el=document.getElementById(id);
+      const base=(k==='r1'||k==='r2'||k==='r3')?'#cfd6da':'transparent';
+      el.setAttribute('stroke', k===s.focus ? '#B45309' : base);
+    });
+    link.setAttribute('stroke', s.focus==='dns' ? '#0E7490' : '#cfd6da');
+    lbl.textContent=s.lbl;
+    if(s.dot){ dot.setAttribute('opacity','1'); dot.setAttribute('cx',DOT[s.dot][0]); dot.setAttribute('cy',DOT[s.dot][1]); }
+    else dot.setAttribute('opacity','0');
+    pan.innerHTML=panel(s.dmac, s.flash);
+    cap.innerHTML=s.cap;
+    cap.classList.remove('fade');void cap.offsetWidth;cap.classList.add('fade');
+  }
+  document.getElementById('jNext').onclick=()=>{ if(st<STEPS.length-1){st++;render();} };
+  document.getElementById('jReset').onclick=()=>{ st=0;render(); };
+  render();
+})();
 
 /* ---------- IPv4 / IPv6 ---------- */
 const ipvStage=document.getElementById('ipvStage');
@@ -457,44 +470,6 @@ function renderCIDR(){
 }
 slide.addEventListener('input',renderCIDR);
 renderCIDR();
-
-/* ---------- ARP (Address Resolution Protocol) ---------- */
-const ARP_DEVICES=[
-  {name:'Your computer', ip:'192.168.1.165', mac:'10:bd:3a:7e:4d:3f', self:true},
-  {name:'Smart TV',      ip:'192.168.1.250', mac:'1E:54:25:7E:D2:3E', target:true},
-  {name:'Printer',       ip:'192.168.1.5',   mac:'00:1b:63:84:45:e6'},
-  {name:'Phone',         ip:'192.168.1.30',  mac:'3c:5a:b4:09:77:d2'},
-];
-const ARP_STEPS=[
-  {cap:"Your computer wants to send a frame to the <b>Smart TV (192.168.1.250)</b> on the same network &mdash; but it only knows the TV's <b>IP</b>, not its <b>MAC</b>."},
-  {cap:"<b>Broadcast.</b> Your computer asks <i>everyone</i> on the subnet: &ldquo;Who has 192.168.1.250? Tell me your MAC.&rdquo; Every device hears it.", mode:'broadcast'},
-  {cap:"<b>Reply.</b> Only the Smart TV answers: &ldquo;192.168.1.250 is at <b>1E:54:25:7E:D2:3E</b>.&rdquo; Now your computer knows the MAC.", mode:'reply'},
-  {cap:"<b>Deliver.</b> Your computer builds the frame with the TV's MAC as the destination and switches it straight there &mdash; no router involved. This never leaves the local network.", mode:'deliver'},
-];
-let arpStep=0;
-const arpStage=document.getElementById('arpStage');
-const arpCap=document.getElementById('arpCaption');
-function renderARP(){
-  const s=ARP_STEPS[arpStep];
-  arpStage.innerHTML='<div style="display:flex;flex-direction:column;gap:7px;max-width:460px">'+
-    ARP_DEVICES.map(d=>{
-      let bg='#f3f5f6',fg='#5f5e5a',bd='#e4e7e9',tag=d.ip;
-      if(d.self){ bg='#1f2730'; fg='#fff'; bd='#1f2730'; tag=d.ip+' (you)'; }
-      if(s.mode==='broadcast' && !d.self){ bg='#cfe7ee'; fg='#234f68'; bd='#9fc7d4'; }
-      if((s.mode==='reply'||s.mode==='deliver') && d.target){ bg='#0E7490'; fg='#fff'; bd='#0E7490'; }
-      const showmac=(s.mode==='reply'||s.mode==='deliver') && (d.target||d.self);
-      return `<div style="display:flex;align-items:center;gap:12px;border-radius:8px;padding:11px 14px;background:${bg};color:${fg};border:1px solid ${bd};transition:.2s">
-        <span style="flex:1;font-weight:700;font-size:13.5px">${d.name}</span>
-        <span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;opacity:.95">${tag}</span>
-        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;opacity:${showmac?'.95':'.32'}">${d.mac}</span>
-      </div>`;
-    }).join('')+'</div>';
-  arpCap.innerHTML=s.cap;
-  arpStage.classList.remove('fade');void arpStage.offsetWidth;arpStage.classList.add('fade');
-}
-document.getElementById('arpNext').onclick=()=>{ if(arpStep<ARP_STEPS.length-1){arpStep++;renderARP();} };
-document.getElementById('arpReset').onclick=()=>{ arpStep=0;renderARP(); };
-renderARP();
 
 /* ---------- interactive packet anatomy ---------- */
 (function(){
