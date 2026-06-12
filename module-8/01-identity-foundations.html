@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Identity Security Foundations &mdash; Module 8</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+* { box-sizing:border-box; margin:0; padding:0; }
+:root{
+  --slate-dark:#1A202C; --slate:#2D3748;
+  --accent:#0E7490; --accent-dark:#0B5567; --accent-soft:#CFF1F6;
+  --info:#1E40AF; --info-soft:#DBEAFE;
+  --text:#1a1a18; --text-muted:#5f5e5a; --text-light:#888780;
+  --border:rgba(0,0,0,0.09); --bg:#fafaf8; --bg-card:#fff; --bg-code:#f6f6f3; --tag-bg:#f1f0eb;
+  --rust:#B45309; --soft:#888780; --muted:#5f5e5a; --ok:#2e7d57; --bad:#c0392b;
+}
+body{ font-family:'Barlow',sans-serif; background:var(--bg); color:var(--text); line-height:1.65; min-height:100vh; }
+.pagenav{ background:var(--slate-dark); }
+.pagenav.foot{ margin-top:48px; }
+.pagenav-inner{ max-width:920px; margin:0 auto; padding:11px 32px; display:flex; justify-content:space-between; align-items:center; gap:16px; }
+.pagenav .brand{ color:rgba(255,255,255,0.45); font-size:11px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; white-space:nowrap; }
+.navbtns{ display:flex; gap:8px; }
+.navbtn{ display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#fff; background:rgba(255,255,255,0.10); border:1px solid rgba(255,255,255,0.22); border-radius:6px; padding:7px 13px; text-decoration:none; transition:0.15s; white-space:nowrap; }
+.navbtn:hover{ background:var(--accent); border-color:var(--accent); }
+.navbtn.disabled{ opacity:0.28; pointer-events:none; }
+@media(max-width:560px){ .pagenav .brand{ display:none } .pagenav-inner{ justify-content:center } }
+.header{ background:#fff; padding:56px 0 44px; border-bottom:0.5px solid var(--border); }
+.header-inner{ max-width:920px; margin:0 auto; padding:0 32px; }
+.header-eyebrow{ font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:14px; display:flex; align-items:center; gap:12px; }
+.header-eyebrow::after{ content:''; flex:1; height:0.5px; background:var(--border); max-width:120px; }
+.header h1{ font-family:'Barlow Condensed',sans-serif; font-size:clamp(34px,4.5vw,52px); font-weight:900; letter-spacing:-0.01em; line-height:1.05; color:var(--text); margin-bottom:18px; }
+.header h1 em{ font-style:normal; color:var(--accent); }
+.header-meta-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+.module-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:var(--slate); color:#fff; }
+.topic-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:#F1F5F9; color:#475569; }
+.topic-pill.accent{ background:var(--accent-soft); color:var(--accent-dark); }
+.page{ max-width:920px; margin:0 auto; padding:0 32px 48px; }
+.objectives{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--accent); border-radius:6px; padding:20px 26px; margin:34px 0 14px; }
+.obj-label{ font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:12px; }
+.objectives ul{ list-style:none; }
+.objectives ul li{ font-size:13.5px; color:var(--text); padding:4px 0 4px 20px; position:relative; line-height:1.5; }
+.objectives ul li::before{ content:'◇'; position:absolute; left:0; color:var(--accent); font-size:10px; top:8px; }
+section{ margin-top:42px; }
+section h2{ font-family:'Barlow Condensed',sans-serif; font-size:27px; font-weight:800; color:var(--text); margin-bottom:8px; display:flex; align-items:baseline; gap:18px; }
+section h2 .num{ font-family:'Barlow Condensed',sans-serif; font-size:54px; font-weight:900; color:var(--accent); letter-spacing:-0.02em; line-height:0.85; min-width:40px; }
+section .lead{ font-size:14.5px; color:var(--text-muted); line-height:1.6; margin:0 0 6px; max-width:720px; }
+section p{ font-size:14.5px; color:var(--text); line-height:1.7; margin-bottom:12px; }
+section p strong{ font-weight:700; }
+code.inline{ font-family:'JetBrains Mono',monospace; font-size:12.5px; background:var(--tag-bg); padding:1px 6px; border-radius:3px; color:var(--text); }
+.keybox{ background:var(--accent-soft); border-left:3px solid var(--accent); border-radius:0 6px 6px 0; padding:13px 18px; margin:16px 0 0; font-size:13px; line-height:1.6; color:var(--text); }
+.keybox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--accent-dark); margin-bottom:5px; }
+.keybox b{ color:var(--accent-dark); }
+.notebox{ background:#FBF3E8; border-left:3px solid var(--rust); border-radius:0 6px 6px 0; padding:13px 18px; margin:16px 0 0; font-size:13px; line-height:1.6; }
+.notebox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--rust); margin-bottom:5px; }
+.assessment-box{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--slate); border-radius:0 6px 6px 0; padding:18px 22px; margin:34px 0 0; }
+.assessment-box .assess-label{ font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); margin-bottom:8px; }
+.assessment-box p{ font-size:13px; line-height:1.65; margin:0; }
+.widget{ border:0.5px solid var(--border); border-radius:10px; padding:18px; margin:18px 0 0; background:var(--bg-card); }
+.widget h4{ margin:0 0 12px; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); font-weight:700; }
+.controls{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+button.ui{ font-family:'Barlow',sans-serif; cursor:pointer; border:1px solid var(--accent); background:var(--accent); color:#fff; padding:7px 16px; border-radius:6px; font-size:12.5px; font-weight:600; transition:0.15s; }
+button.ui:hover{ background:var(--accent-dark); border-color:var(--accent-dark); }
+button.ui.ghost{ background:#fff; color:var(--accent); }
+button.ui.ghost:hover{ background:var(--accent-soft); }
+.fade{ animation:fade 0.35s ease; }
+@keyframes fade{ from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+</style>
+</head><body>
+<header class="pagenav"><div class="pagenav-inner">
+  <span class="brand">Cloud Security Fundamentals</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn disabled" href="#">&larr; Prev</a>
+    <a class="navbtn" href="02-aws-iam.html">Next &rarr;</a>
+  </nav>
+</div></header>
+
+<div class="header"><div class="header-inner">
+  <div class="header-eyebrow">Module 8 &nbsp;·&nbsp; Identity Layer</div>
+  <h1>Identity Security <em>Foundations</em></h1>
+  <div class="header-meta-row">
+    <span class="module-pill">Module 8</span>
+    <span class="topic-pill">SSO · tokens</span>
+    <span class="topic-pill accent">Federation</span>
+  </div>
+</div></div>
+
+<div class="page">
+
+  <div class="objectives">
+    <div class="obj-label">In this note</div>
+    <ul>
+      <li>Why apps stopped storing their own passwords &mdash; single sign-on and the identity provider</li>
+      <li>The three pillars of identity: authentication, access management, and authorization</li>
+      <li>How an app trusts a token it didn&rsquo;t issue &mdash; digital signatures</li>
+      <li>How trust scales across organizations &mdash; the three federation models</li>
+    </ul>
+  </div>
+
+  <section>
+    <h2><span class="num">1</span> From many logins to one</h2>
+    <p class="lead">Every app used to keep its own database of usernames and passwords. That meant many credentials to remember and many places to deprovision a leaver. The fix: <strong>single sign-on</strong> through a central <strong>identity provider</strong>. Flip between them:</p>
+    <div class="widget" id="sso">
+      <h4>Siloed logins vs single sign-on</h4>
+      <div class="controls" style="margin:0 0 14px">
+        <button class="ui" data-m="silo">Siloed (the old way)</button>
+        <button class="ui ghost" data-m="sso">SSO via an IdP</button>
+      </div>
+      <div id="ssoStage"></div>
+      <p id="ssoCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:34px"></p>
+    </div>
+    <div class="keybox">
+      <div class="lbl">The broker idea</div>
+      The <b>identity provider</b> (Duo, Okta, Microsoft Entra) becomes a <b>trusted broker</b>. You authenticate once with it; it then vouches for you to Canvas, Zoom, and the rest &mdash; so those apps never handle your password at all.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> Three pillars of identity</h2>
+    <p class="lead">&ldquo;Logging in&rdquo; is really three separate jobs. Walk a user from the street into the room &mdash; click each gate:</p>
+    <div class="widget" id="pillars">
+      <h4>Authentication &middot; access &middot; authorization</h4>
+      <div id="pillStage"></div>
+      <div class="controls" style="margin:14px 0 0" id="pillBtns"></div>
+      <p id="pillCap" style="font-size:13px;color:var(--text-muted);margin:12px 0 0;line-height:1.6;min-height:48px"></p>
+    </div>
+    <div class="keybox">
+      <div class="lbl">Who owns each pillar</div>
+      The <b>IdP</b> usually owns the first two &mdash; verifying you and deciding whether to let you into an app. <b>Authorization</b> (what you can do <i>inside</i>) has traditionally been the <b>application&rsquo;s</b> job. Bob and the instructor both enter Canvas; only the instructor can build a quiz.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> Trusting a token you didn&rsquo;t issue</h2>
+    <p class="lead">The IdP hands the user a <strong>token</strong> &mdash; a note that says &ldquo;this user is authenticated.&rdquo; But the user carries it to the app, so the app must be sure it&rsquo;s real and unaltered. <strong>Digital signatures</strong> do that. Try tampering with it:</p>
+    <div class="widget" id="token">
+      <h4>Sign at the IdP, verify at the app</h4>
+      <div class="controls" style="margin:0 0 14px">
+        <button class="ui" data-t="ok">Untouched token</button>
+        <button class="ui ghost" data-t="tamper">Tampered token</button>
+      </div>
+      <div id="tokStage"></div>
+      <p id="tokCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:48px"></p>
+    </div>
+    <div class="notebox">
+      <div class="lbl">Why only the hash is signed</div>
+      The IdP signs a <b>hash</b> (small fingerprint) of the token, not the whole thing &mdash; signature schemes can only sign small amounts of data. The app re-hashes what it received and compares: <b>match &rarr; trust; mismatch &rarr; reject</b>. This proves both <b>origin</b> (the IdP&rsquo;s private key signed it) and <b>integrity</b> (nothing changed).
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> Federation: trust across organizations</h2>
+    <p class="lead">What if a Foothill student needs a De&nbsp;Anza app? Their identities live in different systems. <strong>Federation</strong> links them &mdash; and how you wire the trust decides whether it scales. Compare the three:</p>
+    <div class="widget" id="fed">
+      <h4>Three federation models</h4>
+      <div class="controls" style="margin:0 0 14px">
+        <button class="ui" data-f="p2p">Point-to-point</button>
+        <button class="ui ghost" data-f="chain">Chained (proxy)</button>
+        <button class="ui ghost" data-f="broker">Broker</button>
+      </div>
+      <div id="fedStage"></div>
+      <p id="fedCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:48px"></p>
+    </div>
+  </section>
+
+  <div class="assessment-box">
+    <div class="assess-label">Remember</div>
+    <p>Apps stopped storing passwords by trusting a central <strong>identity provider</strong> for <strong>single sign-on</strong>. Identity is three jobs: <strong>authentication</strong> (who are you?), <strong>access management</strong> (may you enter this app?), and <strong>authorization</strong> (what may you do inside?) &mdash; the IdP owns the first two, the app traditionally owns the third. The app trusts the IdP&rsquo;s <strong>token</strong> because it&rsquo;s <strong>digitally signed</strong>: the IdP signs a hash with its <strong>private key</strong>, the app verifies with the IdP&rsquo;s <strong>public key</strong> and re-checks the hash &mdash; proving origin and integrity. And <strong>federation</strong> extends trust across organizations, scaling best through a central <strong>broker</strong>.</p>
+  </div>
+
+</div>
+
+<footer class="pagenav foot"><div class="pagenav-inner">
+  <span class="brand">Module 8 &middot; Identity Layer</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn disabled" href="#">&larr; Prev</a>
+    <a class="navbtn" href="02-aws-iam.html">Next &rarr;</a>
+  </nav>
+</div></footer>
+
+<script>
+/* ---------- 1. Siloed vs SSO ---------- */
+(function(){
+  const stage=document.getElementById('ssoStage'),cap=document.getElementById('ssoCap');
+  let m='silo';
+  const APPS=['Roster','Payroll','Canvas'];
+  function render(){
+    const sso=m==='sso';
+    let s=`<svg viewBox="0 0 520 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    // user
+    s+=`<circle cx="46" cy="100" r="18" fill="#2D3748"/><text x="46" y="105" text-anchor="middle" font-size="14" fill="#fff">&#128100;</text><text x="46" y="135" text-anchor="middle" font-size="9" font-weight="700" fill="#5f5e5a">user</text>`;
+    if(!sso){
+      APPS.forEach((a,i)=>{ const y=40+i*60;
+        s+=`<line x1="64" y1="100" x2="200" y2="${y+16}" stroke="#c0392b" stroke-width="1.6" stroke-dasharray="4 3"/>`;
+        s+=`<rect x="200" y="${y}" width="150" height="34" rx="7" fill="#fff" stroke="#d7dde1" stroke-width="1.2"/>`;
+        s+=`<text x="214" y="${y+15}" font-size="10.5" font-weight="800" fill="#1a1a18">${a}</text>`;
+        s+=`<text x="214" y="${y+27}" font-size="8" font-family="JetBrains Mono,monospace" fill="#c0392b">own login + password</text>`;
+      });
+      s+=`<text x="430" y="104" text-anchor="middle" font-size="10" fill="#5f5e5a">3 passwords,</text><text x="430" y="118" text-anchor="middle" font-size="10" fill="#5f5e5a">3 places to manage</text>`;
+    } else {
+      // user -> IdP -> apps
+      s+=`<line x1="64" y1="100" x2="150" y2="100" stroke="#0E7490" stroke-width="2.4" marker-end="url(#sa)"/>`;
+      s+=`<rect x="150" y="76" width="92" height="48" rx="9" fill="#0E7490"/><text x="196" y="98" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">IdP</text><text x="196" y="113" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.85)">one login</text>`;
+      APPS.forEach((a,i)=>{ const y=40+i*60;
+        s+=`<line x1="242" y1="100" x2="360" y2="${y+16}" stroke="#2e7d57" stroke-width="1.8" marker-end="url(#sa)"/>`;
+        s+=`<rect x="360" y="${y}" width="146" height="34" rx="7" fill="#fff" stroke="#2e7d57" stroke-width="1.2"/>`;
+        s+=`<text x="374" y="${y+15}" font-size="10.5" font-weight="800" fill="#1a1a18">${a}</text>`;
+        s+=`<text x="374" y="${y+27}" font-size="8" fill="#2e7d57">trusts the IdP &mdash; no password</text>`;
+      });
+      s+=`<defs><marker id="sa" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#7a8589"/></marker></defs>`;
+    }
+    s+=`</svg>`;
+    stage.className='fade'; stage.innerHTML=s;
+    cap.innerHTML = sso
+      ? '<b>Single sign-on.</b> One login with the identity provider; it vouches for you to every app. One credential, one place to onboard and offboard.'
+      : '<b>Siloed.</b> Each app stores its own credentials. Users juggle many passwords, and removing a leaver means touching every app &mdash; easy to miss one.';
+    document.querySelectorAll('#sso [data-m]').forEach(b=>b.className='ui'+(b.dataset.m===m?'':' ghost'));
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  render();
+  document.querySelectorAll('#sso [data-m]').forEach(b=>b.onclick=()=>{m=b.dataset.m;render();});
+})();
+
+/* ---------- 2. Three pillars ---------- */
+(function(){
+  const stage=document.getElementById('pillStage'),btns=document.getElementById('pillBtns'),cap=document.getElementById('pillCap');
+  const P=[
+    ['Authentication','authn','#0E7490','Who are you?','Verify the user&rsquo;s credentials &mdash; password, plus MFA to resist phishing. <b>Owned by the IdP.</b> Example: prove you really are Bob.'],
+    ['Access management','access','#8E5CA8','May you enter this app?','A yes/no decision about a whole app. <b>Owned by the IdP</b>, which issues a token only if you&rsquo;re allowed in. Example: an instructor may open Payroll; a student may not.'],
+    ['Authorization','authz','#B45309','What may you do inside?','The fine-grained permissions once you&rsquo;re in. <b>Traditionally owned by the app.</b> Example: in Canvas, the instructor builds quizzes; Bob can only take them.']
+  ];
+  let sel=0;
+  function render(){
+    const gates=['ID check','Entry gate','Inside the room'];
+    let s=`<svg viewBox="0 0 520 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    P.forEach((p,i)=>{
+      const on=i===sel, x=20+i*168;
+      s+=`<rect x="${x}" y="34" width="150" height="62" rx="9" fill="${on?p[2]:'#eef1f3'}" stroke="${on?p[2]:'#dcdcd6'}" stroke-width="${on?2:1.1}" data-i="${i}" style="cursor:pointer"/>`;
+      s+=`<text x="${x+75}" y="60" text-anchor="middle" font-size="11" font-weight="800" fill="${on?'#fff':'#5f5e5a'}" style="pointer-events:none">${gates[i]}</text>`;
+      s+=`<text x="${x+75}" y="78" text-anchor="middle" font-size="8.5" fill="${on?'rgba(255,255,255,.85)':'#9aa3a8'}" style="pointer-events:none">${p[3]}</text>`;
+      if(i<2) s+=`<text x="${x+160}" y="69" text-anchor="middle" font-size="16" font-weight="900" fill="#cfd6db" style="pointer-events:none">&rarr;</text>`;
+    });
+    s+=`</svg>`;
+    stage.className='fade'; stage.innerHTML=s;
+    stage.querySelectorAll('[data-i]').forEach(e=>e.onclick=()=>{sel=+e.dataset.i;render();});
+    btns.querySelectorAll('button').forEach((b,i)=>b.className='ui'+(i===sel?'':' ghost'));
+    cap.innerHTML=`<b style="color:${P[sel][2]}">${P[sel][0]} &mdash; ${P[sel][3]}</b> ${P[sel][4]}`;
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  btns.innerHTML=P.map((p,i)=>`<button class="ui${i===0?'':' ghost'}" data-i="${i}">${p[0]}</button>`).join('');
+  btns.querySelectorAll('button').forEach(b=>b.onclick=()=>{sel=+b.dataset.i;render();});
+  render();
+})();
+
+/* ---------- 3. Token signature ---------- */
+(function(){
+  const stage=document.getElementById('tokStage'),cap=document.getElementById('tokCap');
+  let mode='ok';
+  function render(){
+    const tampered=mode==='tamper';
+    const ok=!tampered;
+    let s=`<svg viewBox="0 0 520 170" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    // IdP side
+    s+=`<rect x="14" y="20" width="96" height="40" rx="8" fill="#0E7490"/><text x="62" y="38" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">IdP</text><text x="62" y="51" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.85)">signs with private key</text>`;
+    // token in transit
+    const claim = tampered ? 'role: ADMIN' : 'role: student';
+    s+=`<rect x="180" y="58" width="160" height="54" rx="8" fill="#fff" stroke="#cfd6db" stroke-width="1.3"/>`;
+    s+=`<text x="190" y="74" font-size="8" font-weight="800" fill="#9aa3a8">TOKEN</text>`;
+    s+=`<text x="190" y="88" font-size="9" font-family="JetBrains Mono,monospace" fill="${tampered?'#c0392b':'#1a1a18'}">Bob &middot; ${claim}</text>`;
+    s+=`<text x="190" y="103" font-size="8" font-family="JetBrains Mono,monospace" fill="#5f5e5a">signature: 9f3a&hellip;</text>`;
+    if(tampered) s+=`<text x="260" y="50" text-anchor="middle" font-size="9" font-weight="800" fill="#c0392b">&#9888; attacker edits the claim</text>`;
+    s+=`<line x1="110" y1="44" x2="180" y2="74" stroke="#9aa3a8" stroke-width="1.6" marker-end="url(#ta)"/>`;
+    // App side
+    s+=`<rect x="410" y="20" width="96" height="40" rx="8" fill="#2D3748"/><text x="458" y="38" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">App</text><text x="458" y="51" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.85)">verifies with public key</text>`;
+    s+=`<line x1="340" y1="74" x2="408" y2="44" stroke="#9aa3a8" stroke-width="1.6" marker-end="url(#ta)"/>`;
+    // hash comparison
+    const c = ok?'#2e7d57':'#c0392b';
+    s+=`<rect x="330" y="118" width="176" height="40" rx="8" fill="${ok?'#eaf7ef':'#fdecea'}" stroke="${c}" stroke-width="1.5"/>`;
+    s+=`<text x="418" y="134" text-anchor="middle" font-size="9.5" font-weight="800" fill="${c}">signed hash ${ok?'=':'&ne;'} re-hash</text>`;
+    s+=`<text x="418" y="149" text-anchor="middle" font-size="10" font-weight="900" fill="${c}">${ok?'&#10003; token accepted':'&#10007; token rejected'}</text>`;
+    s+=`<rect x="14" y="118" width="300" height="40" rx="8" fill="#f4f6f8"/><text x="24" y="135" font-size="9.5" fill="#5f5e5a">App re-hashes the token it received and</text><text x="24" y="149" font-size="9.5" fill="#5f5e5a">compares it to the hash inside the signature.</text>`;
+    s+=`<defs><marker id="ta" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#7a8589"/></marker></defs>`;
+    s+=`</svg>`;
+    stage.className='fade'; stage.innerHTML=s;
+    cap.innerHTML = ok
+      ? '<b>Untouched &rarr; accepted.</b> The hash the app computes matches the hash the IdP signed, so the token is authentic and unaltered. Bob gets in as a student.'
+      : '<b>Tampered &rarr; rejected.</b> The attacker changed the claim to ADMIN, but they can&rsquo;t re-sign without the IdP&rsquo;s private key. The app&rsquo;s fresh hash no longer matches the signed hash, so the token is thrown out.';
+    document.querySelectorAll('#token [data-t]').forEach(b=>b.className='ui'+(b.dataset.t===mode?'':' ghost'));
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  render();
+  document.querySelectorAll('#token [data-t]').forEach(b=>b.onclick=()=>{mode=b.dataset.t;render();});
+})();
+
+/* ---------- 4. Federation models ---------- */
+(function(){
+  const stage=document.getElementById('fedStage'),cap=document.getElementById('fedCap');
+  let f='p2p';
+  function node(x,y,r,c,label){return `<circle cx="${x}" cy="${y}" r="${r}" fill="${c}"/><text x="${x}" y="${y+3}" text-anchor="middle" font-size="8" font-weight="800" fill="#fff">${label}</text>`;}
+  function render(){
+    let s=`<svg viewBox="0 0 520 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    const apps=[[60,40],[60,90],[60,140]], idps=[[460,40],[460,90],[460,140]];
+    if(f==='p2p'){
+      apps.forEach(a=>idps.forEach(i=>{ s+=`<line x1="${a[0]+16}" y1="${a[1]}" x2="${i[0]-16}" y2="${i[1]}" stroke="#c0392b" stroke-width="1" stroke-opacity="0.5"/>`; }));
+      apps.forEach(a=>s+=node(a[0],a[1],16,'#2D3748','app'));
+      idps.forEach(i=>s+=node(i[0],i[1],16,'#0E7490','IdP'));
+      s+=`<text x="260" y="172" text-anchor="middle" font-size="9.5" font-weight="700" fill="#c0392b">every app trusts every IdP &mdash; n &times; m connections</text>`;
+    } else if(f==='chain'){
+      apps.forEach(a=>{ s+=`<line x1="${a[0]+16}" y1="${a[1]}" x2="244" y2="90" stroke="#8E5CA8" stroke-width="1.4"/>`; });
+      s+=`<line x1="276" y1="90" x2="320" y2="90" stroke="#8E5CA8" stroke-width="1.4"/>`;
+      idps.forEach(i=>{ s+=`<line x1="336" y1="90" x2="${i[0]-16}" y2="${i[1]}" stroke="#8E5CA8" stroke-width="1.2" stroke-dasharray="4 3"/>`; });
+      apps.forEach(a=>s+=node(a[0],a[1],16,'#2D3748','app'));
+      s+=node(260,90,18,'#8E5CA8','local');
+      s+=`<text x="260" y="116" text-anchor="middle" font-size="8" fill="#5f5e5a">IdP (proxy)</text>`;
+      idps.forEach(i=>s+=node(i[0],i[1],14,'#0E7490','ext'));
+      s+=`<text x="260" y="172" text-anchor="middle" font-size="9.5" font-weight="700" fill="#8E5CA8">apps trust the local IdP; it brokers external IdPs</text>`;
+    } else {
+      apps.forEach(a=>{ s+=`<line x1="${a[0]+16}" y1="${a[1]}" x2="240" y2="90" stroke="#2e7d57" stroke-width="1.5"/>`; });
+      idps.forEach(i=>{ s+=`<line x1="280" y1="90" x2="${i[0]-16}" y2="${i[1]}" stroke="#2e7d57" stroke-width="1.5"/>`; });
+      apps.forEach(a=>s+=node(a[0],a[1],16,'#2D3748','app'));
+      idps.forEach(i=>s+=node(i[0],i[1],14,'#0E7490','org'));
+      s+=`<rect x="232" y="72" width="56" height="36" rx="8" fill="#2e7d57"/><text x="260" y="90" text-anchor="middle" font-size="9" font-weight="800" fill="#fff">Identity</text><text x="260" y="101" text-anchor="middle" font-size="9" font-weight="800" fill="#fff">Broker</text>`;
+      s+=`<text x="260" y="172" text-anchor="middle" font-size="9.5" font-weight="700" fill="#2e7d57">everyone trusts one broker &mdash; scales cleanly</text>`;
+    }
+    s+=`</svg>`;
+    stage.className='fade'; stage.innerHTML=s;
+    const CAP={
+      p2p:'<b>Point-to-point.</b> Each app sets up direct trust with each external IdP. Add one college and you must update every app &mdash; the connections explode. It doesn&rsquo;t scale.',
+      chain:'<b>Chained (proxy).</b> Apps trust only their <b>local IdP</b>, which validates an external token and swaps it for its own. Cleaner &mdash; but the local IdP still manages every partner relationship.',
+      broker:'<b>Broker.</b> A dedicated <b>identity broker</b> sits in the middle; every app and every org trusts only the broker, which translates between them. The most scalable model, common in higher ed and enterprise.'
+    };
+    cap.innerHTML=CAP[f];
+    document.querySelectorAll('#fed [data-f]').forEach(b=>b.className='ui'+(b.dataset.f===f?'':' ghost'));
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  render();
+  document.querySelectorAll('#fed [data-f]').forEach(b=>b.onclick=()=>{f=b.dataset.f;render();});
+})();
+</script>
+</body></html>

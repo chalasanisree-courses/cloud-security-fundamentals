@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AWS IAM &mdash; Module 8</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+* { box-sizing:border-box; margin:0; padding:0; }
+:root{
+  --slate-dark:#1A202C; --slate:#2D3748;
+  --accent:#0E7490; --accent-dark:#0B5567; --accent-soft:#CFF1F6;
+  --info:#1E40AF; --info-soft:#DBEAFE;
+  --text:#1a1a18; --text-muted:#5f5e5a; --text-light:#888780;
+  --border:rgba(0,0,0,0.09); --bg:#fafaf8; --bg-card:#fff; --bg-code:#f6f6f3; --tag-bg:#f1f0eb;
+  --rust:#B45309; --soft:#888780; --muted:#5f5e5a; --ok:#2e7d57; --bad:#c0392b;
+}
+body{ font-family:'Barlow',sans-serif; background:var(--bg); color:var(--text); line-height:1.65; min-height:100vh; }
+.pagenav{ background:var(--slate-dark); }
+.pagenav.foot{ margin-top:48px; }
+.pagenav-inner{ max-width:920px; margin:0 auto; padding:11px 32px; display:flex; justify-content:space-between; align-items:center; gap:16px; }
+.pagenav .brand{ color:rgba(255,255,255,0.45); font-size:11px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; white-space:nowrap; }
+.navbtns{ display:flex; gap:8px; }
+.navbtn{ display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#fff; background:rgba(255,255,255,0.10); border:1px solid rgba(255,255,255,0.22); border-radius:6px; padding:7px 13px; text-decoration:none; transition:0.15s; white-space:nowrap; }
+.navbtn:hover{ background:var(--accent); border-color:var(--accent); }
+.navbtn.disabled{ opacity:0.28; pointer-events:none; }
+@media(max-width:560px){ .pagenav .brand{ display:none } .pagenav-inner{ justify-content:center } }
+.header{ background:#fff; padding:56px 0 44px; border-bottom:0.5px solid var(--border); }
+.header-inner{ max-width:920px; margin:0 auto; padding:0 32px; }
+.header-eyebrow{ font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:14px; display:flex; align-items:center; gap:12px; }
+.header-eyebrow::after{ content:''; flex:1; height:0.5px; background:var(--border); max-width:120px; }
+.header h1{ font-family:'Barlow Condensed',sans-serif; font-size:clamp(34px,4.5vw,52px); font-weight:900; letter-spacing:-0.01em; line-height:1.05; color:var(--text); margin-bottom:18px; }
+.header h1 em{ font-style:normal; color:var(--accent); }
+.header-meta-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+.module-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:var(--slate); color:#fff; }
+.topic-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:#F1F5F9; color:#475569; }
+.topic-pill.accent{ background:var(--accent-soft); color:var(--accent-dark); }
+.page{ max-width:920px; margin:0 auto; padding:0 32px 48px; }
+.objectives{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--accent); border-radius:6px; padding:20px 26px; margin:34px 0 14px; }
+.obj-label{ font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:12px; }
+.objectives ul{ list-style:none; }
+.objectives ul li{ font-size:13.5px; color:var(--text); padding:4px 0 4px 20px; position:relative; line-height:1.5; }
+.objectives ul li::before{ content:'◇'; position:absolute; left:0; color:var(--accent); font-size:10px; top:8px; }
+section{ margin-top:42px; }
+section h2{ font-family:'Barlow Condensed',sans-serif; font-size:27px; font-weight:800; color:var(--text); margin-bottom:8px; display:flex; align-items:baseline; gap:18px; }
+section h2 .num{ font-family:'Barlow Condensed',sans-serif; font-size:54px; font-weight:900; color:var(--accent); letter-spacing:-0.02em; line-height:0.85; min-width:40px; }
+section .lead{ font-size:14.5px; color:var(--text-muted); line-height:1.6; margin:0 0 6px; max-width:720px; }
+section p{ font-size:14.5px; color:var(--text); line-height:1.7; margin-bottom:12px; }
+section p strong{ font-weight:700; }
+code.inline{ font-family:'JetBrains Mono',monospace; font-size:12.5px; background:var(--tag-bg); padding:1px 6px; border-radius:3px; color:var(--text); }
+pre{ font-family:'JetBrains Mono',monospace; background:var(--bg-code); border:0.5px solid var(--border); border-radius:6px; padding:13px 16px; font-size:11.5px; line-height:1.6; color:var(--text); overflow-x:auto; margin:0; }
+.code-key{ color:var(--info); font-weight:600; }
+.code-str{ color:#0B5567; }
+.hl{ background:#fff3cd; border-radius:3px; padding:0 2px; }
+.keybox{ background:var(--accent-soft); border-left:3px solid var(--accent); border-radius:0 6px 6px 0; padding:13px 18px; margin:16px 0 0; font-size:13px; line-height:1.6; color:var(--text); }
+.keybox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--accent-dark); margin-bottom:5px; }
+.keybox b{ color:var(--accent-dark); }
+.notebox{ background:#FBF3E8; border-left:3px solid var(--rust); border-radius:0 6px 6px 0; padding:13px 18px; margin:16px 0 0; font-size:13px; line-height:1.6; }
+.notebox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--rust); margin-bottom:5px; }
+.assessment-box{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--slate); border-radius:0 6px 6px 0; padding:18px 22px; margin:34px 0 0; }
+.assessment-box .assess-label{ font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); margin-bottom:8px; }
+.assessment-box p{ font-size:13px; line-height:1.65; margin:0; }
+.widget{ border:0.5px solid var(--border); border-radius:10px; padding:18px; margin:18px 0 0; background:var(--bg-card); }
+.widget h4{ margin:0 0 12px; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); font-weight:700; }
+.controls{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+button.ui{ font-family:'Barlow',sans-serif; cursor:pointer; border:1px solid var(--accent); background:var(--accent); color:#fff; padding:7px 16px; border-radius:6px; font-size:12.5px; font-weight:600; transition:0.15s; }
+button.ui:hover{ background:var(--accent-dark); border-color:var(--accent-dark); }
+button.ui.ghost{ background:#fff; color:var(--accent); }
+button.ui.ghost:hover{ background:var(--accent-soft); }
+.fade{ animation:fade 0.35s ease; }
+@keyframes fade{ from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+</style>
+</head><body>
+<header class="pagenav"><div class="pagenav-inner">
+  <span class="brand">Cloud Security Fundamentals</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn" href="01-identity-foundations.html">&larr; Prev</a>
+    <a class="navbtn disabled" href="#">Next &rarr;</a>
+  </nav>
+</div></header>
+
+<div class="header"><div class="header-inner">
+  <div class="header-eyebrow">Module 8 &nbsp;·&nbsp; Identity Layer</div>
+  <h1>Identity in AWS: <em>IAM</em></h1>
+  <div class="header-meta-row">
+    <span class="module-pill">Module 8</span>
+    <span class="topic-pill">Users · roles</span>
+    <span class="topic-pill accent">Policies</span>
+  </div>
+</div></div>
+
+<div class="page">
+
+  <div class="objectives">
+    <div class="obj-label">In this note</div>
+    <ul>
+      <li>The IAM identities: root user, users, groups, and roles</li>
+      <li>The two kinds of policy &mdash; identity-based and resource-based &mdash; and the <code class="inline">Principal</code> field</li>
+      <li>How AWS evaluates a request: explicit deny &rarr; explicit allow &rarr; implicit deny</li>
+      <li>The &ldquo;AWS twist&rdquo;: how IAM does the three pillars differently</li>
+    </ul>
+  </div>
+
+  <section>
+    <h2><span class="num">1</span> The IAM identities</h2>
+    <p class="lead">AWS gives you a small set of identity building blocks. Click each to see what it is and when to use it:</p>
+    <div class="widget" id="ids">
+      <h4>Root, users, groups, roles</h4>
+      <div class="controls" style="margin:0 0 14px" id="idBtns"></div>
+      <div id="idStage" style="background:var(--bg);border-radius:8px;padding:16px 18px;min-height:120px"></div>
+    </div>
+    <div class="notebox">
+      <div class="lbl">Two things students always miss</div>
+      A <b>group is not an identity</b> &mdash; it&rsquo;s just a bucket of users you attach policies to; it can never be a <code class="inline">Principal</code> or make a request itself. And a <b>role has no password</b> &mdash; you <i>assume</i> it for short-lived credentials, which is how AWS does federation.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> Two kinds of policy</h2>
+    <p class="lead">Permissions are JSON documents. The difference between the two types is one field &mdash; <code class="inline">Principal</code> &mdash; which answers &ldquo;who?&rdquo; Toggle them:</p>
+    <div class="widget" id="pol">
+      <h4>Identity-based vs resource-based</h4>
+      <div class="controls" style="margin:0 0 14px">
+        <button class="ui" data-p="identity">Identity-based</button>
+        <button class="ui ghost" data-p="resource">Resource-based</button>
+      </div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start">
+        <div style="flex:1.2;min-width:260px"><div id="polCode"></div></div>
+        <div style="flex:1;min-width:220px"><p id="polCap" style="font-size:13px;color:var(--text-muted);line-height:1.6;margin:0"></p></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> How AWS decides: deny wins</h2>
+    <p class="lead">When you make a request, AWS gathers <em>every</em> policy that applies and evaluates them together by one rule. Run requests through it:</p>
+    <div class="widget" id="eval">
+      <h4>Explicit deny &rarr; explicit allow &rarr; implicit deny</h4>
+      <div class="controls" style="margin:0 0 14px" id="evalBtns"></div>
+      <div id="evalStage"></div>
+      <p id="evalCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:48px"></p>
+    </div>
+    <div class="keybox">
+      <div class="lbl">Least privilege</div>
+      Because access is <b>denied unless granted</b>, you build up from nothing &mdash; give each identity only the permissions it actually needs. That&rsquo;s the <b>principle of least privilege</b>, and an <b>explicit deny</b> is the unbreakable backstop on top of it.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> The AWS twist</h2>
+    <p class="lead">AWS handles the <a href="01-identity-foundations.html">three pillars</a> differently from the traditional model. Click each to see the shift:</p>
+    <div class="widget" id="twist">
+      <h4>Traditional model vs the AWS way</h4>
+      <div class="controls" style="margin:0 0 14px" id="twBtns"></div>
+      <div id="twStage" style="display:flex;gap:14px;flex-wrap:wrap"></div>
+      <p id="twCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:34px"></p>
+    </div>
+  </section>
+
+  <div class="assessment-box">
+    <div class="assess-label">Remember</div>
+    <p>IAM&rsquo;s identities are the <strong>root user</strong> (all-powerful &mdash; lock it away), <strong>IAM users</strong> (long-lived people), <strong>groups</strong> (containers for users, never a principal), and <strong>roles</strong> (temporary, assumed for short-lived credentials &mdash; AWS&rsquo;s federation mechanism). Permissions are JSON policies: <strong>identity-based</strong> (attached to a user/group/role, no <code class="inline">Principal</code>) and <strong>resource-based</strong> (attached to a resource, with a <code class="inline">Principal</code>). AWS evaluates all of them together: an <strong>explicit deny always wins</strong>, otherwise you need an <strong>explicit allow</strong>, and silence is an <strong>implicit deny</strong>. The AWS twist: identities are <strong>ephemeral roles</strong>, access is <strong>resource-level</strong> (no general admission), and one <strong>unified policy</strong> covers both entry and actions.</p>
+  </div>
+
+</div>
+
+<footer class="pagenav foot"><div class="pagenav-inner">
+  <span class="brand">Module 8 &middot; Identity Layer</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn" href="01-identity-foundations.html">&larr; Prev</a>
+    <a class="navbtn disabled" href="#">Next &rarr;</a>
+  </nav>
+</div></footer>
+
+<script>
+/* ---------- 1. IAM identities ---------- */
+(function(){
+  const btns=document.getElementById('idBtns'),stage=document.getElementById('idStage');
+  const ID=[
+    ['Root user','#c0392b','The first identity, created with the account &mdash; <b>unrestricted, full access to everything</b>. Use it only to set up your first IAM identities and enable MFA, then <b>lock it away</b> and never use it day to day.'],
+    ['IAM user','#0E7490','A <b>long-lived</b> identity for a specific person (Bob, Mike), with <b>permanent credentials</b> &mdash; a console password and/or access keys. This is what people use for everyday work.'],
+    ['IAM group','#8E5CA8','A <b>container</b> that organises users (e.g. &ldquo;Students&rdquo;). You attach policies to the group to manage many users at once. <b>A group is not an identity</b> &mdash; it can&rsquo;t make requests or be a <code class="inline">Principal</code>.'],
+    ['IAM role','#2e7d57','A <b>temporary</b> identity with <b>no permanent credentials</b>. A user or service <i>assumes</i> the role to get short-lived credentials. This is the primary mechanism for <b>federation</b> in AWS.']
+  ];
+  let sel=0;
+  btns.innerHTML=ID.map((d,i)=>`<button class="ui${i===0?'':' ghost'}" data-i="${i}">${d[0]}</button>`).join('');
+  function render(){
+    btns.querySelectorAll('button').forEach((b,i)=>b.className='ui'+(i===sel?'':' ghost'));
+    stage.className='fade';
+    stage.innerHTML=`<div style="font-family:'Barlow Condensed';font-weight:900;font-size:23px;color:${ID[sel][1]};margin-bottom:6px">${ID[sel][0]}</div>`+
+      `<div style="font-size:13.5px;line-height:1.65;color:var(--text)">${ID[sel][2]}</div>`;
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  btns.querySelectorAll('button').forEach(b=>b.onclick=()=>{sel=+b.dataset.i;render();});
+  render();
+})();
+
+/* ---------- 2. Policy types ---------- */
+(function(){
+  const code=document.getElementById('polCode'),cap=document.getElementById('polCap');
+  let p='identity';
+  const IDENTITY=`{
+  <span class="code-key">"Effect"</span>: <span class="code-str">"Allow"</span>,
+  <span class="code-key">"Action"</span>: <span class="code-str">"s3:GetObject"</span>,
+  <span class="code-key">"Resource"</span>: <span class="code-str">"arn:aws:s3:::CIS105-bucket/*"</span>
+}
+<span style="color:#9a988f">// attached TO Mike &mdash; no Principal needed</span>`;
+  const RESOURCE=`{
+  <span class="code-key">"Effect"</span>: <span class="code-str">"Allow"</span>,
+  <span class="hl"><span class="code-key">"Principal"</span>: { "AWS": "&hellip;:user/Mike" }</span>,
+  <span class="code-key">"Action"</span>: <span class="code-str">"s3:GetObject"</span>,
+  <span class="code-key">"Resource"</span>: <span class="code-str">"arn:aws:s3:::CIS105-bucket/*"</span>
+}
+<span style="color:#9a988f">// attached TO the bucket &mdash; Principal says who</span>`;
+  function render(){
+    code.className='fade';
+    code.innerHTML=`<pre>${p==='identity'?IDENTITY:RESOURCE}</pre>`;
+    cap.innerHTML = p==='identity'
+      ? '<b>Identity-based.</b> Attached to a user, group, or role. It says what <i>that</i> identity may do, so there&rsquo;s <b>no <code class="inline">Principal</code></b> &mdash; the &ldquo;who&rdquo; is whoever the policy is attached to. <i>&ldquo;Mike may read this bucket.&rdquo;</i>'
+      : '<b>Resource-based.</b> Attached to the resource itself (here, the S3 bucket). It must name a <b><code class="inline">Principal</code></b> &mdash; the actor it allows. <i>&ldquo;This bucket lets Mike read it.&rdquo;</i> This is what enables <b>cross-account</b> access.';
+    document.querySelectorAll('#pol [data-p]').forEach(b=>b.className='ui'+(b.dataset.p===p?'':' ghost'));
+    setTimeout(()=>code.classList.remove('fade'),360);
+  }
+  render();
+  document.querySelectorAll('#pol [data-p]').forEach(b=>b.onclick=()=>{p=b.dataset.p;render();});
+})();
+
+/* ---------- 3. Policy evaluation ---------- */
+(function(){
+  const btns=document.getElementById('evalBtns'),stage=document.getElementById('evalStage'),cap=document.getElementById('evalCap');
+  const SC=[
+    {k:'Allowed, no deny', deny:false, allow:true,
+      reason:'<b>Allowed.</b> A policy explicitly grants this action and nothing denies it. That&rsquo;s the only way in: at least one explicit <code class="inline">Allow</code>, with no <code class="inline">Deny</code> anywhere.'},
+    {k:'Allow + a Deny', deny:true, allow:true,
+      reason:'<b>Denied.</b> One policy allows it, but another has an explicit <code class="inline">Deny</code> &mdash; and an explicit deny <b>overrides every allow</b>. This is how you carve out exceptions that can&rsquo;t be undone by a stray allow.'},
+    {k:'No policy mentions it', deny:false, allow:false,
+      reason:'<b>Denied by default.</b> Nothing grants this action, so AWS falls back to its default: <b>implicit deny</b>. In IAM, silence always means no.'}
+  ];
+  let sel=0;
+  function gate(label,state){
+    const map={deny:['#c0392b','&#10007;','#fdecea'],pass:['#2e7d57','&#10003;','#eaf7ef'],na:['#9aa3a8','&middot;','#f4f6f8']};
+    const [c,sym,bg]=map[state];
+    return `<div style="flex:1;min-width:140px;background:${bg};border:1.5px solid ${c};border-radius:8px;padding:11px 12px">`+
+      `<div style="font-size:12px;font-weight:800;color:#1a1a18">${label}</div>`+
+      `<div style="font-size:14px;font-weight:900;color:${c};margin-top:4px">${sym}</div></div>`;
+  }
+  btns.innerHTML=SC.map((s,i)=>`<button class="ui${i===0?'':' ghost'}" data-i="${i}" style="font-size:11.5px;padding:6px 11px">${s.k}</button>`).join('');
+  function render(){
+    const s=SC[sel];
+    const denyState=s.deny?'deny':'na';
+    const allowState=s.deny?'na':(s.allow?'pass':'na');
+    const result=(!s.deny && s.allow);
+    let g=`<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:stretch">`+
+      gate('1 · Any explicit Deny?', denyState)+
+      `<div style="display:flex;align-items:center;font-size:18px;color:#cfd6db;font-weight:900">&rarr;</div>`+
+      gate('2 · Any explicit Allow?', allowState)+
+      `<div style="display:flex;align-items:center;font-size:18px;color:#cfd6db;font-weight:900">&rarr;</div>`+
+      gate(result?'Request allowed':'Request denied', result?'pass':'deny')+`</div>`;
+    stage.className='fade'; stage.innerHTML=g;
+    cap.innerHTML=s.reason;
+    btns.querySelectorAll('button').forEach((b,i)=>b.className='ui'+(i===sel?'':' ghost'));
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  btns.querySelectorAll('button').forEach(b=>b.onclick=()=>{sel=+b.dataset.i;render();});
+  render();
+})();
+
+/* ---------- 4. The AWS twist ---------- */
+(function(){
+  const btns=document.getElementById('twBtns'),stage=document.getElementById('twStage'),cap=document.getElementById('twCap');
+  const T=[
+    ['Identity verification','Static, long-lived user accounts in a directory.','Ephemeral <b>roles</b> &mdash; you assume one for a temporary session instead of logging into a permanent account.'],
+    ['Access management','Service-level, coarse-grained &mdash; once you&rsquo;re in the app, you&rsquo;re &ldquo;in.&rdquo;','Resource-level, fine-grained &mdash; <b>no general admission</b>. You&rsquo;re authorised for a specific resource (one bucket), not a whole service.'],
+    ['Authorization','Decoupled &mdash; the IdP handles the door, the app handles permissions inside.','<b>Unified policy</b> &mdash; one JSON document controls both entry to the resource and the exact actions allowed.']
+  ];
+  let sel=0;
+  btns.innerHTML=T.map((t,i)=>`<button class="ui${i===0?'':' ghost'}" data-i="${i}" style="font-size:11.5px;padding:6px 11px">${t[0]}</button>`).join('');
+  function render(){
+    const t=T[sel];
+    stage.className='fade';
+    stage.innerHTML=
+      `<div style="flex:1;min-width:230px;background:var(--bg);border-radius:9px;padding:14px 16px;border-left:3px solid #9aa3a8">`+
+      `<div style="font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#9aa3a8;margin-bottom:5px">Traditional model</div>`+
+      `<div style="font-size:13px;line-height:1.6;color:var(--text-muted)">${t[1]}</div></div>`+
+      `<div style="display:flex;align-items:center;font-size:20px;color:var(--accent);font-weight:900">&rarr;</div>`+
+      `<div style="flex:1;min-width:230px;background:var(--accent-soft);border-radius:9px;padding:14px 16px;border-left:3px solid #0E7490">`+
+      `<div style="font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#0B5567;margin-bottom:5px">The AWS twist</div>`+
+      `<div style="font-size:13px;line-height:1.6;color:var(--text)">${t[2]}</div></div>`;
+    cap.innerHTML=`<b>${t[0]}.</b> ${sel===0?'Identities stop being permanent accounts.':sel===1?'Access stops being all-or-nothing per service.':'Access management and authorization merge into one policy engine.'}`;
+    btns.querySelectorAll('button').forEach((b,i)=>b.className='ui'+(i===sel?'':' ghost'));
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  btns.querySelectorAll('button').forEach(b=>b.onclick=()=>{sel=+b.dataset.i;render();});
+  render();
+})();
+</script>
+</body></html>
