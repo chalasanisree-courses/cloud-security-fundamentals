@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Buyer not Builder: Identity, OAuth &amp; OIDC &mdash; Module 12</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+* { box-sizing:border-box; margin:0; padding:0; }
+:root{
+  --slate-dark:#1A202C; --slate:#2D3748;
+  --accent:#0E7490; --accent-dark:#0B5567; --accent-soft:#CFF1F6;
+  --info:#1E40AF; --info-soft:#DBEAFE;
+  --text:#1a1a18; --text-muted:#5f5e5a; --text-light:#888780;
+  --border:rgba(0,0,0,0.09); --bg:#fafaf8; --bg-card:#fff; --bg-code:#f6f6f3; --tag-bg:#f1f0eb;
+  --rust:#B45309; --soft:#888780; --muted:#5f5e5a; --ok:#2e7d57; --bad:#c0392b;
+}
+body{ font-family:'Barlow',sans-serif; background:var(--bg); color:var(--text); line-height:1.65; min-height:100vh; }
+.pagenav{ background:var(--slate-dark); }
+.pagenav.foot{ margin-top:48px; }
+.pagenav-inner{ max-width:920px; margin:0 auto; padding:11px 32px; display:flex; justify-content:space-between; align-items:center; gap:16px; }
+.pagenav .brand{ color:rgba(255,255,255,0.45); font-size:11px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; white-space:nowrap; }
+.navbtns{ display:flex; gap:8px; }
+.navbtn{ display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#fff; background:rgba(255,255,255,0.10); border:1px solid rgba(255,255,255,0.22); border-radius:6px; padding:7px 13px; text-decoration:none; transition:0.15s; white-space:nowrap; }
+.navbtn:hover{ background:var(--accent); border-color:var(--accent); }
+.navbtn.disabled{ opacity:0.28; pointer-events:none; }
+@media(max-width:560px){ .pagenav .brand{ display:none } .pagenav-inner{ justify-content:center } }
+.header{ background:#fff; padding:56px 0 44px; border-bottom:0.5px solid var(--border); }
+.header-inner{ max-width:920px; margin:0 auto; padding:0 32px; }
+.header-eyebrow{ font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:14px; display:flex; align-items:center; gap:12px; }
+.header-eyebrow::after{ content:''; flex:1; height:0.5px; background:var(--border); max-width:120px; }
+.header h1{ font-family:'Barlow Condensed',sans-serif; font-size:clamp(34px,4.5vw,52px); font-weight:900; letter-spacing:-0.01em; line-height:1.05; color:var(--text); margin-bottom:18px; }
+.header h1 em{ font-style:normal; color:var(--accent); }
+.header-meta-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+.module-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:var(--slate); color:#fff; }
+.topic-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:#F1F5F9; color:#475569; }
+.topic-pill.accent{ background:var(--accent-soft); color:var(--accent-dark); }
+.page{ max-width:920px; margin:0 auto; padding:0 32px 48px; }
+.objectives{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--accent); border-radius:6px; padding:20px 26px; margin:34px 0 14px; }
+.obj-label{ font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:12px; }
+.objectives ul{ list-style:none; }
+.objectives ul li{ font-size:13.5px; color:var(--text); padding:4px 0 4px 20px; position:relative; line-height:1.5; }
+.objectives ul li::before{ content:'◇'; position:absolute; left:0; color:var(--accent); font-size:10px; top:8px; }
+section{ margin-top:42px; }
+section h2{ font-family:'Barlow Condensed',sans-serif; font-size:27px; font-weight:800; color:var(--text); margin-bottom:8px; display:flex; align-items:baseline; gap:18px; }
+section h2 .num{ font-family:'Barlow Condensed',sans-serif; font-size:54px; font-weight:900; color:var(--accent); letter-spacing:-0.02em; line-height:0.85; min-width:40px; }
+section .lead{ font-size:14.5px; color:var(--text-muted); line-height:1.6; margin:0 0 6px; max-width:720px; }
+section p{ font-size:14.5px; color:var(--text); line-height:1.7; margin-bottom:12px; }
+section p strong{ font-weight:700; }
+code.inline{ font-family:'JetBrains Mono',monospace; font-size:12.5px; background:var(--tag-bg); padding:1px 6px; border-radius:3px; color:var(--text); }
+.keybox{ background:var(--accent-soft); border-left:3px solid var(--accent); border-radius:0 6px 6px 0; padding:13px 18px; margin:16px 0 0; font-size:13px; line-height:1.6; color:var(--text); }
+.keybox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--accent-dark); margin-bottom:5px; }
+.keybox b{ color:var(--accent-dark); }
+.notebox{ background:#FBF3E8; border-left:3px solid var(--rust); border-radius:0 6px 6px 0; padding:13px 18px; margin:16px 0 0; font-size:13px; line-height:1.6; }
+.notebox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--rust); margin-bottom:5px; }
+.assessment-box{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--slate); border-radius:0 6px 6px 0; padding:18px 22px; margin:34px 0 0; }
+.assessment-box .assess-label{ font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); margin-bottom:8px; }
+.assessment-box p{ font-size:13px; line-height:1.65; margin:0; }
+.widget{ border:0.5px solid var(--border); border-radius:10px; padding:18px; margin:18px 0 0; background:var(--bg-card); }
+.widget h4{ margin:0 0 12px; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); font-weight:700; }
+.controls{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+button.ui{ font-family:'Barlow',sans-serif; cursor:pointer; border:1px solid var(--accent); background:var(--accent); color:#fff; padding:7px 16px; border-radius:6px; font-size:12.5px; font-weight:600; transition:0.15s; }
+button.ui:hover{ background:var(--accent-dark); border-color:var(--accent-dark); }
+button.ui.ghost{ background:#fff; color:var(--accent); }
+button.ui.ghost:hover{ background:var(--accent-soft); }
+.fade{ animation:fade 0.35s ease; }
+@keyframes fade{ from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+.legend{ display:flex; gap:18px; flex-wrap:wrap; font-size:11.5px; color:var(--text-muted); margin-top:14px; }
+.legend span{ display:inline-flex; align-items:center; gap:6px; }
+.swatch{ width:12px; height:12px; border-radius:3px; display:inline-block; }
+</style>
+</head><body>
+<header class="pagenav"><div class="pagenav-inner">
+  <span class="brand">Cloud Security Fundamentals</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn disabled" href="#">&larr; Prev</a>
+    <a class="navbtn" href="02-saas-data-dlp-casb.html">Next &rarr;</a>
+  </nav>
+</div></header>
+
+<div class="header"><div class="header-inner">
+  <div class="header-eyebrow">Module 12 &nbsp;·&nbsp; Up the Stack · SaaS</div>
+  <h1>Buyer, not Builder: <em>Identity, OAuth &amp; OIDC</em></h1>
+  <div class="header-meta-row">
+    <span class="module-pill">Module 12</span>
+    <span class="topic-pill">SaaS pivot</span>
+    <span class="topic-pill accent">OAuth · OIDC</span>
+  </div>
+</div></div>
+
+<div class="page">
+
+  <div class="objectives">
+    <div class="obj-label">In this note</div>
+    <ul>
+      <li>The pivot from <em>builder</em> (IaaS) to <em>buyer</em> (SaaS) &mdash; and the stack that shrinks away</li>
+      <li>Why &ldquo;identity is the new perimeter&rdquo; once the network perimeter is gone</li>
+      <li>OAuth: granting an app limited access without handing over your password &mdash; the valet key</li>
+      <li>OIDC: the ID token, and how it differs from an OAuth access token</li>
+    </ul>
+  </div>
+
+  <section>
+    <h2><span class="num">1</span> The pivot: builder &rarr; buyer</h2>
+    <p class="lead">For most of this course you were a <strong>builder</strong> &mdash; spinning up servers, patching, configuring firewalls. SaaS makes you a <strong>buyer</strong>: you just consume the app. The stack you manage shrinks dramatically. Toggle:</p>
+    <div class="widget" id="stack">
+      <h4>What you still secure</h4>
+      <div class="controls" style="margin:0 0 14px">
+        <button class="ui" data-m="iaas">Builder (IaaS)</button>
+        <button class="ui ghost" data-m="saas">Buyer (SaaS)</button>
+      </div>
+      <div id="stackStage"></div>
+      <div class="legend">
+        <span><span class="swatch" style="background:#0E7490"></span> You secure</span>
+        <span><span class="swatch" style="background:#2D3748"></span> Vendor secures</span>
+      </div>
+      <p id="stackCap" style="font-size:13px;color:var(--text-muted);margin:12px 0 0;line-height:1.6;min-height:34px"></p>
+    </div>
+    <div class="keybox">
+      <div class="lbl">Identity is the new perimeter</div>
+      In SaaS the app sits on the <b>public internet</b> &mdash; there&rsquo;s no firewall or DMZ around it. Often the only thing between an attacker and your data is a <b>login screen</b>. That&rsquo;s why <b>MFA and strong identity</b> matter so much here: a stolen password shouldn&rsquo;t be enough on its own.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> OAuth: don&rsquo;t hand over your password</h2>
+    <p class="lead">You want Spotify to read a playlist from your Google account. The wrong move is to <strong>give Spotify your Google password</strong> &mdash; now it can do <em>anything</em>. OAuth hands it a <strong>valet key</strong> instead. Compare:</p>
+    <div class="widget" id="oauth">
+      <h4>Master key vs valet key</h4>
+      <div class="controls" style="margin:0 0 14px">
+        <button class="ui" data-o="pw">Share your password</button>
+        <button class="ui ghost" data-o="oauth">OAuth token (scoped)</button>
+      </div>
+      <div id="oauthStage"></div>
+      <p id="oauthCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:48px"></p>
+    </div>
+    <div class="keybox">
+      <div class="lbl">The four players</div>
+      Every OAuth flow has four: the <b>resource owner</b> (you), the <b>client</b> (the app, e.g. Spotify), the <b>authorization server</b> (issues the token, e.g. Google Auth), and the <b>resource server</b> (holds the data, e.g. Google Drive). The <b>access token</b> is the valet key; the <b>scopes</b> stamped on it are exactly what it&rsquo;s allowed to do.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> OIDC: who you are vs what you can do</h2>
+    <p class="lead">OAuth proves <em>what</em> an app may do &mdash; not <em>who</em> you are. &ldquo;Log in with Google&rdquo; needs identity, so <strong>OIDC</strong> adds an <strong>ID token</strong> on top of OAuth. Two tokens, two jobs &mdash; flip them:</p>
+    <div class="widget" id="tok">
+      <h4>ID token vs access token</h4>
+      <div class="controls" style="margin:0 0 14px">
+        <button class="ui" data-t="id">ID token (OIDC)</button>
+        <button class="ui ghost" data-t="access">Access token (OAuth)</button>
+      </div>
+      <div id="tokStage"></div>
+      <p id="tokCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:48px"></p>
+    </div>
+    <div class="notebox">
+      <div class="lbl">OIDC vs SAML</div>
+      Both let you log in through a third party (<b>federated identity</b>). <b>OIDC</b> uses lightweight <b>JSON / JWT</b> &mdash; the modern standard for mobile apps and &ldquo;Log in with Google&rdquo; buttons. <b>SAML</b> uses heavier <b>XML</b> &mdash; the older enterprise standard you&rsquo;ll meet in corporate SSO and legacy systems.
+    </div>
+  </section>
+
+  <div class="assessment-box">
+    <div class="assess-label">Remember</div>
+    <p>SaaS turns you from a <strong>builder</strong> into a <strong>buyer</strong>: the vendor owns the infrastructure, OS, and network, so your job shrinks to <strong>identity and data</strong>. With no network perimeter, <strong>identity is the new perimeter</strong> &mdash; lean on MFA. <strong>OAuth</strong> is delegated <em>authorization</em>: it gives an app a scoped <strong>access token</strong> (a valet key) so it never sees your password &mdash; four players (owner, client, auth server, resource server), with <strong>scopes</strong> limiting the token. <strong>OIDC</strong> adds delegated <em>authentication</em> with an <strong>ID token</strong> (a JWT of claims: who you are) &mdash; the access token says <em>what</em> you may do, the ID token says <em>who</em> you are. OIDC is JSON/modern; SAML is XML/enterprise.</p>
+  </div>
+
+</div>
+
+<footer class="pagenav foot"><div class="pagenav-inner">
+  <span class="brand">Module 12 &middot; SaaS Security</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn disabled" href="#">&larr; Prev</a>
+    <a class="navbtn" href="02-saas-data-dlp-casb.html">Next &rarr;</a>
+  </nav>
+</div></footer>
+
+<script>
+/* ---------- 1. Shrinking stack ---------- */
+(function(){
+  const stage=document.getElementById('stackStage'),cap=document.getElementById('stackCap');
+  const L=['Identity','Data','Application','Operating system','Network','Hardware'];
+  // index of first vendor-secured layer
+  const B={iaas:5, saas:2};
+  let m='iaas';
+  function render(){
+    const b=B[m];
+    let s='<div style="display:flex;flex-direction:column;gap:4px;max-width:440px">';
+    L.forEach((l,i)=>{
+      const vendor=i>=b, fill=vendor?'#2D3748':'#0E7490';
+      s+=`<div style="display:flex;align-items:center;gap:10px">`+
+         `<div style="flex:1;background:${fill};color:#fff;font-size:12px;font-weight:600;padding:7px 13px;border-radius:5px">${l}</div>`+
+         `<span style="font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:${vendor?'#8a93a0':'#0E7490'};min-width:46px">${vendor?'vendor':'you'}</span></div>`;
+    });
+    s+='</div>';
+    stage.className='fade'; stage.innerHTML=s;
+    cap.innerHTML = m==='saas'
+      ? '<b>Buyer (SaaS).</b> The vendor secures the app, OS, network, and hardware. You&rsquo;re left with the two layers that are always yours: <b>identity</b> (the people) and <b>data</b> (the information).'
+      : '<b>Builder (IaaS).</b> You still own the OS, network, and app &mdash; patching, firewalls, host antivirus, the lot. Only the hardware is the vendor&rsquo;s.';
+    document.querySelectorAll('#stack [data-m]').forEach(btn=>btn.className='ui'+(btn.dataset.m===m?'':' ghost'));
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  render();
+  document.querySelectorAll('#stack [data-m]').forEach(btn=>btn.onclick=()=>{m=btn.dataset.m;render();});
+})();
+
+/* ---------- 2. OAuth master vs valet ---------- */
+(function(){
+  const stage=document.getElementById('oauthStage'),cap=document.getElementById('oauthCap');
+  let o='pw';
+  const ABIL=['Read playlists','Create a playlist','Read your email','Delete your files','Change your password'];
+  function render(){
+    const pw=o==='pw';
+    // password = all allowed (bad); oauth = only first two (scoped)
+    let s=`<div style="display:flex;gap:18px;flex-wrap:wrap;align-items:center">`;
+    s+=`<div style="flex:0 0 auto;text-align:center"><div style="width:74px;height:74px;border-radius:14px;background:#2e7d57;display:flex;align-items:center;justify-content:center;font-size:30px">&#127925;</div><div style="font-size:11px;font-weight:800;margin-top:5px">Spotify</div><div style="font-size:9px;color:var(--text-muted)">the app</div></div>`;
+    s+=`<div style="flex:1;min-width:230px">`;
+    ABIL.forEach((a,i)=>{
+      let label,color;
+      if(pw){ label='&#10003; can'; color='#c0392b'; }
+      else if(i<2){ label='&#10003; can'; color='#2e7d57'; }
+      else { label='&#10007; blocked'; color='#9aa3a8'; }
+      s+=`<div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg);border-radius:7px;padding:7px 12px;margin-bottom:5px"><span style="font-size:12.5px;color:var(--text)">${a}</span><span style="font-size:11px;font-weight:800;color:${color}">${label}</span></div>`;
+    });
+    s+=`</div></div>`;
+    stage.className='fade'; stage.innerHTML=s;
+    cap.innerHTML = pw
+      ? '<b style="color:#c0392b">Master key.</b> Hand over your password and Spotify can do <b>everything you can</b> &mdash; read your email, delete files, even change your password. And if Spotify is ever breached, so is your whole Google account.'
+      : '<b style="color:#2e7d57">Valet key.</b> OAuth gives Spotify a token <b>scoped</b> to just what it needs &mdash; read and create playlists, nothing else. Your password never leaves Google, and you can revoke the token anytime.';
+    document.querySelectorAll('#oauth [data-o]').forEach(b=>b.className='ui'+(b.dataset.o===o?'':' ghost'));
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  render();
+  document.querySelectorAll('#oauth [data-o]').forEach(b=>b.onclick=()=>{o=b.dataset.o;render();});
+})();
+
+/* ---------- 3. ID token vs access token ---------- */
+(function(){
+  const stage=document.getElementById('tokStage'),cap=document.getElementById('tokCap');
+  let t='id';
+  function render(){
+    const id=t==='id';
+    const col=id?'#8E5CA8':'#0E7490';
+    let s=`<div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start">`;
+    s+=`<div style="flex:1;min-width:240px"><div style="font-family:JetBrains Mono,monospace;background:#1A202C;border-radius:9px;padding:14px 16px">`;
+    if(id){
+      [['typ','ID token (JWT)'],['sub','user 8c2f&hellip; (Mary)'],['name','Mary Smith'],['email','mary@example.com'],['iss','google.com']].forEach(r=>{
+        s+=`<div style="display:flex;gap:8px;padding:3px 0"><span style="flex:0 0 44px;font-size:10px;color:#7CF2C0">${r[0]}</span><span style="font-size:11.5px;color:#e7ecee">${r[1]}</span></div>`;
+      });
+    } else {
+      [['type','Access token'],['scope','playlist-read'],['','playlist-modify'],['exp','in 60 min'],['holder','(no name &mdash; bearer)']].forEach(r=>{
+        s+=`<div style="display:flex;gap:8px;padding:3px 0"><span style="flex:0 0 44px;font-size:10px;color:#7CF2C0">${r[0]}</span><span style="font-size:11.5px;color:#e7ecee">${r[1]}</span></div>`;
+      });
+    }
+    s+=`</div></div>`;
+    s+=`<div style="flex:1;min-width:200px"><div style="font-family:'Barlow Condensed';font-weight:900;font-size:24px;color:${col}">${id?'ID token':'Access token'}</div>`+
+       `<div style="display:inline-block;background:var(--tag-bg);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;margin:4px 0 8px">${id?'OIDC &middot; authentication':'OAuth &middot; authorization'}</div>`+
+       `<p style="font-size:13px;line-height:1.6;margin:0"><b>${id?'Who you are.':'What you can do.'}</b> ${id?'Readable claims about the user &mdash; like an <b>ID badge</b>.':'A bearer credential scoped to actions &mdash; like a <b>movie ticket</b>: it admits the holder but carries no name.'}</p></div>`;
+    s+=`</div>`;
+    stage.className='fade'; stage.innerHTML=s;
+    cap.innerHTML = id
+      ? '<b>ID token (OIDC).</b> A signed JWT of <b>claims</b> &mdash; name, email, a stable user id (<code class="inline">sub</code>), and who issued it. It lets the app say &ldquo;Welcome, Mary&rdquo; without ever seeing her password.'
+      : '<b>Access token (OAuth).</b> Proves the holder is <b>allowed to do</b> something (read playlists), but says nothing about <i>who</i> they are. Using it to identify a user is the &ldquo;movie ticket&rdquo; mistake OIDC was built to fix.';
+    document.querySelectorAll('#tok [data-t]').forEach(b=>b.className='ui'+(b.dataset.t===t?'':' ghost'));
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  render();
+  document.querySelectorAll('#tok [data-t]').forEach(b=>b.onclick=()=>{t=b.dataset.t;render();});
+})();
+</script>
+</body></html>

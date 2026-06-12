@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Securing the Application &mdash; Module 11</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+* { box-sizing:border-box; margin:0; padding:0; }
+:root{
+  --slate-dark:#1A202C; --slate:#2D3748;
+  --accent:#0E7490; --accent-dark:#0B5567; --accent-soft:#CFF1F6;
+  --info:#1E40AF; --info-soft:#DBEAFE;
+  --text:#1a1a18; --text-muted:#5f5e5a; --text-light:#888780;
+  --border:rgba(0,0,0,0.09); --bg:#fafaf8; --bg-card:#fff; --bg-code:#f6f6f3; --tag-bg:#f1f0eb;
+  --rust:#B45309; --soft:#888780; --muted:#5f5e5a; --ok:#2e7d57; --bad:#c0392b;
+}
+body{ font-family:'Barlow',sans-serif; background:var(--bg); color:var(--text); line-height:1.65; min-height:100vh; }
+.pagenav{ background:var(--slate-dark); }
+.pagenav.foot{ margin-top:48px; }
+.pagenav-inner{ max-width:920px; margin:0 auto; padding:11px 32px; display:flex; justify-content:space-between; align-items:center; gap:16px; }
+.pagenav .brand{ color:rgba(255,255,255,0.45); font-size:11px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; white-space:nowrap; }
+.navbtns{ display:flex; gap:8px; }
+.navbtn{ display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#fff; background:rgba(255,255,255,0.10); border:1px solid rgba(255,255,255,0.22); border-radius:6px; padding:7px 13px; text-decoration:none; transition:0.15s; white-space:nowrap; }
+.navbtn:hover{ background:var(--accent); border-color:var(--accent); }
+.navbtn.disabled{ opacity:0.28; pointer-events:none; }
+@media(max-width:560px){ .pagenav .brand{ display:none } .pagenav-inner{ justify-content:center } }
+.header{ background:#fff; padding:56px 0 44px; border-bottom:0.5px solid var(--border); }
+.header-inner{ max-width:920px; margin:0 auto; padding:0 32px; }
+.header-eyebrow{ font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:14px; display:flex; align-items:center; gap:12px; }
+.header-eyebrow::after{ content:''; flex:1; height:0.5px; background:var(--border); max-width:120px; }
+.header h1{ font-family:'Barlow Condensed',sans-serif; font-size:clamp(34px,4.5vw,52px); font-weight:900; letter-spacing:-0.01em; line-height:1.05; color:var(--text); margin-bottom:18px; }
+.header h1 em{ font-style:normal; color:var(--accent); }
+.header-meta-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+.module-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:var(--slate); color:#fff; }
+.topic-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:#F1F5F9; color:#475569; }
+.topic-pill.accent{ background:var(--accent-soft); color:var(--accent-dark); }
+.page{ max-width:920px; margin:0 auto; padding:0 32px 48px; }
+.objectives{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--accent); border-radius:6px; padding:20px 26px; margin:34px 0 14px; }
+.obj-label{ font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:12px; }
+.objectives ul{ list-style:none; }
+.objectives ul li{ font-size:13.5px; color:var(--text); padding:4px 0 4px 20px; position:relative; line-height:1.5; }
+.objectives ul li::before{ content:'◇'; position:absolute; left:0; color:var(--accent); font-size:10px; top:8px; }
+section{ margin-top:42px; }
+section h2{ font-family:'Barlow Condensed',sans-serif; font-size:27px; font-weight:800; color:var(--text); margin-bottom:8px; display:flex; align-items:baseline; gap:18px; }
+section h2 .num{ font-family:'Barlow Condensed',sans-serif; font-size:54px; font-weight:900; color:var(--accent); letter-spacing:-0.02em; line-height:0.85; min-width:40px; }
+section .lead{ font-size:14.5px; color:var(--text-muted); line-height:1.6; margin:0 0 6px; max-width:720px; }
+section p{ font-size:14.5px; color:var(--text); line-height:1.7; margin-bottom:12px; }
+section p strong{ font-weight:700; }
+code.inline{ font-family:'JetBrains Mono',monospace; font-size:12.5px; background:var(--tag-bg); padding:1px 6px; border-radius:3px; color:var(--text); }
+.keybox{ background:var(--accent-soft); border-left:3px solid var(--accent); border-radius:0 6px 6px 0; padding:13px 18px; margin:16px 0 0; font-size:13px; line-height:1.6; color:var(--text); }
+.keybox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--accent-dark); margin-bottom:5px; }
+.keybox b{ color:var(--accent-dark); }
+.notebox{ background:#FBF3E8; border-left:3px solid var(--rust); border-radius:0 6px 6px 0; padding:13px 18px; margin:16px 0 0; font-size:13px; line-height:1.6; }
+.notebox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--rust); margin-bottom:5px; }
+.assessment-box{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--slate); border-radius:0 6px 6px 0; padding:18px 22px; margin:34px 0 0; }
+.assessment-box .assess-label{ font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); margin-bottom:8px; }
+.assessment-box p{ font-size:13px; line-height:1.65; margin:0; }
+.widget{ border:0.5px solid var(--border); border-radius:10px; padding:18px; margin:18px 0 0; background:var(--bg-card); }
+.widget h4{ margin:0 0 12px; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); font-weight:700; }
+.controls{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+button.ui{ font-family:'Barlow',sans-serif; cursor:pointer; border:1px solid var(--accent); background:var(--accent); color:#fff; padding:7px 16px; border-radius:6px; font-size:12.5px; font-weight:600; transition:0.15s; }
+button.ui:hover{ background:var(--accent-dark); border-color:var(--accent-dark); }
+button.ui.ghost{ background:#fff; color:var(--accent); }
+button.ui.ghost:hover{ background:var(--accent-soft); }
+.fade{ animation:fade 0.35s ease; }
+@keyframes fade{ from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+</style>
+</head><body>
+<header class="pagenav"><div class="pagenav-inner">
+  <span class="brand">Cloud Security Fundamentals</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn" href="01-modern-architectures.html">&larr; Prev</a>
+    <a class="navbtn disabled" href="#">Next &rarr;</a>
+  </nav>
+</div></header>
+
+<div class="header"><div class="header-inner">
+  <div class="header-eyebrow">Module 11 &nbsp;·&nbsp; Up the Stack · Application</div>
+  <h1>Securing the <em>Application</em></h1>
+  <div class="header-meta-row">
+    <span class="module-pill">Module 11</span>
+    <span class="topic-pill">3-tier · CloudFront</span>
+    <span class="topic-pill accent">WAF · Shield</span>
+  </div>
+</div></div>
+
+<div class="page">
+
+  <div class="objectives">
+    <div class="obj-label">In this note</div>
+    <ul>
+      <li>The 3-tier app and the &ldquo;golden rule&rdquo; of network segmentation</li>
+      <li>Identity in two stages: who you are (Cognito) vs what you own (the app)</li>
+      <li>Mapping real application threats to the AWS service that stops each one</li>
+      <li>End-to-end encryption, in motion and at rest</li>
+    </ul>
+  </div>
+
+  <section>
+    <h2><span class="num">1</span> The shape of a secured app</h2>
+    <p class="lead">Take a photo-viewer app on AWS. The <strong>golden rule</strong>: only the load balancer faces the internet; everything else hides in private subnets. Click a piece to see its job:</p>
+    <div class="widget" id="arch">
+      <h4>A 3-tier app, segmented</h4>
+      <div id="archStage"></div>
+      <div class="controls" style="margin:14px 0 0" id="archBtns"></div>
+      <p id="archCap" style="font-size:13px;color:var(--text-muted);margin:12px 0 0;line-height:1.6;min-height:48px"></p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> Two stages of identity</h2>
+    <p class="lead">When Mary opens her photos, two different systems answer two different questions. Step through:</p>
+    <div class="widget" id="id">
+      <h4>Authentication vs authorization</h4>
+      <div class="controls" style="margin:0 0 14px">
+        <button class="ui" data-i="authn">1 &middot; Who are you?</button>
+        <button class="ui ghost" data-i="authz">2 &middot; What do you own?</button>
+      </div>
+      <div id="idStage"></div>
+      <p id="idCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:48px"></p>
+    </div>
+    <div class="keybox">
+      <div class="lbl">The split that trips people up</div>
+      <b>Cognito</b> (the identity provider) knows <i>who</i> Mary is and issues her a token; the <b>load balancer</b> checks that token&rsquo;s signature on every request. But only the <b>application</b> knows <i>what</i> Mary owns &mdash; it runs <code class="inline">SELECT * FROM photos WHERE owner='Mary'</code> so she sees her photos and no one else&rsquo;s. <b>The IdP knows who; the app knows what.</b>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> Threats &rarr; defenses</h2>
+    <p class="lead">Securing the app means matching each threat to the AWS service that stops it. Click a threat:</p>
+    <div class="widget" id="threat">
+      <h4>The defense matrix</h4>
+      <div class="controls" style="margin:0 0 14px" id="thBtns"></div>
+      <div id="thStage" style="background:var(--bg);border-radius:8px;padding:16px 18px;min-height:120px"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> Encryption, end to end</h2>
+    <p class="lead">Finally, protect the data itself &mdash; in motion and at rest:</p>
+    <div class="widget" id="enc">
+      <h4>In motion &middot; at rest</h4>
+      <div id="encStage"></div>
+    </div>
+    <div class="notebox">
+      <div class="lbl">Keep S3 traffic off the internet</div>
+      The app&rsquo;s hop to S3 can use a <b>VPC endpoint</b>, so that traffic stays on the <b>private AWS network</b> and never crosses the public internet &mdash; even though S3 lives outside your VPC.
+    </div>
+  </section>
+
+  <div class="assessment-box">
+    <div class="assess-label">Remember</div>
+    <p>Secure a 3-tier app by <strong>segmentation</strong> &mdash; only the load balancer in the public subnet, everything else private. Identity is two stages: <strong>Cognito</strong> authenticates and issues a token the load balancer validates, while the <strong>application</strong> authorizes what data you own. Match each threat to a service: MITM&nbsp;&rarr;&nbsp;<strong>TLS</strong>, DDoS&nbsp;&rarr;&nbsp;<strong>Shield</strong>, SQL injection&nbsp;&rarr;&nbsp;<strong>WAF</strong>, malicious uploads&nbsp;&rarr;&nbsp;<strong>GuardDuty</strong>, vulnerable packages&nbsp;&rarr;&nbsp;<strong>Inspector</strong>, and origin-bypass&nbsp;&rarr;&nbsp;<strong>locking the load balancer to CloudFront</strong>. And encrypt everything &mdash; <strong>TLS</strong> on every hop (with a <strong>VPC endpoint</strong> to S3) and <strong>server-side encryption</strong> at rest.</p>
+  </div>
+
+</div>
+
+<footer class="pagenav foot"><div class="pagenav-inner">
+  <span class="brand">Module 11 &middot; Application Security</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn" href="01-modern-architectures.html">&larr; Prev</a>
+    <a class="navbtn disabled" href="#">Next &rarr;</a>
+  </nav>
+</div></footer>
+
+<script>
+/* ---------- 1. Architecture ---------- */
+(function(){
+  const stage=document.getElementById('archStage'),btns=document.getElementById('archBtns'),cap=document.getElementById('archCap');
+  const C=[
+    ['CloudFront','cf','#8E5CA8','The CDN and entry point. It caches static content close to users for speed, and is the front line for HTTPS and DDoS protection.'],
+    ['Load balancer','alb','#0E7490','The <b>only</b> component in the public subnet (the DMZ). It validates the user&rsquo;s token and forwards valid requests to the backend &mdash; the single internet-facing door.'],
+    ['Web / App','app','#2e7d57','Web and application servers run the logic in <b>private subnets</b>, hidden from the internet. They can only be reached through the load balancer.'],
+    ['Data','data','#B45309','The database and S3 buckets &mdash; also private. The app reads them; the internet never touches them directly.']
+  ];
+  let sel=1;
+  function render(){
+    const on=k=>C[sel][1]===k;
+    let s=`<svg viewBox="0 0 560 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    // internet
+    s+=`<text x="26" y="96" text-anchor="middle" font-size="22">&#127758;</text><text x="26" y="116" text-anchor="middle" font-size="8" font-weight="700" fill="#5f5e5a">internet</text>`;
+    // CloudFront
+    s+=`<rect x="60" y="74" width="76" height="44" rx="8" fill="${on('cf')?'#8E5CA8':'#eef1f3'}" stroke="${on('cf')?'#8E5CA8':'#dcdcd6'}" stroke-width="${on('cf')?2.2:1}" data-k="cf" style="cursor:pointer"/><text x="98" y="100" text-anchor="middle" font-size="10" font-weight="800" fill="${on('cf')?'#fff':'#5f5e5a'}" style="pointer-events:none">CloudFront</text>`;
+    // public subnet (ALB)
+    s+=`<rect x="156" y="20" width="120" height="160" rx="9" fill="none" stroke="#9aa3a8" stroke-width="1.2" stroke-dasharray="5 4"/><text x="216" y="36" text-anchor="middle" font-size="8.5" font-weight="800" fill="#9aa3a8">PUBLIC SUBNET</text>`;
+    s+=`<rect x="172" y="74" width="88" height="44" rx="8" fill="${on('alb')?'#0E7490':'#eef1f3'}" stroke="${on('alb')?'#0E7490':'#dcdcd6'}" stroke-width="${on('alb')?2.2:1}" data-k="alb" style="cursor:pointer"/><text x="216" y="93" text-anchor="middle" font-size="10" font-weight="800" fill="${on('alb')?'#fff':'#5f5e5a'}" style="pointer-events:none">Load</text><text x="216" y="106" text-anchor="middle" font-size="10" font-weight="800" fill="${on('alb')?'#fff':'#5f5e5a'}" style="pointer-events:none">balancer</text>`;
+    // private subnet (web/app + data)
+    s+=`<rect x="288" y="20" width="258" height="160" rx="9" fill="none" stroke="#0E7490" stroke-width="1.2" stroke-dasharray="5 4"/><text x="417" y="36" text-anchor="middle" font-size="8.5" font-weight="800" fill="#0B5567">PRIVATE SUBNETS</text>`;
+    s+=`<rect x="304" y="62" width="100" height="40" rx="7" fill="${on('app')?'#2e7d57':'#eef1f3'}" stroke="${on('app')?'#2e7d57':'#dcdcd6'}" stroke-width="${on('app')?2.2:1}" data-k="app" style="cursor:pointer"/><text x="354" y="86" text-anchor="middle" font-size="10" font-weight="800" fill="${on('app')?'#fff':'#5f5e5a'}" style="pointer-events:none">Web / App</text>`;
+    s+=`<rect x="304" y="112" width="100" height="40" rx="7" fill="${on('data')?'#B45309':'#eef1f3'}" stroke="${on('data')?'#B45309':'#dcdcd6'}" stroke-width="${on('data')?2.2:1}" data-k="data" style="cursor:pointer"/><text x="354" y="136" text-anchor="middle" font-size="10" font-weight="800" fill="${on('data')?'#fff':'#5f5e5a'}" style="pointer-events:none">DB / S3</text>`;
+    // arrows
+    s+=`<line x1="42" y1="96" x2="58" y2="96" stroke="#b9c0c6" stroke-width="1.6"/>`;
+    s+=`<line x1="136" y1="96" x2="170" y2="96" stroke="#b9c0c6" stroke-width="1.6"/>`;
+    s+=`<line x1="260" y1="92" x2="302" y2="82" stroke="#b9c0c6" stroke-width="1.6"/>`;
+    s+=`<line x1="354" y1="102" x2="354" y2="112" stroke="#b9c0c6" stroke-width="1.6"/>`;
+    s+=`</svg>`;
+    stage.className='fade'; stage.innerHTML=s;
+    stage.querySelectorAll('[data-k]').forEach(e=>e.onclick=()=>{sel=C.findIndex(c=>c[1]===e.dataset.k);render();});
+    btns.querySelectorAll('button').forEach((b,i)=>b.className='ui'+(i===sel?'':' ghost'));
+    cap.innerHTML=`<b style="color:${C[sel][2]}">${C[sel][0]}.</b> ${C[sel][3]}`;
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  btns.innerHTML=C.map((c,i)=>`<button class="ui${i===sel?'':' ghost'}" data-i="${i}">${c[0]}</button>`).join('');
+  btns.querySelectorAll('button').forEach(b=>b.onclick=()=>{sel=+b.dataset.i;render();});
+  render();
+})();
+
+/* ---------- 2. AuthN vs AuthZ ---------- */
+(function(){
+  const stage=document.getElementById('idStage'),cap=document.getElementById('idCap');
+  let i='authn';
+  function render(){
+    const authn=i==='authn';
+    let s=`<svg viewBox="0 0 520 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    s+=`<circle cx="40" cy="60" r="17" fill="#2D3748"/><text x="40" y="65" text-anchor="middle" font-size="14" fill="#fff">&#128100;</text><text x="40" y="92" text-anchor="middle" font-size="9" font-weight="700" fill="#5f5e5a">Mary</text>`;
+    if(authn){
+      s+=`<rect x="150" y="38" width="120" height="44" rx="9" fill="#8E5CA8"/><text x="210" y="58" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">Amazon Cognito</text><text x="210" y="72" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.85)">verifies + MFA</text>`;
+      s+=`<line x1="58" y1="58" x2="148" y2="58" stroke="#9aa3a8" stroke-width="1.8" marker-end="url(#ia)"/>`;
+      s+=`<rect x="320" y="44" width="170" height="32" rx="7" fill="#1A202C"/><text x="405" y="64" text-anchor="middle" font-size="10" font-weight="700" font-family="JetBrains Mono,monospace" fill="#7CF2C0">access token issued</text>`;
+      s+=`<line x1="270" y1="60" x2="318" y2="60" stroke="#9aa3a8" stroke-width="1.8" marker-end="url(#ia)"/>`;
+    } else {
+      s+=`<rect x="150" y="38" width="120" height="44" rx="9" fill="#2e7d57"/><text x="210" y="58" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">App + Database</text><text x="210" y="72" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.85)">decides what she sees</text>`;
+      s+=`<line x1="58" y1="58" x2="148" y2="58" stroke="#9aa3a8" stroke-width="1.8" marker-end="url(#ia)"/>`;
+      s+=`<rect x="300" y="40" width="200" height="42" rx="7" fill="#fff" stroke="#cfd6db" stroke-width="1.2"/><text x="312" y="58" font-size="9" font-family="JetBrains Mono,monospace" fill="#5f5e5a">WHERE owner =</text><text x="312" y="72" font-size="9" font-family="JetBrains Mono,monospace" fill="#0B5567">&#39;Mary&#39;  &rarr; her photos only</text>`;
+      s+=`<line x1="270" y1="60" x2="298" y2="60" stroke="#9aa3a8" stroke-width="1.8" marker-end="url(#ia)"/>`;
+    }
+    s+=`<defs><marker id="ia" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#7a8589"/></marker></defs>`;
+    s+=`</svg>`;
+    stage.className='fade'; stage.innerHTML=s;
+    cap.innerHTML = authn
+      ? '<b>Authentication &mdash; who are you?</b> Mary submits her credentials to <b>Cognito</b>, which verifies them (and MFA) and issues an <b>access token</b> to her browser. The load balancer then checks that token&rsquo;s signature on every request.'
+      : '<b>Authorization &mdash; what do you own?</b> The request reaches the <b>app</b>, which now knows it&rsquo;s Mary. It queries the database for <i>her</i> rows only, so she sees her photos &mdash; never someone else&rsquo;s. Cognito couldn&rsquo;t do this; only the app knows the data.';
+    document.querySelectorAll('#id [data-i]').forEach(b=>b.className='ui'+(b.dataset.i===i?'':' ghost'));
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  render();
+  document.querySelectorAll('#id [data-i]').forEach(b=>b.onclick=()=>{i=b.dataset.i;render();});
+})();
+
+/* ---------- 3. Threat matrix ---------- */
+(function(){
+  const btns=document.getElementById('thBtns'),stage=document.getElementById('thStage');
+  const T=[
+    ['Man-in-the-middle','#0E7490','TLS / HTTPS','Encrypts traffic on every leg &mdash; client&rarr;CloudFront&rarr;load balancer. An eavesdropper sees only ciphertext, so stolen tokens are useless.'],
+    ['DDoS flood','#1E40AF','AWS Shield','Sits in front of CloudFront and absorbs volumetric Layer 3/4 floods. Shield Standard is always-on and free; Advanced adds Layer-7 protection.'],
+    ['SQL injection','#B45309','AWS WAF','A web application firewall inspects Layer-7 HTTP traffic and blocks malicious patterns like <code class="inline">DROP TABLE</code> before they reach the app.'],
+    ['Malicious upload','#8E5CA8','Amazon GuardDuty','Malware Protection for S3 scans newly uploaded objects with multiple engines and <b>flags</b> infected files &mdash; you wire up the removal (it detects, it doesn&rsquo;t auto-delete).'],
+    ['Vulnerable libraries','#2e7d57','Amazon Inspector','Continuously scans EC2 instances for known vulnerabilities (CVEs) in OS and software packages &mdash; e.g. an outdated Log4j.'],
+    ['Origin bypass','#c0392b','Lock ALB to CloudFront','Stop attackers hitting the load balancer&rsquo;s IP directly: allow only CloudFront &mdash; via the CloudFront-managed prefix list, or a secret header CloudFront adds and WAF checks.']
+  ];
+  let sel=0;
+  btns.innerHTML=T.map((t,i)=>`<button class="ui${i===0?'':' ghost'}" data-i="${i}" style="font-size:11.5px;padding:6px 11px">${t[0]}</button>`).join('');
+  function render(){
+    btns.querySelectorAll('button').forEach((b,i)=>b.className='ui'+(i===sel?'':' ghost'));
+    stage.className='fade';
+    stage.innerHTML=`<div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">`+
+      `<span style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#c0392b">${T[sel][0]}</span>`+
+      `<span style="font-size:16px;color:#cfd6db;font-weight:900">&rarr;</span>`+
+      `<span style="font-family:'Barlow Condensed';font-weight:900;font-size:21px;color:${T[sel][1]}">${T[sel][2]}</span></div>`+
+      `<div style="font-size:13px;line-height:1.65;color:var(--text)">${T[sel][3]}</div>`;
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  btns.querySelectorAll('button').forEach(b=>b.onclick=()=>{sel=+b.dataset.i;render();});
+  render();
+})();
+
+/* ---------- 4. Encryption ---------- */
+(function(){
+  const stage=document.getElementById('encStage');
+  let s=`<svg viewBox="0 0 560 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+  const nodes=[['Client',40],['CloudFront',170],['Load bal.',310],['S3 / DB',470]];
+  nodes.forEach((n,i)=>{ s+=`<rect x="${n[1]-46}" y="40" width="92" height="36" rx="8" fill="#2D3748"/><text x="${n[1]}" y="62" text-anchor="middle" font-size="10.5" font-weight="700" fill="#fff">${n[0]}</text>`; });
+  for(let i=0;i<3;i++){ const x1=nodes[i][1]+46,x2=nodes[i+1][1]-46,mid=(x1+x2)/2;
+    s+=`<line x1="${x1}" y1="58" x2="${x2}" y2="58" stroke="#0E7490" stroke-width="2.4"/>`;
+    s+=`<rect x="${mid-7}" y="50" width="14" height="11" rx="2" fill="#0E7490"/><path d="M${mid-4} 50 v-3 a4 4 0 0 1 8 0 v3" fill="none" stroke="#0E7490" stroke-width="1.6"/>`;
+    s+=`<text x="${mid}" y="84" text-anchor="middle" font-size="8.5" font-weight="700" fill="#0E7490">TLS</text>`;
+  }
+  s+=`<text x="40" y="100" text-anchor="middle" font-size="8.5" fill="#5f5e5a">in motion: every hop encrypted</text>`;
+  s+=`<rect x="424" y="80" width="92" height="16" rx="4" fill="#B45309"/><text x="470" y="92" text-anchor="middle" font-size="8.5" font-weight="700" fill="#fff">SSE at rest</text>`;
+  s+=`</svg>`;
+  stage.innerHTML=s;
+})();
+</script>
+</body></html>

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Protecting SaaS Data: DLP &amp; CASB &mdash; Module 12</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+* { box-sizing:border-box; margin:0; padding:0; }
+:root{
+  --slate-dark:#1A202C; --slate:#2D3748;
+  --accent:#0E7490; --accent-dark:#0B5567; --accent-soft:#CFF1F6;
+  --info:#1E40AF; --info-soft:#DBEAFE;
+  --text:#1a1a18; --text-muted:#5f5e5a; --text-light:#888780;
+  --border:rgba(0,0,0,0.09); --bg:#fafaf8; --bg-card:#fff; --bg-code:#f6f6f3; --tag-bg:#f1f0eb;
+  --rust:#B45309; --soft:#888780; --muted:#5f5e5a; --ok:#2e7d57; --bad:#c0392b;
+}
+body{ font-family:'Barlow',sans-serif; background:var(--bg); color:var(--text); line-height:1.65; min-height:100vh; }
+.pagenav{ background:var(--slate-dark); }
+.pagenav.foot{ margin-top:48px; }
+.pagenav-inner{ max-width:920px; margin:0 auto; padding:11px 32px; display:flex; justify-content:space-between; align-items:center; gap:16px; }
+.pagenav .brand{ color:rgba(255,255,255,0.45); font-size:11px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; white-space:nowrap; }
+.navbtns{ display:flex; gap:8px; }
+.navbtn{ display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#fff; background:rgba(255,255,255,0.10); border:1px solid rgba(255,255,255,0.22); border-radius:6px; padding:7px 13px; text-decoration:none; transition:0.15s; white-space:nowrap; }
+.navbtn:hover{ background:var(--accent); border-color:var(--accent); }
+.navbtn.disabled{ opacity:0.28; pointer-events:none; }
+@media(max-width:560px){ .pagenav .brand{ display:none } .pagenav-inner{ justify-content:center } }
+.header{ background:#fff; padding:56px 0 44px; border-bottom:0.5px solid var(--border); }
+.header-inner{ max-width:920px; margin:0 auto; padding:0 32px; }
+.header-eyebrow{ font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:14px; display:flex; align-items:center; gap:12px; }
+.header-eyebrow::after{ content:''; flex:1; height:0.5px; background:var(--border); max-width:120px; }
+.header h1{ font-family:'Barlow Condensed',sans-serif; font-size:clamp(34px,4.5vw,52px); font-weight:900; letter-spacing:-0.01em; line-height:1.05; color:var(--text); margin-bottom:18px; }
+.header h1 em{ font-style:normal; color:var(--accent); }
+.header-meta-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+.module-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:var(--slate); color:#fff; }
+.topic-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:#F1F5F9; color:#475569; }
+.topic-pill.accent{ background:var(--accent-soft); color:var(--accent-dark); }
+.page{ max-width:920px; margin:0 auto; padding:0 32px 48px; }
+.objectives{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--accent); border-radius:6px; padding:20px 26px; margin:34px 0 14px; }
+.obj-label{ font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:12px; }
+.objectives ul{ list-style:none; }
+.objectives ul li{ font-size:13.5px; color:var(--text); padding:4px 0 4px 20px; position:relative; line-height:1.5; }
+.objectives ul li::before{ content:'◇'; position:absolute; left:0; color:var(--accent); font-size:10px; top:8px; }
+section{ margin-top:42px; }
+section h2{ font-family:'Barlow Condensed',sans-serif; font-size:27px; font-weight:800; color:var(--text); margin-bottom:8px; display:flex; align-items:baseline; gap:18px; }
+section h2 .num{ font-family:'Barlow Condensed',sans-serif; font-size:54px; font-weight:900; color:var(--accent); letter-spacing:-0.02em; line-height:0.85; min-width:40px; }
+section .lead{ font-size:14.5px; color:var(--text-muted); line-height:1.6; margin:0 0 6px; max-width:720px; }
+section p{ font-size:14.5px; color:var(--text); line-height:1.7; margin-bottom:12px; }
+section p strong{ font-weight:700; }
+code.inline{ font-family:'JetBrains Mono',monospace; font-size:12.5px; background:var(--tag-bg); padding:1px 6px; border-radius:3px; color:var(--text); }
+.keybox{ background:var(--accent-soft); border-left:3px solid var(--accent); border-radius:0 6px 6px 0; padding:13px 18px; margin:16px 0 0; font-size:13px; line-height:1.6; color:var(--text); }
+.keybox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--accent-dark); margin-bottom:5px; }
+.keybox b{ color:var(--accent-dark); }
+.notebox{ background:#FBF3E8; border-left:3px solid var(--rust); border-radius:0 6px 6px 0; padding:13px 18px; margin:16px 0 0; font-size:13px; line-height:1.6; }
+.notebox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--rust); margin-bottom:5px; }
+.assessment-box{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--slate); border-radius:0 6px 6px 0; padding:18px 22px; margin:34px 0 0; }
+.assessment-box .assess-label{ font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); margin-bottom:8px; }
+.assessment-box p{ font-size:13px; line-height:1.65; margin:0; }
+.widget{ border:0.5px solid var(--border); border-radius:10px; padding:18px; margin:18px 0 0; background:var(--bg-card); }
+.widget h4{ margin:0 0 12px; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); font-weight:700; }
+.controls{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+button.ui{ font-family:'Barlow',sans-serif; cursor:pointer; border:1px solid var(--accent); background:var(--accent); color:#fff; padding:7px 16px; border-radius:6px; font-size:12.5px; font-weight:600; transition:0.15s; }
+button.ui:hover{ background:var(--accent-dark); border-color:var(--accent-dark); }
+button.ui.ghost{ background:#fff; color:var(--accent); }
+button.ui.ghost:hover{ background:var(--accent-soft); }
+.fade{ animation:fade 0.35s ease; }
+@keyframes fade{ from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+</style>
+</head><body>
+<header class="pagenav"><div class="pagenav-inner">
+  <span class="brand">Cloud Security Fundamentals</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn" href="01-saas-identity-oauth.html">&larr; Prev</a>
+    <a class="navbtn disabled" href="#">Next &rarr;</a>
+  </nav>
+</div></header>
+
+<div class="header"><div class="header-inner">
+  <div class="header-eyebrow">Module 12 &nbsp;·&nbsp; Up the Stack · SaaS</div>
+  <h1>Protecting SaaS Data: <em>DLP &amp; CASB</em></h1>
+  <div class="header-meta-row">
+    <span class="module-pill">Module 12</span>
+    <span class="topic-pill">DLP</span>
+    <span class="topic-pill accent">CASB</span>
+  </div>
+</div></div>
+
+<div class="page">
+
+  <div class="objectives">
+    <div class="obj-label">In this note</div>
+    <ul>
+      <li>The three big risks to enterprise data in the cloud</li>
+      <li>DLP: inspecting file <em>content</em> to keep sensitive data out of the wrong place</li>
+      <li>CASB: the &ldquo;traffic cop&rdquo; that stops data from leaving the sanctioned cloud</li>
+      <li>The full SaaS security stack: identity, DLP, CASB</li>
+    </ul>
+  </div>
+
+  <section>
+    <h2><span class="num">1</span> Three ways data goes wrong</h2>
+    <p class="lead">The other half of SaaS security (after <a href="01-saas-identity-oauth.html">identity</a>) is the <strong>data</strong>. In the cloud you can&rsquo;t just wrap a firewall around it. Three risks dominate &mdash; click each:</p>
+    <div class="widget" id="risks">
+      <h4>The three data risks</h4>
+      <div class="controls" style="margin:0 0 14px" id="riskBtns"></div>
+      <div id="riskStage" style="background:var(--bg);border-radius:8px;padding:16px 18px;min-height:96px"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> DLP: is this data allowed to exist here?</h2>
+    <p class="lead">Identity checks <em>who</em> logged in, but ignores <em>what</em> they upload. <strong>Data Loss Prevention</strong> reads the actual <strong>content</strong> of files &mdash; not just the name &mdash; looking for regulated patterns. Drop a file on the scanner:</p>
+    <div class="widget" id="dlp">
+      <h4>Content inspection</h4>
+      <div class="controls" style="margin:0 0 14px">
+        <button class="ui" data-d="ok">Meeting notes</button>
+        <button class="ui ghost" data-d="bad">Customer spreadsheet</button>
+      </div>
+      <div id="dlpStage"></div>
+      <p id="dlpCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:48px"></p>
+    </div>
+    <div class="notebox">
+      <div class="lbl">Tools &amp; actions</div>
+      DLP engines scan for <b>credit-card numbers</b> (PCI), <b>SSNs</b> (PII), <b>medical records</b> (HIPAA), or secret keywords like &ldquo;Confidential.&rdquo; On a hit they can <b>quarantine</b>, <b>redact</b>, or <b>alert</b>. Examples: <b>AWS Macie</b> (scans S3), <b>Box Shield</b> (scans a SaaS app).
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> CASB: is this data allowed to leave here?</h2>
+    <p class="lead">Even data that&rsquo;s safe <em>inside</em> corporate Box must not <strong>exfiltrate</strong> to somewhere insecure. A <strong>Cloud Access Security Broker</strong> sits between users and the SaaS app as a policy traffic cop. Watch it stop two escapes:</p>
+    <div class="widget" id="casb">
+      <h4>Stopping exfiltration</h4>
+      <div class="controls" style="margin:0 0 14px">
+        <button class="ui" data-c="device">Download to personal iPad</button>
+        <button class="ui ghost" data-c="cloud">Sync to personal Google Drive</button>
+      </div>
+      <div id="casbStage"></div>
+      <p id="casbCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:48px"></p>
+    </div>
+    <div class="keybox">
+      <div class="lbl">The SaaS security stack</div>
+      Three questions, three controls. <b>Identity</b> (OIDC + MFA): <i>are you who you say you are?</i> &nbsp;<b>DLP</b>: <i>is this data allowed to exist here?</i> &nbsp;<b>CASB</b>: <i>is this data allowed to leave here?</i> Together they replace the firewall you no longer control.
+    </div>
+  </section>
+
+  <div class="assessment-box">
+    <div class="assess-label">Remember</div>
+    <p>Cloud data faces three risks: <strong>compliance violations</strong> (sensitive data stored where it shouldn&rsquo;t be), <strong>unauthorized access</strong> (over-loose sharing), and <strong>exfiltration</strong> (data leaving for an unmanaged device or cloud). <strong>DLP</strong> answers &ldquo;is this data allowed to <em>exist</em> here?&rdquo; by inspecting file <strong>content</strong> for PCI/PII/HIPAA patterns and quarantining, redacting, or alerting (AWS Macie, Box Shield). <strong>CASB</strong> answers &ldquo;is this data allowed to <em>leave</em> here?&rdquo; &mdash; a traffic cop that blocks downloads to unmanaged devices and <strong>revokes cloud-to-cloud OAuth tokens</strong>. With identity, they form the SaaS security stack.</p>
+  </div>
+
+</div>
+
+<footer class="pagenav foot"><div class="pagenav-inner">
+  <span class="brand">Module 12 &middot; SaaS Security</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn" href="01-saas-identity-oauth.html">&larr; Prev</a>
+    <a class="navbtn disabled" href="#">Next &rarr;</a>
+  </nav>
+</div></footer>
+
+<script>
+/* ---------- 1. Three risks ---------- */
+(function(){
+  const btns=document.getElementById('riskBtns'),stage=document.getElementById('riskStage');
+  const R=[
+    ['Compliance violation','#B45309','Data stored where it&rsquo;s not allowed &mdash; credit-card numbers dropped in a public S3 bucket, or patient records in an unencrypted Box folder. The data may be perfectly accessible; it just shouldn&rsquo;t live there, and a regulator (PCI, HIPAA) will fine you for it.'],
+    ['Unauthorized access','#0E7490','The wrong people get in because permissions were too loose &mdash; the classic &ldquo;anyone with the public link can view&rdquo; share. The data didn&rsquo;t move; the access did.'],
+    ['Data exfiltration','#c0392b','Data leaves the sanctioned service for somewhere insecure &mdash; downloaded to a personal laptop, or synced to a personal Google Drive. Once it&rsquo;s out of the corporate cloud, you&rsquo;ve lost all control of it.']
+  ];
+  let sel=0;
+  btns.innerHTML=R.map((r,i)=>`<button class="ui${i===0?'':' ghost'}" data-i="${i}">${r[0]}</button>`).join('');
+  function render(){
+    btns.querySelectorAll('button').forEach((b,i)=>b.className='ui'+(i===sel?'':' ghost'));
+    stage.className='fade';
+    stage.innerHTML=`<div style="font-family:'Barlow Condensed';font-weight:900;font-size:22px;color:${R[sel][1]};margin-bottom:6px">${R[sel][0]}</div><div style="font-size:13.5px;line-height:1.65;color:var(--text)">${R[sel][2]}</div>`;
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  btns.querySelectorAll('button').forEach(b=>b.onclick=()=>{sel=+b.dataset.i;render();});
+  render();
+})();
+
+/* ---------- 2. DLP scan ---------- */
+(function(){
+  const stage=document.getElementById('dlpStage'),cap=document.getElementById('dlpCap');
+  let d='ok';
+  function render(){
+    const bad=d==='bad';
+    const c=bad?'#c0392b':'#2e7d57';
+    let s=`<svg viewBox="0 0 520 150" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    // file
+    s+=`<rect x="20" y="38" width="84" height="74" rx="6" fill="#fff" stroke="#cfd6db" stroke-width="1.4"/><path d="M88 38 v14 h16" fill="none" stroke="#cfd6db" stroke-width="1.4"/>`;
+    if(bad){
+      s+=`<text x="30" y="58" font-size="7" font-family="JetBrains Mono,monospace" fill="#5f5e5a">Name,Card</text>`;
+      s+=`<text x="30" y="70" font-size="7" font-family="JetBrains Mono,monospace" fill="#c0392b">Bob,4111-1111</text>`;
+      s+=`<text x="30" y="82" font-size="7" font-family="JetBrains Mono,monospace" fill="#c0392b">Mia,5500-0000</text>`;
+      s+=`<text x="62" y="106" text-anchor="middle" font-size="8" font-weight="700" fill="#5f5e5a">customers.xlsx</text>`;
+    } else {
+      s+=`<rect x="30" y="52" width="60" height="3" fill="#dde2e5"/><rect x="30" y="62" width="60" height="3" fill="#dde2e5"/><rect x="30" y="72" width="44" height="3" fill="#dde2e5"/>`;
+      s+=`<text x="62" y="106" text-anchor="middle" font-size="8" font-weight="700" fill="#5f5e5a">notes.docx</text>`;
+    }
+    // DLP scanner
+    s+=`<rect x="180" y="50" width="120" height="50" rx="9" fill="#0E7490"/><text x="240" y="72" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">DLP</text><text x="240" y="86" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.85)">reads the content</text>`;
+    s+=`<line x1="104" y1="75" x2="178" y2="75" stroke="#9aa3a8" stroke-width="1.8" marker-end="url(#da)"/>`;
+    s+=`<line x1="300" y1="75" x2="368" y2="75" stroke="#9aa3a8" stroke-width="1.8" marker-end="url(#da)"/>`;
+    // verdict
+    s+=`<rect x="372" y="48" width="134" height="54" rx="9" fill="${bad?'#fdecea':'#eaf7ef'}" stroke="${c}" stroke-width="1.6"/>`;
+    s+=`<text x="439" y="70" text-anchor="middle" font-size="10.5" font-weight="800" fill="#1a1a18">${bad?'PCI detected':'Clean'}</text>`;
+    s+=`<text x="439" y="86" text-anchor="middle" font-size="10" font-weight="900" fill="${c}">${bad?'&#9888; QUARANTINED':'&#10003; allowed'}</text>`;
+    s+=`<defs><marker id="da" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#7a8589"/></marker></defs>`;
+    s+=`</svg>`;
+    stage.className='fade'; stage.innerHTML=s;
+    cap.innerHTML = bad
+      ? '<b style="color:#c0392b">Blocked.</b> The DLP engine reads inside the spreadsheet, recognises the <b>credit-card number pattern</b> (a PCI violation), and quarantines the file &mdash; even though a valid user uploaded it. Identity would never have caught this.'
+      : '<b style="color:#2e7d57">Allowed.</b> The meeting notes contain no regulated data, so DLP lets them through. It judged the <b>content</b>, not the filename.';
+    document.querySelectorAll('#dlp [data-d]').forEach(b=>b.className='ui'+(b.dataset.d===d?'':' ghost'));
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  render();
+  document.querySelectorAll('#dlp [data-d]').forEach(b=>b.onclick=()=>{d=b.dataset.d;render();});
+})();
+
+/* ---------- 3. CASB ---------- */
+(function(){
+  const stage=document.getElementById('casbStage'),cap=document.getElementById('casbCap');
+  let c='device';
+  function render(){
+    const dev=c==='device';
+    let s=`<svg viewBox="0 0 520 150" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    // corporate cloud (Box)
+    s+=`<rect x="14" y="50" width="104" height="50" rx="9" fill="#2D3748"/><text x="66" y="72" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">Corp Box</text><text x="66" y="86" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.7)">sanctioned</text>`;
+    // CASB cop in the middle
+    s+=`<rect x="200" y="44" width="110" height="62" rx="10" fill="#0E7490"/><text x="255" y="68" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">CASB</text><text x="255" y="83" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.85)">traffic cop</text>`;
+    s+=`<line x1="118" y1="75" x2="198" y2="75" stroke="#9aa3a8" stroke-width="1.8"/>`;
+    // destination (blocked)
+    const destLabel = dev ? 'Personal iPad' : 'Personal Drive';
+    const destSub = dev ? 'unmanaged device' : 'unmanaged cloud';
+    s+=`<rect x="400" y="48" width="106" height="56" rx="9" fill="#fff" stroke="#c0392b" stroke-width="1.4"/><text x="453" y="72" text-anchor="middle" font-size="10.5" font-weight="800" fill="#1a1a18">${destLabel}</text><text x="453" y="86" text-anchor="middle" font-size="8" fill="#5f5e5a">${destSub}</text>`;
+    // blocked path
+    s+=`<line x1="310" y1="75" x2="392" y2="75" stroke="#c0392b" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#ca)"/>`;
+    s+=`<circle cx="351" cy="75" r="13" fill="#fff" stroke="#c0392b" stroke-width="2.4"/><text x="351" y="80" text-anchor="middle" font-size="15" font-weight="900" fill="#c0392b">&#215;</text>`;
+    s+=`<text x="255" y="128" text-anchor="middle" font-size="9.5" font-weight="800" fill="#c0392b">${dev?'download blocked &mdash; device not managed':'OAuth token revoked &mdash; sync broken'}</text>`;
+    s+=`<defs><marker id="ca" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#c0392b"/></marker></defs>`;
+    s+=`</svg>`;
+    stage.className='fade'; stage.innerHTML=s;
+    cap.innerHTML = dev
+      ? '<b>Device exfiltration, blocked.</b> Mary logs into corporate Box from her personal iPad and tries to download the customer list. The CASB sees the device isn&rsquo;t <b>enterprise-managed</b> and blocks the download &mdash; the data stays in the cloud.'
+      : '<b>Cloud-to-cloud exfiltration, blocked.</b> Mary connects her personal Google Drive to corporate Box to &ldquo;sync&rdquo; files. The CASB spots the unauthorized cloud-to-cloud connection and <b>revokes the OAuth token</b>, breaking the sync before data leaks out.';
+    document.querySelectorAll('#casb [data-c]').forEach(b=>b.className='ui'+(b.dataset.c===c?'':' ghost'));
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  render();
+  document.querySelectorAll('#casb [data-c]').forEach(b=>b.onclick=()=>{c=b.dataset.c;render();});
+})();
+</script>
+</body></html>

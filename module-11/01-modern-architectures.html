@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Modern Application Architectures &mdash; Module 11</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+* { box-sizing:border-box; margin:0; padding:0; }
+:root{
+  --slate-dark:#1A202C; --slate:#2D3748;
+  --accent:#0E7490; --accent-dark:#0B5567; --accent-soft:#CFF1F6;
+  --info:#1E40AF; --info-soft:#DBEAFE;
+  --text:#1a1a18; --text-muted:#5f5e5a; --text-light:#888780;
+  --border:rgba(0,0,0,0.09); --bg:#fafaf8; --bg-card:#fff; --bg-code:#f6f6f3; --tag-bg:#f1f0eb;
+  --rust:#B45309; --soft:#888780; --muted:#5f5e5a; --ok:#2e7d57; --bad:#c0392b;
+}
+body{ font-family:'Barlow',sans-serif; background:var(--bg); color:var(--text); line-height:1.65; min-height:100vh; }
+.pagenav{ background:var(--slate-dark); }
+.pagenav.foot{ margin-top:48px; }
+.pagenav-inner{ max-width:920px; margin:0 auto; padding:11px 32px; display:flex; justify-content:space-between; align-items:center; gap:16px; }
+.pagenav .brand{ color:rgba(255,255,255,0.45); font-size:11px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; white-space:nowrap; }
+.navbtns{ display:flex; gap:8px; }
+.navbtn{ display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#fff; background:rgba(255,255,255,0.10); border:1px solid rgba(255,255,255,0.22); border-radius:6px; padding:7px 13px; text-decoration:none; transition:0.15s; white-space:nowrap; }
+.navbtn:hover{ background:var(--accent); border-color:var(--accent); }
+.navbtn.disabled{ opacity:0.28; pointer-events:none; }
+@media(max-width:560px){ .pagenav .brand{ display:none } .pagenav-inner{ justify-content:center } }
+.header{ background:#fff; padding:56px 0 44px; border-bottom:0.5px solid var(--border); }
+.header-inner{ max-width:920px; margin:0 auto; padding:0 32px; }
+.header-eyebrow{ font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:14px; display:flex; align-items:center; gap:12px; }
+.header-eyebrow::after{ content:''; flex:1; height:0.5px; background:var(--border); max-width:120px; }
+.header h1{ font-family:'Barlow Condensed',sans-serif; font-size:clamp(34px,4.5vw,52px); font-weight:900; letter-spacing:-0.01em; line-height:1.05; color:var(--text); margin-bottom:18px; }
+.header h1 em{ font-style:normal; color:var(--accent); }
+.header-meta-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+.module-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:var(--slate); color:#fff; }
+.topic-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:#F1F5F9; color:#475569; }
+.topic-pill.accent{ background:var(--accent-soft); color:var(--accent-dark); }
+.page{ max-width:920px; margin:0 auto; padding:0 32px 48px; }
+.objectives{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--accent); border-radius:6px; padding:20px 26px; margin:34px 0 14px; }
+.obj-label{ font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:12px; }
+.objectives ul{ list-style:none; }
+.objectives ul li{ font-size:13.5px; color:var(--text); padding:4px 0 4px 20px; position:relative; line-height:1.5; }
+.objectives ul li::before{ content:'◇'; position:absolute; left:0; color:var(--accent); font-size:10px; top:8px; }
+section{ margin-top:42px; }
+section h2{ font-family:'Barlow Condensed',sans-serif; font-size:27px; font-weight:800; color:var(--text); margin-bottom:8px; display:flex; align-items:baseline; gap:18px; }
+section h2 .num{ font-family:'Barlow Condensed',sans-serif; font-size:54px; font-weight:900; color:var(--accent); letter-spacing:-0.02em; line-height:0.85; min-width:40px; }
+section .lead{ font-size:14.5px; color:var(--text-muted); line-height:1.6; margin:0 0 6px; max-width:720px; }
+section p{ font-size:14.5px; color:var(--text); line-height:1.7; margin-bottom:12px; }
+section p strong{ font-weight:700; }
+code.inline{ font-family:'JetBrains Mono',monospace; font-size:12.5px; background:var(--tag-bg); padding:1px 6px; border-radius:3px; color:var(--text); }
+.keybox{ background:var(--accent-soft); border-left:3px solid var(--accent); border-radius:0 6px 6px 0; padding:13px 18px; margin:16px 0 0; font-size:13px; line-height:1.6; color:var(--text); }
+.keybox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--accent-dark); margin-bottom:5px; }
+.keybox b{ color:var(--accent-dark); }
+.notebox{ background:#FBF3E8; border-left:3px solid var(--rust); border-radius:0 6px 6px 0; padding:13px 18px; margin:16px 0 0; font-size:13px; line-height:1.6; }
+.notebox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--rust); margin-bottom:5px; }
+.assessment-box{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--slate); border-radius:0 6px 6px 0; padding:18px 22px; margin:34px 0 0; }
+.assessment-box .assess-label{ font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); margin-bottom:8px; }
+.assessment-box p{ font-size:13px; line-height:1.65; margin:0; }
+.widget{ border:0.5px solid var(--border); border-radius:10px; padding:18px; margin:18px 0 0; background:var(--bg-card); }
+.widget h4{ margin:0 0 12px; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); font-weight:700; }
+.controls{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+button.ui{ font-family:'Barlow',sans-serif; cursor:pointer; border:1px solid var(--accent); background:var(--accent); color:#fff; padding:7px 16px; border-radius:6px; font-size:12.5px; font-weight:600; transition:0.15s; }
+button.ui:hover{ background:var(--accent-dark); border-color:var(--accent-dark); }
+button.ui.ghost{ background:#fff; color:var(--accent); }
+button.ui.ghost:hover{ background:var(--accent-soft); }
+.fade{ animation:fade 0.35s ease; }
+@keyframes fade{ from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+</style>
+</head><body>
+<header class="pagenav"><div class="pagenav-inner">
+  <span class="brand">Cloud Security Fundamentals</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn disabled" href="#">&larr; Prev</a>
+    <a class="navbtn" href="02-securing-the-app.html">Next &rarr;</a>
+  </nav>
+</div></header>
+
+<div class="header"><div class="header-inner">
+  <div class="header-eyebrow">Module 11 &nbsp;·&nbsp; Up the Stack · Application</div>
+  <h1>Modern Application <em>Architectures</em></h1>
+  <div class="header-meta-row">
+    <span class="module-pill">Module 11</span>
+    <span class="topic-pill">Containers · serverless</span>
+    <span class="topic-pill accent">Microservices</span>
+  </div>
+</div></div>
+
+<div class="page">
+
+  <div class="objectives">
+    <div class="obj-label">In this note</div>
+    <ul>
+      <li>Two evolutions at once: how we <em>run</em> code, and how we <em>structure</em> it</li>
+      <li>Physical &rarr; VM &rarr; container &rarr; serverless &mdash; and what you stop managing at each step</li>
+      <li>Monolith vs microservices, and why big apps split apart</li>
+      <li>Serverless: Fargate vs Lambda, and the shift from load balancer to API Gateway</li>
+    </ul>
+  </div>
+
+  <section>
+    <h2><span class="num">1</span> How we run code: four steps</h2>
+    <p class="lead">Computing keeps handing more of the stack to the cloud vendor. Each step packs apps tighter and leaves you managing less. Step through them &mdash; the <strong>shipping analogy</strong> rides along:</p>
+    <div class="widget" id="infra">
+      <h4>Physical &rarr; VM &rarr; container &rarr; serverless</h4>
+      <div class="controls" style="margin:0 0 14px" id="infraBtns"></div>
+      <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start">
+        <div id="infraStage" style="flex:1;min-width:240px"></div>
+        <div style="flex:1;min-width:230px"><div id="infraDetail"></div></div>
+      </div>
+    </div>
+    <div class="notebox">
+      <div class="lbl">Why containers exist</div>
+      Two apps that need different library versions (Python 3.12 vs 3.14) used to need <b>separate machines</b> &mdash; &ldquo;dependency hell.&rdquo; A <b>container</b> packages an app <i>with its own libraries</i>, so many isolated apps share one machine. That solves both the dependency clash <i>and</i> the waste of a whole OS per app.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> How we structure code: monolith vs microservices</h2>
+    <p class="lead">Separately, the <em>shape</em> of the code changed. A small app can be one big program; a huge one (Netflix) can&rsquo;t. Flip between them:</p>
+    <div class="widget" id="mono">
+      <h4>One big program vs many small services</h4>
+      <div class="controls" style="margin:0 0 14px">
+        <button class="ui" data-m="monolith">Monolith</button>
+        <button class="ui ghost" data-m="micro">Microservices</button>
+      </div>
+      <div id="monoStage"></div>
+      <p id="monoCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:48px"></p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> Serverless, and the new front door</h2>
+    <p class="lead">At the far end of the evolution, you stop managing servers entirely &mdash; and with no servers to balance, the <strong>load balancer gives way to an API Gateway</strong>. Compare the two serverless flavors:</p>
+    <div class="widget" id="srvless">
+      <h4>Fargate vs Lambda &middot; and LB &rarr; API Gateway</h4>
+      <div class="controls" style="margin:0 0 14px">
+        <button class="ui" data-x="fargate">Fargate (containers)</button>
+        <button class="ui ghost" data-x="lambda">Lambda (functions)</button>
+      </div>
+      <div id="srvStage"></div>
+      <p id="srvCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:48px"></p>
+    </div>
+    <div class="keybox">
+      <div class="lbl">The front-door swap</div>
+      A <b>load balancer</b> spreads requests across servers. In serverless there are no servers, so an <b>API Gateway</b> takes its place &mdash; it validates each API request and <b>triggers the right Lambda function</b> to handle it. Same job (the front door), different world.
+    </div>
+  </section>
+
+  <div class="assessment-box">
+    <div class="assess-label">Remember</div>
+    <p>Two evolutions run in parallel. <strong>How we run code</strong>: physical servers &rarr; <strong>VMs</strong> (one OS per app, wasteful) &rarr; <strong>containers</strong> (package an app with its libraries, pack many on one machine, end dependency hell) &rarr; <strong>serverless</strong> (the vendor runs the OS and runtime; you bring only code). <strong>How we structure code</strong>: a <strong>monolith</strong> (everything in one program) &rarr; <strong>microservices</strong> (independent services that scale and ship on their own). Serverless comes in two forms &mdash; <strong>Fargate</strong> (you hand over a container) and <strong>Lambda</strong> (you hand over a function) &mdash; and because there are no servers to balance, the load balancer becomes an <strong>API Gateway</strong>.</p>
+  </div>
+
+</div>
+
+<footer class="pagenav foot"><div class="pagenav-inner">
+  <span class="brand">Module 11 &middot; Application Security</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn disabled" href="#">&larr; Prev</a>
+    <a class="navbtn" href="02-securing-the-app.html">Next &rarr;</a>
+  </nav>
+</div></footer>
+
+<script>
+/* ---------- 1. Infrastructure evolution ---------- */
+(function(){
+  const btns=document.getElementById('infraBtns'),stage=document.getElementById('infraStage'),det=document.getElementById('infraDetail');
+  const S=[
+    {k:'Physical',ship:'Own the truck',you:'Hardware, OS, runtime, app',d:'You buy and maintain the physical server and everything on it. One app per machine to avoid clashing dependencies &mdash; lots of idle hardware you still pay for.'},
+    {k:'VM (EC2)',ship:'Rent the truck',you:'OS, runtime, app',d:'The vendor owns the hardware; you rent a virtual machine. But running a <b>whole OS for one small app</b> is like renting a whole truck to ship one box &mdash; wasted space.'},
+    {k:'Container',ship:'Crates on the truck',you:'App + its libraries',d:'Pack each app with its libraries into a <b>container</b> and run many on one host. Like bin-packing crates into a truck &mdash; full utilization, no dependency clashes. Kubernetes orchestrates them at scale.'},
+    {k:'Serverless',ship:'Hand it to freight',you:'Just your code',d:'The vendor runs the OS <i>and</i> runtime; you hand over only code (or a container). Zero servers to patch or scale &mdash; you focus purely on what the app does.'}
+  ];
+  let sel=0;
+  function box(x,y,w,h,c,t,fg){return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="${c}"/><text x="${x+w/2}" y="${y+h/2+3.5}" text-anchor="middle" font-size="9" font-weight="700" fill="${fg||'#fff'}">${t}</text>`;}
+  function diagram(){
+    const i=sel;
+    let s=`<svg viewBox="0 0 300 170" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    const V='#cfd6db', A='#0E7490';
+    if(i===0){ // physical: one column app/os/hardware (all yours)
+      s+=box(110,30,80,28,A,'App');
+      s+=box(110,62,80,28,'#2D7D9A','OS');
+      s+=box(90,94,120,30,'#7d8893','Hardware','#fff');
+      s+=`<text x="150" y="142" text-anchor="middle" font-size="9" font-weight="700" fill="#5f5e5a">1 app, whole machine &mdash; all yours</text>`;
+    } else if(i===1){ // vm: hardware vendor, 2 VMs each app+os
+      s+=box(40,90,220,28,V,'Hardware (vendor)','#3a4750');
+      [60,170].forEach(x=>{ s+=box(x,30,70,26,A,'App'); s+=box(x,60,70,26,'#2D7D9A','OS'); });
+      s+=`<text x="150" y="142" text-anchor="middle" font-size="9" font-weight="700" fill="#5f5e5a">a full OS per app</text>`;
+    } else if(i===2){ // container: hardware + one OS + 3 app crates
+      s+=box(40,108,220,26,V,'Hardware (vendor)','#3a4750');
+      s+=box(40,80,220,26,'#2D7D9A','Operating system');
+      [54,124,194].forEach(x=>{ s+=box(x,40,56,34,A,'App+libs'); });
+      s+=`<text x="150" y="150" text-anchor="middle" font-size="9" font-weight="700" fill="#5f5e5a">many apps, one host</text>`;
+    } else { // serverless: cloud with code
+      s+=`<path d="M40 120 a18 18 0 0 1 4 -34 a20 20 0 0 1 40 5 a16 16 0 0 1 50 0 a18 18 0 0 1 -3 29 z" fill="${V}"/>`;
+      s+=`<text x="200" y="60" text-anchor="middle" font-size="9" font-weight="700" fill="#3a4750">vendor runs everything</text>`;
+      [120,180].forEach((x,j)=>{ s+=box(x,72,52,30,A,'your code'); });
+      s+=`<text x="150" y="150" text-anchor="middle" font-size="9" font-weight="700" fill="#5f5e5a">just your code</text>`;
+    }
+    s+=`</svg>`;
+    return s;
+  }
+  btns.innerHTML=S.map((d,i)=>`<button class="ui${i===0?'':' ghost'}" data-i="${i}">${d.k}</button>`).join('');
+  function render(){
+    btns.querySelectorAll('button').forEach((b,i)=>b.className='ui'+(i===sel?'':' ghost'));
+    stage.className='fade'; stage.innerHTML=diagram();
+    det.innerHTML=`<div style="font-family:'Barlow Condensed';font-weight:900;font-size:22px;color:var(--accent)">${S[sel].k}</div>`+
+      `<div style="display:inline-block;background:var(--tag-bg);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;margin:4px 0 8px">&#128230; ${S[sel].ship}</div>`+
+      `<p style="font-size:13px;line-height:1.6;margin:0 0 8px">${S[sel].d}</p>`+
+      `<div style="font-size:11.5px;color:var(--text-muted)"><b>You manage:</b> ${S[sel].you}</div>`;
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  btns.querySelectorAll('button').forEach(b=>b.onclick=()=>{sel=+b.dataset.i;render();});
+  render();
+})();
+
+/* ---------- 2. Monolith vs microservices ---------- */
+(function(){
+  const stage=document.getElementById('monoStage'),cap=document.getElementById('monoCap');
+  let m='monolith';
+  function render(){
+    const mono=m==='monolith';
+    let s=`<svg viewBox="0 0 520 150" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    if(mono){
+      s+=`<rect x="150" y="24" width="220" height="100" rx="9" fill="#0E7490"/>`;
+      ['UI','Search','Orders','Billing'].forEach((t,i)=>{ s+=`<rect x="${166+i*52}" y="44" width="44" height="60" rx="5" fill="rgba(255,255,255,.18)"/><text x="${188+i*52}" y="78" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">${t}</text>`; });
+      s+=`<text x="260" y="138" text-anchor="middle" font-size="9.5" font-weight="700" fill="#5f5e5a">one program, one deploy unit</text>`;
+    } else {
+      ['Search','Orders','Billing','UI'].forEach((t,i)=>{ const x=40+i*120; s+=`<rect x="${x}" y="40" width="100" height="56" rx="8" fill="#0E7490"/><text x="${x+50}" y="72" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">${t}</text>`; if(t==='Search'){ s+=`<rect x="${x}" y="100" width="100" height="14" rx="4" fill="#2e7d57"/><text x="${x+50}" y="111" text-anchor="middle" font-size="8" font-weight="700" fill="#fff">scaled &times;3</text>`; } });
+      s+=`<text x="260" y="138" text-anchor="middle" font-size="9.5" font-weight="700" fill="#5f5e5a">independent services &mdash; scale &amp; ship each alone</text>`;
+    }
+    s+=`</svg>`;
+    stage.className='fade'; stage.innerHTML=s;
+    cap.innerHTML = mono
+      ? '<b>Monolith.</b> UI, logic, and data access live in one codebase &mdash; simple, perfect for a small app. But to scale just the Search feature, you must duplicate the <i>entire</i> application, and one team&rsquo;s change can break everything.'
+      : '<b>Microservices.</b> Split the app into independent services. Popular Search? Spin up more Search containers without touching Billing. Different teams can build different services in different languages, and deploy on their own schedule.';
+    document.querySelectorAll('#mono [data-m]').forEach(b=>b.className='ui'+(b.dataset.m===m?'':' ghost'));
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  render();
+  document.querySelectorAll('#mono [data-m]').forEach(b=>b.onclick=()=>{m=b.dataset.m;render();});
+})();
+
+/* ---------- 3. Serverless ---------- */
+(function(){
+  const stage=document.getElementById('srvStage'),cap=document.getElementById('srvCap');
+  let x='fargate';
+  function render(){
+    const far=x==='fargate';
+    let s=`<svg viewBox="0 0 520 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    // user -> API Gateway -> compute
+    s+=`<circle cx="40" cy="60" r="16" fill="#2D3748"/><text x="40" y="65" text-anchor="middle" font-size="13" fill="#fff">&#128100;</text>`;
+    s+=`<rect x="160" y="40" width="110" height="40" rx="8" fill="#8E5CA8"/><text x="215" y="58" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">API Gateway</text><text x="215" y="71" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.85)">the front door</text>`;
+    s+=`<line x1="56" y1="60" x2="158" y2="60" stroke="#9aa3a8" stroke-width="1.8" marker-end="url(#sva)"/>`;
+    s+=`<line x1="270" y1="60" x2="346" y2="60" stroke="#9aa3a8" stroke-width="1.8" marker-end="url(#sva)"/>`;
+    if(far){
+      s+=`<rect x="350" y="34" width="150" height="52" rx="9" fill="#0E7490"/><text x="425" y="55" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">Fargate</text><text x="425" y="71" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,.85)">your container, vendor runs it</text>`;
+    } else {
+      s+=`<rect x="350" y="34" width="150" height="52" rx="9" fill="#B45309"/><text x="425" y="55" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">Lambda</text><text x="425" y="71" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,.85)">your function, run on trigger</text>`;
+    }
+    s+=`<defs><marker id="sva" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#7a8589"/></marker></defs>`;
+    s+=`</svg>`;
+    stage.className='fade'; stage.innerHTML=s;
+    cap.innerHTML = far
+      ? '<b>Fargate &mdash; serverless containers.</b> You still build a container, but you hand it to AWS to run &mdash; no VM to manage. Like a freight service: you pack the crate, they handle the logistics.'
+      : '<b>Lambda &mdash; functions.</b> You upload raw code; AWS stores it and runs it the instant a trigger arrives, then stops. Zero maintenance &mdash; no truck, no crate. The vendor even patches the OS underneath.';
+    document.querySelectorAll('#srvless [data-x]').forEach(b=>b.className='ui'+(b.dataset.x===x?'':' ghost'));
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  render();
+  document.querySelectorAll('#srvless [data-x]').forEach(b=>b.onclick=()=>{x=b.dataset.x;render();});
+})();
+</script>
+</body></html>
