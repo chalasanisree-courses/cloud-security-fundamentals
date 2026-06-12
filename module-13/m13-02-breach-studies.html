@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>When Prevention Fails: SolarWinds &mdash; Module 13</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+* { box-sizing:border-box; margin:0; padding:0; }
+:root{
+  --slate-dark:#1A202C; --slate:#2D3748;
+  --accent:#0E7490; --accent-dark:#0B5567; --accent-soft:#CFF1F6;
+  --info:#1E40AF; --info-soft:#DBEAFE;
+  --text:#1a1a18; --text-muted:#5f5e5a; --text-light:#888780;
+  --border:rgba(0,0,0,0.09); --bg:#fafaf8; --bg-card:#fff; --bg-code:#f6f6f3; --tag-bg:#f1f0eb;
+  --rust:#B45309; --soft:#888780; --muted:#5f5e5a; --ok:#2e7d57; --bad:#c0392b;
+}
+body{ font-family:'Barlow',sans-serif; background:var(--bg); color:var(--text); line-height:1.65; min-height:100vh; }
+.pagenav{ background:var(--slate-dark); }
+.pagenav.foot{ margin-top:48px; }
+.pagenav-inner{ max-width:920px; margin:0 auto; padding:11px 32px; display:flex; justify-content:space-between; align-items:center; gap:16px; }
+.pagenav .brand{ color:rgba(255,255,255,0.45); font-size:11px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; white-space:nowrap; }
+.navbtns{ display:flex; gap:8px; }
+.navbtn{ display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#fff; background:rgba(255,255,255,0.10); border:1px solid rgba(255,255,255,0.22); border-radius:6px; padding:7px 13px; text-decoration:none; transition:0.15s; white-space:nowrap; }
+.navbtn:hover{ background:var(--accent); border-color:var(--accent); }
+.navbtn.disabled{ opacity:0.28; pointer-events:none; }
+@media(max-width:560px){ .pagenav .brand{ display:none } .pagenav-inner{ justify-content:center } }
+.header{ background:#fff; padding:56px 0 44px; border-bottom:0.5px solid var(--border); }
+.header-inner{ max-width:920px; margin:0 auto; padding:0 32px; }
+.header-eyebrow{ font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:14px; display:flex; align-items:center; gap:12px; }
+.header-eyebrow::after{ content:''; flex:1; height:0.5px; background:var(--border); max-width:120px; }
+.header h1{ font-family:'Barlow Condensed',sans-serif; font-size:clamp(34px,4.5vw,52px); font-weight:900; letter-spacing:-0.01em; line-height:1.05; color:var(--text); margin-bottom:18px; }
+.header h1 em{ font-style:normal; color:var(--accent); }
+.header-meta-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+.module-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:var(--slate); color:#fff; }
+.topic-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:#F1F5F9; color:#475569; }
+.topic-pill.accent{ background:var(--accent-soft); color:var(--accent-dark); }
+.page{ max-width:920px; margin:0 auto; padding:0 32px 48px; }
+.objectives{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--accent); border-radius:6px; padding:20px 26px; margin:34px 0 14px; }
+.obj-label{ font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:12px; }
+.objectives ul{ list-style:none; }
+.objectives ul li{ font-size:13.5px; color:var(--text); padding:4px 0 4px 20px; position:relative; line-height:1.5; }
+.objectives ul li::before{ content:'◇'; position:absolute; left:0; color:var(--accent); font-size:10px; top:8px; }
+section{ margin-top:42px; }
+section h2{ font-family:'Barlow Condensed',sans-serif; font-size:27px; font-weight:800; color:var(--text); margin-bottom:8px; display:flex; align-items:baseline; gap:18px; }
+section h2 .num{ font-family:'Barlow Condensed',sans-serif; font-size:54px; font-weight:900; color:var(--accent); letter-spacing:-0.02em; line-height:0.85; min-width:40px; }
+section .lead{ font-size:14.5px; color:var(--text-muted); line-height:1.6; margin:0 0 6px; max-width:720px; }
+section p{ font-size:14.5px; color:var(--text); line-height:1.7; margin-bottom:12px; }
+section p strong{ font-weight:700; }
+code.inline{ font-family:'JetBrains Mono',monospace; font-size:12.5px; background:var(--tag-bg); padding:1px 6px; border-radius:3px; color:var(--text); }
+.keybox{ background:var(--accent-soft); border-left:3px solid var(--accent); border-radius:0 6px 6px 0; padding:13px 18px; margin:16px 0 0; font-size:13px; line-height:1.6; color:var(--text); }
+.keybox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--accent-dark); margin-bottom:5px; }
+.keybox b{ color:var(--accent-dark); }
+.notebox{ background:#FBF3E8; border-left:3px solid var(--rust); border-radius:0 6px 6px 0; padding:13px 18px; margin:16px 0 0; font-size:13px; line-height:1.6; }
+.notebox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--rust); margin-bottom:5px; }
+.assessment-box{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--slate); border-radius:0 6px 6px 0; padding:18px 22px; margin:34px 0 0; }
+.assessment-box .assess-label{ font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); margin-bottom:8px; }
+.assessment-box p{ font-size:13px; line-height:1.65; margin:0; }
+.widget{ border:0.5px solid var(--border); border-radius:10px; padding:18px; margin:18px 0 0; background:var(--bg-card); }
+.widget h4{ margin:0 0 12px; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); font-weight:700; }
+.controls{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+button.ui{ font-family:'Barlow',sans-serif; cursor:pointer; border:1px solid var(--accent); background:var(--accent); color:#fff; padding:7px 16px; border-radius:6px; font-size:12.5px; font-weight:600; transition:0.15s; }
+button.ui:hover{ background:var(--accent-dark); border-color:var(--accent-dark); }
+button.ui.ghost{ background:#fff; color:var(--accent); }
+button.ui.ghost:hover{ background:var(--accent-soft); }
+.fade{ animation:fade 0.35s ease; }
+@keyframes fade{ from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+</style>
+</head><body>
+<header class="pagenav"><div class="pagenav-inner">
+  <span class="brand">Cloud Security Fundamentals</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn" href="01-threat-detection.html">&larr; Prev</a>
+    <a class="navbtn disabled" href="#">Next &rarr;</a>
+  </nav>
+</div></header>
+
+<div class="header"><div class="header-inner">
+  <div class="header-eyebrow">Module 13 &nbsp;·&nbsp; Assume Breach</div>
+  <h1>When Prevention Fails: <em>SolarWinds</em></h1>
+  <div class="header-meta-row">
+    <span class="module-pill">Module 13</span>
+    <span class="topic-pill">SolarWinds</span>
+    <span class="topic-pill accent">Incident response</span>
+  </div>
+</div></div>
+
+<div class="page">
+
+  <div class="objectives">
+    <div class="obj-label">In this note</div>
+    <ul>
+      <li>SolarWinds: a supply-chain attack and the textbook <em>detection</em> failure</li>
+      <li>Why a genuinely-signed, trusted update gave prevention nothing to catch</li>
+      <li>The incident-response lifecycle &mdash; what you do once you&rsquo;ve detected an attacker</li>
+    </ul>
+  </div>
+
+  <section>
+    <h2><span class="num">1</span> SolarWinds: poison in a trusted update</h2>
+    <p class="lead">The textbook detection failure. The attackers didn&rsquo;t break in &mdash; they were <strong>installed</strong>, inside software thousands of organizations trusted. Step through it:</p>
+    <div class="widget" id="sw">
+      <h4>A supply-chain attack</h4>
+      <div id="swSteps" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px"></div>
+      <div id="swStage" style="background:var(--bg);border-radius:8px;padding:16px 18px;min-height:96px"></div>
+    </div>
+    <div class="notebox">
+      <div class="lbl">What failed: Detect, not Protect</div>
+      Every preventive control worked &mdash; the update was <b>genuinely signed by SolarWinds</b>, so there was nothing malicious for a firewall or antivirus to catch. The failure was <b>detection</b>: the intruders sat undetected for <b>months</b>, moving laterally across thousands of networks, and were found only when a security firm noticed its <i>own</i> compromise. Long <b>dwell time</b> = enormous damage.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> Why it stayed invisible</h2>
+    <p class="lead">Three things made SolarWinds so hard to detect &mdash; and each maps to something we&rsquo;ve studied. Click each:</p>
+    <div class="widget" id="why">
+      <h4>The anatomy of a long dwell time</h4>
+      <div class="controls" style="margin:0 0 14px" id="whyBtns"></div>
+      <div id="whyStage" style="background:var(--bg);border-radius:8px;padding:16px 18px;min-height:96px"></div>
+    </div>
+    <div class="keybox">
+      <div class="lbl">The lesson</div>
+      You cannot prevent every attack &mdash; especially one that arrives <b>inside trusted software</b>. That&rsquo;s exactly why the <a href="01-threat-detection.html">detection</a> half of the job matters: assume something will get through, and invest in finding it <b>fast</b>. A short dwell time would have turned a catastrophe into an incident.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> Once you detect: incident response</h2>
+    <p class="lead">Detection is only half of &ldquo;Threat Detection &amp; Incident Response.&rdquo; The moment an alert is confirmed, a disciplined <strong>response lifecycle</strong> kicks in. Click a stage:</p>
+    <div class="widget" id="ir">
+      <h4>The incident-response lifecycle</h4>
+      <div id="irStage"></div>
+      <p id="irCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:48px"></p>
+    </div>
+  </section>
+
+  <div class="assessment-box">
+    <div class="assess-label">Remember</div>
+    <p><strong>SolarWinds</strong> was a <strong>supply-chain</strong> attack &mdash; malicious code hidden inside a legitimately-signed software update &mdash; and a <strong>detection</strong> failure, not a prevention one: there was nothing malicious for preventive controls to catch, so the attackers enjoyed a dwell time of <strong>months</strong>, moving laterally across thousands of networks until a security firm found it by accident. The lesson of the whole course: you can&rsquo;t prevent everything, so <strong>detect fast</strong> &mdash; and when you do detect, run the <strong>incident-response lifecycle</strong>: <strong>detect &amp; analyze &rarr; contain &rarr; eradicate &rarr; recover &rarr; learn</strong>. Protect every layer, detect quickly when a layer fails, and respond in a disciplined way.</p>
+  </div>
+
+</div>
+
+<footer class="pagenav foot"><div class="pagenav-inner">
+  <span class="brand">Module 13 &middot; Threat Detection &amp; Incident Response</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn" href="01-threat-detection.html">&larr; Prev</a>
+    <a class="navbtn disabled" href="#">Next &rarr;</a>
+  </nav>
+</div></footer>
+
+<script>
+/* ---------- 1. SolarWinds stepper ---------- */
+(function(){
+  const steps=document.getElementById('swSteps'),stage=document.getElementById('swStage');
+  const S=[
+    ['Poison the build','Attackers quietly breach SolarWinds&rsquo; build system and slip malicious code (&ldquo;SUNBURST&rdquo;) into the next update of its Orion network-monitoring software.'],
+    ['Ship it, signed','SolarWinds builds and <b>digitally signs</b> the tainted update as normal. To everyone downstream it looks 100% legitimate.'],
+    ['Thousands install','Customers &mdash; companies and US government agencies &mdash; install the trusted update through their normal patch process. The backdoor rides in with it.'],
+    ['Quiet, then move','The backdoor lies dormant for about two weeks, then beacons out. The attackers steal credentials and move laterally &mdash; undetected for <b>months</b>.'],
+    ['Found by accident','Only in Dec 2020 does a security firm (investigating its <i>own</i> breach) discover SUNBURST &mdash; roughly a year after the first intrusion.']
+  ];
+  let sel=0;
+  function render(){
+    steps.innerHTML=S.map((s,i)=>`<button class="ui${i===sel?'':' ghost'}" data-i="${i}" style="font-size:11.5px;padding:6px 11px">${i+1}</button>`).join('');
+    steps.querySelectorAll('button').forEach(b=>b.onclick=()=>{sel=+b.dataset.i;render();});
+    stage.className='fade';
+    stage.innerHTML=`<div style="display:flex;gap:14px;align-items:flex-start"><div style="flex-shrink:0;width:40px;height:40px;border-radius:10px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed';font-weight:900;font-size:21px">${sel+1}</div><div><b style="font-size:14.5px">${S[sel][0]}</b><p style="font-size:13px;color:var(--text-muted);line-height:1.6;margin:3px 0 0">${S[sel][1]}</p></div></div>`;
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  render();
+})();
+
+/* ---------- 2. Why invisible ---------- */
+(function(){
+  const btns=document.getElementById('whyBtns'),stage=document.getElementById('whyStage');
+  const W=[
+    ['Trust in the supply chain','#0E7490','The malware arrived in a <b>signed update from a trusted vendor</b>. Patch management is supposed to be a <i>good</i> habit &mdash; so the very process that keeps you secure delivered the attacker. Prevention had nothing to flag.'],
+    ['It looked legitimate','#8E5CA8','Once inside, the attackers used <b>stolen valid credentials</b> and blended into normal traffic. To the monitoring tools, the activity looked like ordinary admin work &mdash; no obvious exploit, no malware signature.'],
+    ['Patience','#B45309','The backdoor stayed <b>dormant for ~2 weeks</b> before doing anything, then moved slowly and quietly. Low-and-slow behaviour avoids the spikes that alarms watch for &mdash; stretching the dwell time to months.']
+  ];
+  let sel=0;
+  btns.innerHTML=W.map((w,i)=>`<button class="ui${i===0?'':' ghost'}" data-i="${i}">${w[0]}</button>`).join('');
+  function render(){
+    btns.querySelectorAll('button').forEach((b,i)=>b.className='ui'+(i===sel?'':' ghost'));
+    stage.className='fade';
+    stage.innerHTML=`<div style="font-family:'Barlow Condensed';font-weight:900;font-size:20px;color:${W[sel][1]};margin-bottom:5px">${W[sel][0]}</div><div style="font-size:13.5px;line-height:1.65;color:var(--text)">${W[sel][2]}</div>`;
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  btns.querySelectorAll('button').forEach(b=>b.onclick=()=>{sel=+b.dataset.i;render();});
+  render();
+})();
+
+/* ---------- 3. Incident response lifecycle ---------- */
+(function(){
+  const stage=document.getElementById('irStage'),cap=document.getElementById('irCap');
+  const IR=[
+    ['Detect &amp; analyze','#B45309','Confirm the alert is a real incident, not a glitch, and scope it: which systems, which accounts, how far has it spread?'],
+    ['Contain','#c0392b','Stop the bleeding. Isolate affected machines, disable compromised accounts, block the attacker&rsquo;s access &mdash; so it can&rsquo;t spread while you work.'],
+    ['Eradicate','#8E5CA8','Remove the attacker&rsquo;s foothold entirely: delete malware and backdoors, rotate stolen credentials, close the vulnerability they used.'],
+    ['Recover','#0E7490','Restore clean systems to normal operation and watch closely for any sign the attacker comes back.'],
+    ['Learn','#2e7d57','Hold a post-incident review. What let them in, what slowed detection? Fix the gap so the same attack can&rsquo;t work twice.']
+  ];
+  let sel=0;
+  function render(){
+    let s=`<svg viewBox="0 0 520 70" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    const labels=['Detect','Contain','Eradicate','Recover','Learn'];
+    IR.forEach((d,i)=>{
+      const on=i===sel, x=8+i*102;
+      s+=`<rect x="${x}" y="16" width="94" height="40" rx="8" fill="${on?d[1]:'#eef1f3'}" stroke="${on?d[1]:'#dcdcd6'}" stroke-width="${on?2:1.1}" data-i="${i}" style="cursor:pointer"/>`;
+      s+=`<text x="${x+47}" y="33" text-anchor="middle" font-size="11" font-weight="800" fill="${on?'#fff':'#5f5e5a'}" style="pointer-events:none">${labels[i]}</text>`;
+      s+=`<text x="${x+47}" y="47" text-anchor="middle" font-size="7.5" fill="${on?'rgba(255,255,255,.85)':'#9aa3a8'}" style="pointer-events:none">step ${i+1}</text>`;
+      if(i<4) s+=`<text x="${x+99}" y="40" text-anchor="middle" font-size="12" font-weight="900" fill="#cfd6db" style="pointer-events:none">&rarr;</text>`;
+    });
+    s+=`</svg>`;
+    stage.className='fade'; stage.innerHTML=s;
+    stage.querySelectorAll('[data-i]').forEach(e=>e.onclick=()=>{sel=+e.dataset.i;render();});
+    cap.innerHTML=`<b style="color:${IR[sel][1]}">${IR[sel][0]}.</b> ${IR[sel][2]}`;
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  render();
+})();
+</script>
+</body></html>

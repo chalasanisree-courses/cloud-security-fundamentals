@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Find Them Fast: Threat Detection &mdash; Module 13</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+* { box-sizing:border-box; margin:0; padding:0; }
+:root{
+  --slate-dark:#1A202C; --slate:#2D3748;
+  --accent:#0E7490; --accent-dark:#0B5567; --accent-soft:#CFF1F6;
+  --info:#1E40AF; --info-soft:#DBEAFE;
+  --text:#1a1a18; --text-muted:#5f5e5a; --text-light:#888780;
+  --border:rgba(0,0,0,0.09); --bg:#fafaf8; --bg-card:#fff; --bg-code:#f6f6f3; --tag-bg:#f1f0eb;
+  --rust:#B45309; --soft:#888780; --muted:#5f5e5a; --ok:#2e7d57; --bad:#c0392b;
+}
+body{ font-family:'Barlow',sans-serif; background:var(--bg); color:var(--text); line-height:1.65; min-height:100vh; }
+.pagenav{ background:var(--slate-dark); }
+.pagenav.foot{ margin-top:48px; }
+.pagenav-inner{ max-width:920px; margin:0 auto; padding:11px 32px; display:flex; justify-content:space-between; align-items:center; gap:16px; }
+.pagenav .brand{ color:rgba(255,255,255,0.45); font-size:11px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; white-space:nowrap; }
+.navbtns{ display:flex; gap:8px; }
+.navbtn{ display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#fff; background:rgba(255,255,255,0.10); border:1px solid rgba(255,255,255,0.22); border-radius:6px; padding:7px 13px; text-decoration:none; transition:0.15s; white-space:nowrap; }
+.navbtn:hover{ background:var(--accent); border-color:var(--accent); }
+.navbtn.disabled{ opacity:0.28; pointer-events:none; }
+@media(max-width:560px){ .pagenav .brand{ display:none } .pagenav-inner{ justify-content:center } }
+.header{ background:#fff; padding:56px 0 44px; border-bottom:0.5px solid var(--border); }
+.header-inner{ max-width:920px; margin:0 auto; padding:0 32px; }
+.header-eyebrow{ font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:14px; display:flex; align-items:center; gap:12px; }
+.header-eyebrow::after{ content:''; flex:1; height:0.5px; background:var(--border); max-width:120px; }
+.header h1{ font-family:'Barlow Condensed',sans-serif; font-size:clamp(34px,4.5vw,52px); font-weight:900; letter-spacing:-0.01em; line-height:1.05; color:var(--text); margin-bottom:18px; }
+.header h1 em{ font-style:normal; color:var(--accent); }
+.header-meta-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+.module-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:var(--slate); color:#fff; }
+.topic-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:#F1F5F9; color:#475569; }
+.topic-pill.accent{ background:var(--accent-soft); color:var(--accent-dark); }
+.page{ max-width:920px; margin:0 auto; padding:0 32px 48px; }
+.objectives{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--accent); border-radius:6px; padding:20px 26px; margin:34px 0 14px; }
+.obj-label{ font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:12px; }
+.objectives ul{ list-style:none; }
+.objectives ul li{ font-size:13.5px; color:var(--text); padding:4px 0 4px 20px; position:relative; line-height:1.5; }
+.objectives ul li::before{ content:'◇'; position:absolute; left:0; color:var(--accent); font-size:10px; top:8px; }
+section{ margin-top:42px; }
+section h2{ font-family:'Barlow Condensed',sans-serif; font-size:27px; font-weight:800; color:var(--text); margin-bottom:8px; display:flex; align-items:baseline; gap:18px; }
+section h2 .num{ font-family:'Barlow Condensed',sans-serif; font-size:54px; font-weight:900; color:var(--accent); letter-spacing:-0.02em; line-height:0.85; min-width:40px; }
+section .lead{ font-size:14.5px; color:var(--text-muted); line-height:1.6; margin:0 0 6px; max-width:720px; }
+section p{ font-size:14.5px; color:var(--text); line-height:1.7; margin-bottom:12px; }
+section p strong{ font-weight:700; }
+code.inline{ font-family:'JetBrains Mono',monospace; font-size:12.5px; background:var(--tag-bg); padding:1px 6px; border-radius:3px; color:var(--text); }
+.keybox{ background:var(--accent-soft); border-left:3px solid var(--accent); border-radius:0 6px 6px 0; padding:13px 18px; margin:16px 0 0; font-size:13px; line-height:1.6; color:var(--text); }
+.keybox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--accent-dark); margin-bottom:5px; }
+.keybox b{ color:var(--accent-dark); }
+.notebox{ background:#FBF3E8; border-left:3px solid var(--rust); border-radius:0 6px 6px 0; padding:13px 18px; margin:16px 0 0; font-size:13px; line-height:1.6; }
+.notebox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--rust); margin-bottom:5px; }
+.assessment-box{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--slate); border-radius:0 6px 6px 0; padding:18px 22px; margin:34px 0 0; }
+.assessment-box .assess-label{ font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); margin-bottom:8px; }
+.assessment-box p{ font-size:13px; line-height:1.65; margin:0; }
+.widget{ border:0.5px solid var(--border); border-radius:10px; padding:18px; margin:18px 0 0; background:var(--bg-card); }
+.widget h4{ margin:0 0 12px; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); font-weight:700; }
+.controls{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+button.ui{ font-family:'Barlow',sans-serif; cursor:pointer; border:1px solid var(--accent); background:var(--accent); color:#fff; padding:7px 16px; border-radius:6px; font-size:12.5px; font-weight:600; transition:0.15s; }
+button.ui:hover{ background:var(--accent-dark); border-color:var(--accent-dark); }
+button.ui.ghost{ background:#fff; color:var(--accent); }
+button.ui.ghost:hover{ background:var(--accent-soft); }
+.fade{ animation:fade 0.35s ease; }
+@keyframes fade{ from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+input[type=range]{ accent-color:var(--accent); }
+</style>
+</head><body>
+<header class="pagenav"><div class="pagenav-inner">
+  <span class="brand">Cloud Security Fundamentals</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn disabled" href="#">&larr; Prev</a>
+    <a class="navbtn" href="02-breach-studies.html">Next &rarr;</a>
+  </nav>
+</div></header>
+
+<div class="header"><div class="header-inner">
+  <div class="header-eyebrow">Module 13 &nbsp;·&nbsp; Assume Breach</div>
+  <h1>Find Them Fast: <em>Threat Detection</em></h1>
+  <div class="header-meta-row">
+    <span class="module-pill">Module 13</span>
+    <span class="topic-pill">SIEM · XDR · SOC</span>
+    <span class="topic-pill accent">Dwell time</span>
+  </div>
+</div></div>
+
+<div class="page">
+
+  <div class="objectives">
+    <div class="obj-label">In this note</div>
+    <ul>
+      <li>Why prevention eventually fails in the cloud &mdash; asset sprawl and configuration complexity</li>
+      <li>The pivot from &ldquo;keep them out&rdquo; to &ldquo;find them fast&rdquo; &mdash; and where it sits in the NIST framework</li>
+      <li>The detection stack: logs &rarr; SIEM &rarr; XDR &rarr; SOC analyst</li>
+      <li>The two clocks &mdash; MTTD, MTTR &mdash; and what dwell time really means</li>
+    </ul>
+  </div>
+
+  <section>
+    <h2><span class="num">1</span> Five phases &mdash; and where the cloud breaks them</h2>
+    <p class="lead">The NIST framework runs in five phases. Most of this course lived in the first two &mdash; but in the cloud, those very phases get <em>harder</em>. Click each:</p>
+    <div class="widget" id="nist">
+      <h4>The NIST cybersecurity framework</h4>
+      <div id="nistStage"></div>
+      <p id="nistCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:48px"></p>
+    </div>
+    <div class="keybox">
+      <div class="lbl">The pivot</div>
+      Because defenses eventually fail, the operational question changes. Not &ldquo;<b>how do we keep hackers out?</b>&rdquo; but &ldquo;<b>how quickly can we find them once they&rsquo;re in?</b>&rdquo; That mindset &mdash; <b>assume breach</b> &mdash; is the whole subject of this module.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> The detection stack</h2>
+    <p class="lead">Detection is finding a needle in a haystack of millions of log lines. It takes a stack of four things working together &mdash; click along the chain:</p>
+    <div class="widget" id="stack">
+      <h4>Logs &rarr; SIEM &rarr; XDR &rarr; SOC analyst</h4>
+      <div id="stackStage"></div>
+      <p id="stackCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:48px"></p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> The two clocks</h2>
+    <p class="lead">Detection is measured with two stopwatches. The whole goal is to shrink them from <strong>months to minutes</strong>. Drag the detection speed and watch the damage:</p>
+    <div class="widget" id="clock">
+      <h4>MTTD &middot; MTTR &middot; dwell time</h4>
+      <div class="controls" style="margin:0 0 10px">
+        <span style="font-size:12.5px;color:var(--text-muted)">How fast you detect:</span>
+        <input type="range" id="spdRange" min="0" max="100" value="78" style="flex:1;min-width:160px">
+        <span id="spdVal" style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12.5px;color:var(--accent)"></span>
+      </div>
+      <div id="clockStage"></div>
+      <p id="clockCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:34px"></p>
+    </div>
+    <div class="notebox">
+      <div class="lbl">One precise definition</div>
+      <b>Dwell time</b> is the stretch the attacker is inside <i>undetected</i> &mdash; from the moment of compromise to the moment you detect them. It lines up with <b>MTTD</b>. Add <b>MTTR</b> (detection&nbsp;&rarr;&nbsp;kicked out) and you get the <b>total incident lifecycle</b>, not dwell time. Shrinking dwell time is what limits how much an attacker can steal.
+    </div>
+  </section>
+
+  <div class="assessment-box">
+    <div class="assess-label">Remember</div>
+    <p>In the cloud, <strong>Identify</strong> is undermined by <strong>asset sprawl</strong> (ephemeral containers, Shadow IT) and <strong>Protect</strong> by <strong>configuration complexity</strong> (the open S3 bucket) &mdash; so prevention eventually fails and the goal pivots to <strong>detection</strong>: find them fast. The stack is <strong>logs &rarr; SIEM</strong> (aggregate, store, and correlate) <strong>&rarr; XDR</strong> (AI that links signals across layers, e.g. impossible travel) <strong>&rarr; SOC analyst</strong> (the human who hunts). Success is measured by two clocks: <strong>MTTD</strong> (time to detect) and <strong>MTTR</strong> (time to remediate). <strong>Dwell time</strong> &mdash; the undetected stretch &mdash; is the compromise-to-detection window (MTTD); shrink it from months to minutes.</p>
+  </div>
+
+</div>
+
+<footer class="pagenav foot"><div class="pagenav-inner">
+  <span class="brand">Module 13 &middot; Threat Detection &amp; Incident Response</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn disabled" href="#">&larr; Prev</a>
+    <a class="navbtn" href="02-breach-studies.html">Next &rarr;</a>
+  </nav>
+</div></footer>
+
+<script>
+/* ---------- 1. NIST phases ---------- */
+(function(){
+  const stage=document.getElementById('nistStage'),cap=document.getElementById('nistCap');
+  const P=[
+    ['Identify','#8E5CA8','prior','Know what you have to protect &mdash; assets, data, risks. <b>Cloud problem:</b> asset sprawl. Developers spin up thousands of ephemeral containers, and Shadow IT adds unsanctioned SaaS &mdash; you can&rsquo;t protect what you don&rsquo;t know exists.'],
+    ['Protect','#0E7490','prior','Put up the defenses &mdash; firewalls, OAuth, hardened servers. <b>Cloud problem:</b> configuration complexity. Every provider does permissions differently, so a misconfiguration (an open S3 bucket) is almost inevitable.'],
+    ['Detect','#B45309','now','Notice the intruder who got past Protect. This is where this module begins &mdash; the SIEM/XDR/SOC stack hunting through logs.'],
+    ['Respond','#c0392b','now','Act on a confirmed incident &mdash; contain it, kick the attacker out, limit the damage.'],
+    ['Recover','#2e7d57','now','Restore normal operations and learn the lessons so it doesn&rsquo;t happen the same way twice.']
+  ];
+  let sel=0;
+  function render(){
+    let s=`<svg viewBox="0 0 520 70" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    P.forEach((p,i)=>{
+      const on=i===sel, x=8+i*102;
+      s+=`<rect x="${x}" y="14" width="94" height="42" rx="8" fill="${on?p[1]:'#eef1f3'}" stroke="${on?p[1]:'#dcdcd6'}" stroke-width="${on?2:1.1}" data-i="${i}" style="cursor:pointer"/>`;
+      s+=`<text x="${x+47}" y="34" text-anchor="middle" font-size="11.5" font-weight="800" fill="${on?'#fff':'#5f5e5a'}" style="pointer-events:none">${p[0]}</text>`;
+      s+=`<text x="${x+47}" y="48" text-anchor="middle" font-size="7.5" font-weight="700" fill="${on?'rgba(255,255,255,.85)':(p[2]==='now'?'#B45309':'#9aa3a8')}" style="pointer-events:none">${p[2]==='now'?'THIS MODULE':'covered'}</text>`;
+      if(i<4) s+=`<text x="${x+99}" y="40" text-anchor="middle" font-size="12" font-weight="900" fill="#cfd6db" style="pointer-events:none">&rarr;</text>`;
+    });
+    s+=`</svg>`;
+    stage.className='fade'; stage.innerHTML=s;
+    stage.querySelectorAll('[data-i]').forEach(e=>e.onclick=()=>{sel=+e.dataset.i;render();});
+    cap.innerHTML=`<b style="color:${P[sel][1]}">${P[sel][0]}.</b> ${P[sel][3]}`;
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  render();
+})();
+
+/* ---------- 2. Detection stack ---------- */
+(function(){
+  const stage=document.getElementById('stackStage'),cap=document.getElementById('stackCap');
+  const S=[
+    ['Logs','#9aa3a8','the raw data','Ingest events from everywhere &mdash; AWS, the identity provider (Okta), SaaS apps (Office 365), on-prem firewalls. Millions of lines a day &mdash; the haystack.'],
+    ['SIEM','#0E7490','the library','<b>Security Information and Event Management.</b> Aggregates and stores all those logs in one place, keeps the history for compliance, and runs correlation rules to surface suspicious patterns.'],
+    ['XDR','#8E5CA8','the brain','<b>Extended Detection and Response.</b> The intelligence engine &mdash; AI/ML that correlates signals <i>across</i> layers (email, endpoint, cloud). It&rsquo;s what spots a user logging in from Russia and Texas at once: <b>impossible travel</b>.'],
+    ['SOC analyst','#B45309','the hunter','When XDR raises an alert, a human in the <b>Security Operations Center</b> investigates &mdash; glitch or real attacker? That investigation is <b>threat hunting</b>.']
+  ];
+  let sel=0;
+  function render(){
+    let s=`<svg viewBox="0 0 520 92" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    S.forEach((d,i)=>{
+      const on=i===sel, x=6+i*128;
+      s+=`<rect x="${x}" y="20" width="108" height="50" rx="9" fill="${on?d[1]:'#eef1f3'}" stroke="${on?d[1]:'#dcdcd6'}" stroke-width="${on?2:1.1}" data-i="${i}" style="cursor:pointer"/>`;
+      s+=`<text x="${x+54}" y="44" text-anchor="middle" font-size="12" font-weight="800" fill="${on?'#fff':'#5f5e5a'}" style="pointer-events:none">${d[0]}</text>`;
+      s+=`<text x="${x+54}" y="58" text-anchor="middle" font-size="8" fill="${on?'rgba(255,255,255,.85)':'#9aa3a8'}" style="pointer-events:none">${d[2]}</text>`;
+      if(i<3) s+=`<text x="${x+121}" y="49" text-anchor="middle" font-size="14" font-weight="900" fill="#cfd6db" style="pointer-events:none">&rarr;</text>`;
+    });
+    s+=`</svg>`;
+    stage.className='fade'; stage.innerHTML=s;
+    stage.querySelectorAll('[data-i]').forEach(e=>e.onclick=()=>{sel=+e.dataset.i;render();});
+    cap.innerHTML=`<b style="color:${S[sel][1]==='#9aa3a8'?'#5f5e5a':S[sel][1]}">${S[sel][0]} &mdash; ${S[sel][2]}.</b> ${S[sel][3]}`;
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  render();
+})();
+
+/* ---------- 3. The clocks ---------- */
+(function(){
+  const range=document.getElementById('spdRange'),val=document.getElementById('spdVal'),stage=document.getElementById('clockStage'),cap=document.getElementById('clockCap');
+  function label(frac){ // frac 0..1 of "slowness"
+    if(frac>0.8) return ['8 months','slow'];
+    if(frac>0.55) return ['6 weeks','slow'];
+    if(frac>0.3) return ['4 days','better'];
+    if(frac>0.12) return ['9 hours','good'];
+    return ['12 minutes','fast'];
+  }
+  function render(){
+    const fast=+range.value; const slow=100-fast; const f=slow/100;
+    const [mttd] = label(f);
+    val.textContent='MTTD '+mttd;
+    // timeline: compromise --(MTTD/dwell)-- detected --(MTTR)-- contained
+    const dwellW = 60+f*300;     // dwell grows with slowness
+    const mttrW = 70;
+    let s=`<svg viewBox="0 0 520 110" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    const y=56, x0=20;
+    const xDet=x0+dwellW, xCon=xDet+mttrW;
+    // base line
+    s+=`<line x1="${x0}" y1="${y}" x2="${Math.min(xCon+10,505)}" y2="${y}" stroke="#cfd6db" stroke-width="2"/>`;
+    // dwell span (red = bad)
+    const dc = f>0.55?'#c0392b':f>0.3?'#B45309':'#2e7d57';
+    s+=`<rect x="${x0}" y="${y-9}" width="${dwellW}" height="18" rx="4" fill="${dc}" fill-opacity="0.18" stroke="${dc}" stroke-width="1"/>`;
+    s+=`<text x="${x0+dwellW/2}" y="${y-16}" text-anchor="middle" font-size="9" font-weight="800" fill="${dc}">DWELL TIME = MTTD (${mttd})</text>`;
+    // mttr span
+    s+=`<rect x="${xDet}" y="${y-9}" width="${mttrW}" height="18" rx="4" fill="#0E7490" fill-opacity="0.18" stroke="#0E7490" stroke-width="1"/>`;
+    s+=`<text x="${xDet+mttrW/2}" y="${y+30}" text-anchor="middle" font-size="9" font-weight="800" fill="#0E7490">MTTR</text>`;
+    // markers
+    function mark(x,label2,sub){ return `<circle cx="${x}" cy="${y}" r="5" fill="#1A202C"/><text x="${x}" y="${y-22}" text-anchor="middle" font-size="8.5" font-weight="700" fill="#1a1a18">${label2}</text>`; }
+    s+=mark(x0,'compromise');
+    s+=`<circle cx="${xDet}" cy="${y}" r="5" fill="#1A202C"/><text x="${xDet}" y="${y+44}" text-anchor="middle" font-size="8.5" font-weight="700" fill="#1a1a18">detected</text>`;
+    s+=`<circle cx="${xCon}" cy="${y}" r="5" fill="#1A202C"/><text x="${Math.min(xCon,498)}" y="${y-22}" text-anchor="middle" font-size="8.5" font-weight="700" fill="#1a1a18">contained</text>`;
+    s+=`</svg>`;
+    stage.innerHTML=s;
+    cap.innerHTML = f>0.55
+      ? '<b style="color:#c0392b">Slow detection.</b> The attacker roams for '+mttd+' before anyone notices &mdash; months of free rein to move laterally and steal data. This is the SolarWinds story.'
+      : f>0.3
+      ? '<b style="color:#B45309">Getting faster.</b> Dwell time is down to '+mttd+'. Less time inside means less damage &mdash; but there&rsquo;s still room to improve.'
+      : '<b style="color:#2e7d57">Fast detection.</b> Caught in '+mttd+'. The attacker barely gets started before the SOC and automated response shut them down. This is the goal.';
+  }
+  render();
+  range.oninput=render;
+})();
+</script>
+</body></html>
