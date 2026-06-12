@@ -166,57 +166,51 @@ input[type=range]{ accent-color:var(--accent); }
   <section>
     <h2><span class="num">2</span> Why ports exist</h2>
     <p>A single computer often runs <strong>many network services at the same time</strong> &mdash; for example a web server, a remote-login service, and an email service, all on one machine. Without ports, the operating system would have no way to know <strong>which program should receive</strong> a given piece of incoming data.</p>
-    <p>Ports solve this by acting as <strong>logical doorways</strong> into different applications. A packet arrives at the device's IP address; the OS reads the <strong>destination port number</strong> and hands the data to whichever application is listening on that port.</p>
-  <div class="widget"><h4>How a packet finds the right application</h4>
-  <svg viewBox="0 0 760 360" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">
-    <defs><marker id="ah" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa3a8"/></marker></defs>
-    <!-- servers -->
-    <rect x="30"  y="20" width="130" height="46" rx="8" fill="#0E7490"/><text x="95"  y="48" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">FTP server</text>
-    <rect x="190" y="20" width="130" height="46" rx="8" fill="#0E7490"/><text x="255" y="48" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">HTTP server</text>
-    <rect x="350" y="20" width="130" height="46" rx="8" fill="#0E7490"/><text x="415" y="48" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">HTTPS server</text>
-    <!-- arrows with port numbers -->
-    <line x1="95"  y1="66" x2="95"  y2="146" stroke="#9aa3a8" stroke-width="2" marker-end="url(#ah)"/>
-    <line x1="255" y1="66" x2="255" y2="146" stroke="#9aa3a8" stroke-width="2" marker-end="url(#ah)"/>
-    <line x1="415" y1="66" x2="415" y2="146" stroke="#9aa3a8" stroke-width="2" marker-end="url(#ah)"/>
-    <rect x="79"  y="98" width="32" height="20" rx="4" fill="#fff" stroke="#e4e7e9"/><text x="95"  y="112" text-anchor="middle" fill="#1a1a18" font-size="12" font-weight="700" font-family="'JetBrains Mono',monospace">21</text>
-    <rect x="239" y="98" width="32" height="20" rx="4" fill="#fff" stroke="#e4e7e9"/><text x="255" y="112" text-anchor="middle" fill="#1a1a18" font-size="12" font-weight="700" font-family="'JetBrains Mono',monospace">80</text>
-    <rect x="395" y="98" width="40" height="20" rx="4" fill="#fff" stroke="#e4e7e9"/><text x="415" y="112" text-anchor="middle" fill="#1a1a18" font-size="12" font-weight="700" font-family="'JetBrains Mono',monospace">443</text>
-    <!-- OS + Device -->
-    <rect x="30" y="150" width="450" height="42" rx="6" fill="#2D3748"/><text x="255" y="177" text-anchor="middle" fill="#fff" font-size="14" font-weight="700" letter-spacing="2">OS</text>
-    <rect x="30" y="206" width="450" height="58" rx="6" fill="#1f2730"/><text x="255" y="241" text-anchor="middle" fill="#fff" font-size="14" font-weight="700" letter-spacing="2">DEVICE</text>
-    <!-- incoming IP arrow -->
-    <line x1="255" y1="330" x2="255" y2="268" stroke="#9aa3a8" stroke-width="2" marker-end="url(#ah)"/>
-    <text x="272" y="305" fill="#5f5e5a" font-size="12" font-weight="700" font-family="'JetBrains Mono',monospace">IP</text>
-    <!-- brace + annotation for servers -->
-    <path d="M494,20 C502,20 502,41 510,43 C502,45 502,66 494,66" fill="none" stroke="#cdd6da" stroke-width="2"/>
-    <text x="520" y="40" fill="#5f5e5a" font-size="12.5" font-weight="600">Applications listen</text>
-    <text x="520" y="58" fill="#5f5e5a" font-size="12.5" font-weight="600">on various ports</text>
-    <!-- routing note -->
-    <rect x="510" y="150" width="232" height="114" rx="8" fill="#f1f9fb" stroke="#cfe7ee"/>
-    <text x="524" y="176" fill="#1a1a18" font-size="12">Packets arrive at the device's</text>
-    <text x="524" y="194" fill="#1a1a18" font-size="12">IP address. The OS reads the</text>
-    <text x="524" y="212" fill="#1a1a18" font-size="12">destination <tspan font-weight="700">port number</tspan> and</text>
-    <text x="524" y="230" fill="#1a1a18" font-size="12">hands the data to the app</text>
-    <text x="524" y="248" fill="#1a1a18" font-size="12">listening on that port.</text>
-  </svg>
-  </div>
-
-  </section>
-
-  <section>
-    <h2><span class="num">3</span> The building analogy</h2>
-    <div class="widget"><h4>IP = building, port = apartment</h4><svg viewBox="0 0 560 270" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif"><defs><marker id="bldA" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa3a8"/></marker></defs><polygon points="60,60 240,60 150,28" fill="#2D3748"/><rect x="70" y="60" width="160" height="180" rx="4" fill="#2D3748"/><rect x="86" y="80" width="56" height="34" rx="5" fill="#e7ecee" stroke="#1a2530" stroke-width="1"/><text x="114" y="102" fill="#5f5e5a" font-size="11.5" font-weight="700" text-anchor="middle" font-family="'JetBrains Mono',monospace">:22</text><rect x="86" y="124" width="56" height="34" rx="5" fill="#e7ecee" stroke="#1a2530" stroke-width="1"/><text x="114" y="146" fill="#5f5e5a" font-size="11.5" font-weight="700" text-anchor="middle" font-family="'JetBrains Mono',monospace">:80</text><rect x="86" y="168" width="56" height="34" rx="5" fill="#e7ecee" stroke="#1a2530" stroke-width="1"/><text x="114" y="190" fill="#5f5e5a" font-size="11.5" font-weight="700" text-anchor="middle" font-family="'JetBrains Mono',monospace">:25</text><rect x="158" y="124" width="56" height="34" rx="5" fill="#0E7490" stroke="#1a2530" stroke-width="1"/><text x="186" y="146" fill="#fff" font-size="11.5" font-weight="700" text-anchor="middle" font-family="'JetBrains Mono',monospace">:443</text><text x="150" y="255" fill="#5f5e5a" font-size="10.5" font-weight="700" text-anchor="middle">IP 203.0.113.10</text><text x="150" y="234" fill="#cbd5e0" font-size="9.5" font-weight="500" text-anchor="middle">(the building)</text><rect x="330" y="108" width="160" height="40" rx="8" fill="#f1f9fb" stroke="#0E7490" stroke-width="1"/><text x="410" y="124" fill="#0E7490" font-size="11.5" font-weight="700" text-anchor="middle" font-family="'JetBrains Mono',monospace">203.0.113.10:443</text><text x="410" y="140" fill="#5f5e5a" font-size="9.5" font-weight="600" text-anchor="middle">deliver to apartment 443</text><line x1="328" y1="128" x2="218" y2="138" stroke="#0E7490" stroke-width="2" marker-end="url(#bldA)"/><text x="410" y="182" fill="#5f5e5a" font-size="11" font-weight="600" text-anchor="middle">IP gets you to the building;</text><text x="410" y="198" fill="#5f5e5a" font-size="11" font-weight="600" text-anchor="middle">the port, to the right app.</text></svg></div>
-    <p>Click an incoming port below to watch the OS hand the packet to the right application:</p>
-    <div class="widget" id="router">
-      <h4>Where does the packet go?</h4>
-      <div class="controls" style="margin-top:0;margin-bottom:16px" id="portBtns"></div>
-      <div id="routerStage"></div>
-      <p id="routerCaption" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6"></p>
+    <p>Ports solve this by acting as <strong>logical doorways</strong> into different applications. A packet arrives at the device's IP address; the OS reads the <strong>destination port number</strong> and hands the data to whichever application is listening on that port. In fact, the packet you watched travel in the Networking note carries <strong>two port numbers</strong> alongside its IP and MAC addresses &mdash; a source port and a destination port, in the TCP header. That's why the Wireshark capture showed traffic going to <code class="inline">:443</code>.</p>
+    <p>Think of it like an apartment building: the <strong>IP address</strong> gets the packet to the building (<code class="inline">203.0.113.10</code>), and the <strong>port</strong> to the right apartment (<code class="inline">:443</code>).</p>
+  <div class="widget" id="portRouter">
+      <h4>How a packet finds the right application &mdash; pick a destination port</h4>
+      <div class="controls" id="portBtns" style="margin:0 0 14px"></div>
+      <svg viewBox="0 0 760 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">
+        <defs><marker id="cmbA" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa3a8"/></marker></defs>
+      <rect class="pSrv" data-port="21" x="30" y="20" width="120" height="46" rx="8" fill="#cfd9dd"/>
+      <text x="90" y="48" text-anchor="middle" fill="#fff" font-size="12.5" font-weight="700" pointer-events="none">FTP server</text>
+      <line class="pArr" data-port="21" x1="90" y1="66" x2="90" y2="146" stroke="#d3dadd" stroke-width="2" marker-end="url(#cmbA)"/>
+      <rect class="pChip" data-port="21" x="74" y="96" width="32" height="20" rx="4" fill="#fff" stroke="#e4e7e9"/>
+      <text class="pChipT" data-port="21" x="90" y="110" text-anchor="middle" fill="#9aa3a8" font-size="12" font-weight="700" font-family="'JetBrains Mono',monospace" pointer-events="none">21</text>
+      <rect class="pSrv" data-port="22" x="170" y="20" width="120" height="46" rx="8" fill="#cfd9dd"/>
+      <text x="230" y="48" text-anchor="middle" fill="#fff" font-size="12.5" font-weight="700" pointer-events="none">SSH service</text>
+      <line class="pArr" data-port="22" x1="230" y1="66" x2="230" y2="146" stroke="#d3dadd" stroke-width="2" marker-end="url(#cmbA)"/>
+      <rect class="pChip" data-port="22" x="214" y="96" width="32" height="20" rx="4" fill="#fff" stroke="#e4e7e9"/>
+      <text class="pChipT" data-port="22" x="230" y="110" text-anchor="middle" fill="#9aa3a8" font-size="12" font-weight="700" font-family="'JetBrains Mono',monospace" pointer-events="none">22</text>
+      <rect class="pSrv" data-port="80" x="310" y="20" width="120" height="46" rx="8" fill="#cfd9dd"/>
+      <text x="370" y="48" text-anchor="middle" fill="#fff" font-size="12.5" font-weight="700" pointer-events="none">HTTP server</text>
+      <line class="pArr" data-port="80" x1="370" y1="66" x2="370" y2="146" stroke="#d3dadd" stroke-width="2" marker-end="url(#cmbA)"/>
+      <rect class="pChip" data-port="80" x="354" y="96" width="32" height="20" rx="4" fill="#fff" stroke="#e4e7e9"/>
+      <text class="pChipT" data-port="80" x="370" y="110" text-anchor="middle" fill="#9aa3a8" font-size="12" font-weight="700" font-family="'JetBrains Mono',monospace" pointer-events="none">80</text>
+      <rect class="pSrv" data-port="443" x="450" y="20" width="120" height="46" rx="8" fill="#cfd9dd"/>
+      <text x="510" y="48" text-anchor="middle" fill="#fff" font-size="12.5" font-weight="700" pointer-events="none">HTTPS server</text>
+      <line class="pArr" data-port="443" x1="510" y1="66" x2="510" y2="146" stroke="#d3dadd" stroke-width="2" marker-end="url(#cmbA)"/>
+      <rect class="pChip" data-port="443" x="490" y="96" width="40" height="20" rx="4" fill="#fff" stroke="#e4e7e9"/>
+      <text class="pChipT" data-port="443" x="510" y="110" text-anchor="middle" fill="#9aa3a8" font-size="12" font-weight="700" font-family="'JetBrains Mono',monospace" pointer-events="none">443</text>
+        <rect x="30" y="150" width="540" height="42" rx="6" fill="#2D3748"/><text x="300" y="177" text-anchor="middle" fill="#fff" font-size="14" font-weight="700" letter-spacing="2">OS</text>
+        <rect x="30" y="206" width="540" height="58" rx="6" fill="#1f2730"/><text x="300" y="241" text-anchor="middle" fill="#fff" font-size="14" font-weight="700" letter-spacing="2">DEVICE</text>
+        <line x1="300" y1="322" x2="300" y2="268" stroke="#B45309" stroke-width="2.5" marker-end="url(#cmbA)"/>
+        <text id="pktLbl" x="316" y="302" fill="#B45309" font-size="12.5" font-weight="700" font-family="'JetBrains Mono',monospace">203.0.113.10:443</text>
+        <path d="M584,20 C592,20 592,41 600,43 C592,45 592,66 584,66" fill="none" stroke="#cdd6da" stroke-width="2"/>
+        <text x="610" y="40" fill="#5f5e5a" font-size="12.5" font-weight="600">Applications listen</text>
+        <text x="610" y="58" fill="#5f5e5a" font-size="12.5" font-weight="600">on various ports</text>
+      </svg>
+      <p id="routerCaption" style="font-size:13px;color:var(--text-muted);margin:12px 0 0;line-height:1.65"></p>
     </div>
+  
+
   </section>
 
+  
+
   <section>
-    <h2><span class="num">4</span> Common ports</h2>
+    <h2><span class="num">3</span> Common ports</h2>
     <p>A handful of port numbers are reserved by convention for well-known services. These are worth memorizing &mdash; they show up constantly in firewall rules, security groups, and packet captures.</p>
     <table class="compare-table">
       <thead><tr><th>Port</th><th>Service</th><th>Purpose</th></tr></thead>
@@ -234,7 +228,7 @@ input[type=range]{ accent-color:var(--accent); }
 
   <div class="assessment-box">
     <div class="assess-label">Remember</div>
-    <p>A port is <strong>not hardware</strong>. It is <strong>not a cable</strong>. A port is a <strong>logical number used by the operating system</strong> to route incoming traffic to the right application. IP gets you to the machine; the port gets you to the program.</p>
+    <p>A port is <strong>not hardware</strong> &mdash; not a cable, and not the USB or Ethernet jack on your laptop, despite sharing the name. A port is a <strong>logical number used by the operating system</strong> to route incoming traffic to the right application. IP gets you to the machine; the port gets you to the program.</p>
   </div>
 
 </div>
@@ -256,51 +250,53 @@ input[type=range]{ accent-color:var(--accent); }
   chev.textContent=open?'▶':'▼';
 }
 
-/* Port router: click an incoming port, watch the OS hand it to the listening app */
+/* Port router: click a port, watch the SVG highlight the listening app */
 const APPS=[
-  {port:'21', name:'FTP server', sub:'File transfer'},
-  {port:'22', name:'SSH service', sub:'Remote login'},
+  {port:'21', name:'FTP server', sub:'file transfer'},
+  {port:'22', name:'SSH service', sub:'remote login'},
   {port:'80', name:'Web server', sub:'HTTP'},
   {port:'443',name:'Secure web server', sub:'HTTPS'},
 ];
-const PORTS=['21','22','80','443'];
 const btns=document.getElementById('portBtns');
-const stage=document.getElementById('routerStage');
 const cap=document.getElementById('routerCaption');
+const pktLbl=document.getElementById('pktLbl');
 
-PORTS.forEach((p,i)=>{
+APPS.forEach((a,i)=>{
   const b=document.createElement('button');
-  b.className='ui'+(i===0?'':' ghost');
-  b.textContent='Packet \u2192 port '+p;
-  b.dataset.port=p;
-  b.onclick=()=>route(p,b);
+  b.className='ui ghost';
+  b.textContent='Packet \u2192 port '+a.port;
+  b.dataset.port=a.port;
+  b.onclick=()=>route(a.port,b);
   btns.appendChild(b);
 });
 
-function render(active){
-  stage.innerHTML='<div style="display:flex;flex-direction:column;gap:7px;max-width:420px">'+
-    APPS.map(a=>{
-      const on=a.port===active;
-      return `<div style="display:flex;align-items:center;gap:12px;border-radius:8px;padding:11px 14px;
-        background:${on?'#0E7490':'#f3f5f6'};color:${on?'#fff':'#5f5e5a'};
-        border:1px solid ${on?'#0E7490':'#e4e7e9'};transition:.2s">
-        <span style="font-family:'JetBrains Mono',monospace;font-weight:700;min-width:42px;
-          background:${on?'rgba(255,255,255,.18)':'#e7ecee'};color:${on?'#fff':'#5f5e5a'};
-          border-radius:5px;padding:2px 0;text-align:center;font-size:12px">:${a.port}</span>
-        <span style="flex:1;font-weight:700;font-size:13.5px">${a.name}</span>
-        <span style="font-size:11px;opacity:.85">${on?'\u25c0 delivered here':a.sub}</span>
-      </div>`;
-    }).join('')+'</div>';
-}
 function route(port,btn){
   document.querySelectorAll('#portBtns .ui').forEach(x=>x.className='ui ghost');
   btn.className='ui';
-  render(port);
+  document.querySelectorAll('#portRouter .pSrv').forEach(r=>{
+    const on=r.dataset.port===port;
+    r.setAttribute('fill', on?'#0E7490':'#cfd9dd');
+    r.setAttribute('stroke', on?'#B45309':'none');
+    r.setAttribute('stroke-width', on?'3':'0');
+  });
+  document.querySelectorAll('#portRouter .pArr').forEach(l=>{
+    const on=l.dataset.port===port;
+    l.setAttribute('stroke', on?'#B45309':'#d3dadd');
+    l.setAttribute('stroke-width', on?'3':'2');
+  });
+  document.querySelectorAll('#portRouter .pChip').forEach(c=>{
+    const on=c.dataset.port===port;
+    c.setAttribute('fill', on?'#FBF3E8':'#fff');
+    c.setAttribute('stroke', on?'#B45309':'#e4e7e9');
+  });
+  document.querySelectorAll('#portRouter .pChipT').forEach(t=>{
+    t.setAttribute('fill', t.dataset.port===port?'#B45309':'#9aa3a8');
+  });
+  pktLbl.textContent='203.0.113.10:'+port;
   const app=APPS.find(a=>a.port===port);
   cap.innerHTML=`A packet arrives at the device's IP address with destination port <b>${port}</b>. `+
-    `The OS reads the port and hands the data to the <b>${app.name}</b> listening on <code class="inline">:${port}</code> &mdash; `+
+    `The OS reads the port and hands the data to the <b>${app.name}</b> (${app.sub}) listening on <code class="inline">:${port}</code> &mdash; `+
     `every other application is left untouched.`;
-  stage.classList.remove('fade');void stage.offsetWidth;stage.classList.add('fade');
 }
 route('443', btns.querySelector('[data-port="443"]'));
 </script>
