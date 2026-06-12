@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Protecting Keys &mdash; Module 9</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+* { box-sizing:border-box; margin:0; padding:0; }
+:root{
+  --slate-dark:#1A202C; --slate:#2D3748;
+  --accent:#0E7490; --accent-dark:#0B5567; --accent-soft:#CFF1F6;
+  --info:#1E40AF; --info-soft:#DBEAFE;
+  --text:#1a1a18; --text-muted:#5f5e5a; --text-light:#888780;
+  --border:rgba(0,0,0,0.09); --bg:#fafaf8; --bg-card:#fff; --bg-code:#f6f6f3; --tag-bg:#f1f0eb;
+  --rust:#B45309; --soft:#888780; --muted:#5f5e5a; --ok:#2e7d57; --bad:#c0392b;
+}
+body{ font-family:'Barlow',sans-serif; background:var(--bg); color:var(--text); line-height:1.65; min-height:100vh; }
+.pagenav{ background:var(--slate-dark); }
+.pagenav.foot{ margin-top:48px; }
+.pagenav-inner{ max-width:920px; margin:0 auto; padding:11px 32px; display:flex; justify-content:space-between; align-items:center; gap:16px; }
+.pagenav .brand{ color:rgba(255,255,255,0.45); font-size:11px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; white-space:nowrap; }
+.navbtns{ display:flex; gap:8px; }
+.navbtn{ display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#fff; background:rgba(255,255,255,0.10); border:1px solid rgba(255,255,255,0.22); border-radius:6px; padding:7px 13px; text-decoration:none; transition:0.15s; white-space:nowrap; }
+.navbtn:hover{ background:var(--accent); border-color:var(--accent); }
+.navbtn.disabled{ opacity:0.28; pointer-events:none; }
+@media(max-width:560px){ .pagenav .brand{ display:none } .pagenav-inner{ justify-content:center } }
+.header{ background:#fff; padding:56px 0 44px; border-bottom:0.5px solid var(--border); }
+.header-inner{ max-width:920px; margin:0 auto; padding:0 32px; }
+.header-eyebrow{ font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:14px; display:flex; align-items:center; gap:12px; }
+.header-eyebrow::after{ content:''; flex:1; height:0.5px; background:var(--border); max-width:120px; }
+.header h1{ font-family:'Barlow Condensed',sans-serif; font-size:clamp(34px,4.5vw,52px); font-weight:900; letter-spacing:-0.01em; line-height:1.05; color:var(--text); margin-bottom:18px; }
+.header h1 em{ font-style:normal; color:var(--accent); }
+.header-meta-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+.module-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:var(--slate); color:#fff; }
+.topic-pill{ display:inline-block; font-size:10px; font-weight:700; padding:3px 11px; border-radius:4px; letter-spacing:0.05em; text-transform:uppercase; background:#F1F5F9; color:#475569; }
+.topic-pill.accent{ background:var(--accent-soft); color:var(--accent-dark); }
+.page{ max-width:920px; margin:0 auto; padding:0 32px 48px; }
+.objectives{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--accent); border-radius:6px; padding:20px 26px; margin:34px 0 14px; }
+.obj-label{ font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-light); margin-bottom:12px; }
+.objectives ul{ list-style:none; }
+.objectives ul li{ font-size:13.5px; color:var(--text); padding:4px 0 4px 20px; position:relative; line-height:1.5; }
+.objectives ul li::before{ content:'◇'; position:absolute; left:0; color:var(--accent); font-size:10px; top:8px; }
+section{ margin-top:42px; }
+section h2{ font-family:'Barlow Condensed',sans-serif; font-size:27px; font-weight:800; color:var(--text); margin-bottom:8px; display:flex; align-items:baseline; gap:18px; }
+section h2 .num{ font-family:'Barlow Condensed',sans-serif; font-size:54px; font-weight:900; color:var(--accent); letter-spacing:-0.02em; line-height:0.85; min-width:40px; }
+section .lead{ font-size:14.5px; color:var(--text-muted); line-height:1.6; margin:0 0 6px; max-width:720px; }
+section p{ font-size:14.5px; color:var(--text); line-height:1.7; margin-bottom:12px; }
+section p strong{ font-weight:700; }
+code.inline{ font-family:'JetBrains Mono',monospace; font-size:12.5px; background:var(--tag-bg); padding:1px 6px; border-radius:3px; color:var(--text); }
+.keybox{ background:var(--accent-soft); border-left:3px solid var(--accent); border-radius:0 6px 6px 0; padding:13px 18px; margin:16px 0 0; font-size:13px; line-height:1.6; color:var(--text); }
+.keybox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--accent-dark); margin-bottom:5px; }
+.keybox b{ color:var(--accent-dark); }
+.notebox{ background:#FBF3E8; border-left:3px solid var(--rust); border-radius:0 6px 6px 0; padding:13px 18px; margin:16px 0 0; font-size:13px; line-height:1.6; }
+.notebox .lbl{ font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--rust); margin-bottom:5px; }
+.assessment-box{ background:var(--bg-card); border:0.5px solid var(--border); border-left:3px solid var(--slate); border-radius:0 6px 6px 0; padding:18px 22px; margin:34px 0 0; }
+.assessment-box .assess-label{ font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); margin-bottom:8px; }
+.assessment-box p{ font-size:13px; line-height:1.65; margin:0; }
+.widget{ border:0.5px solid var(--border); border-radius:10px; padding:18px; margin:18px 0 0; background:var(--bg-card); }
+.widget h4{ margin:0 0 12px; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); font-weight:700; }
+.controls{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+button.ui{ font-family:'Barlow',sans-serif; cursor:pointer; border:1px solid var(--accent); background:var(--accent); color:#fff; padding:7px 16px; border-radius:6px; font-size:12.5px; font-weight:600; transition:0.15s; }
+button.ui:hover{ background:var(--accent-dark); border-color:var(--accent-dark); }
+button.ui.ghost{ background:#fff; color:var(--accent); }
+button.ui.ghost:hover{ background:var(--accent-soft); }
+.fade{ animation:fade 0.35s ease; }
+@keyframes fade{ from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+</style>
+</head><body>
+<header class="pagenav"><div class="pagenav-inner">
+  <span class="brand">Cloud Security Fundamentals</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn disabled" href="#">&larr; Prev</a>
+    <a class="navbtn" href="02-aws-kms.html">Next &rarr;</a>
+  </nav>
+</div></header>
+
+<div class="header"><div class="header-inner">
+  <div class="header-eyebrow">Module 9 &nbsp;·&nbsp; Cross-Cutting · Encryption</div>
+  <h1>Protecting <em>Keys</em></h1>
+  <div class="header-meta-row">
+    <span class="module-pill">Module 9</span>
+    <span class="topic-pill">HSM · TPM · TEE</span>
+    <span class="topic-pill accent">Envelope encryption</span>
+  </div>
+</div></div>
+
+<div class="page">
+
+  <div class="objectives">
+    <div class="obj-label">In this note</div>
+    <ul>
+      <li>Why a key needs a vault &mdash; protecting secrets even when the OS is compromised</li>
+      <li>The hardware vaults: TPM, TEE / Secure Enclave, and the HSM</li>
+      <li>Envelope encryption: why we don&rsquo;t encrypt data with the master key directly</li>
+      <li>The KEK / DEK workflow for encrypting and decrypting</li>
+    </ul>
+  </div>
+
+  <section>
+    <h2><span class="num">1</span> A key needs a vault</h2>
+    <p class="lead">Encryption only helps if the <strong>key</strong> stays secret. But if malware compromises the OS, anything sitting in normal memory &mdash; including your master key &mdash; is up for grabs. The fix: keep the key in an <strong>isolated vault</strong>. Toggle the attack:</p>
+    <div class="widget" id="vault">
+      <h4>Key in memory vs key in a vault</h4>
+      <div class="controls" style="margin:0 0 14px">
+        <button class="ui" data-v="naive">Key in OS memory</button>
+        <button class="ui ghost" data-v="vault">Key in the vault</button>
+      </div>
+      <div id="vaultStage"></div>
+      <p id="vaultCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:34px"></p>
+    </div>
+    <div class="keybox">
+      <div class="lbl">The vault does two jobs</div>
+      The isolated environment doesn&rsquo;t just <b>store</b> the key &mdash; it also <b>performs the encryption and decryption inside itself</b>. So the key never leaves the vault in plaintext, even to do its work. Think of a password manager on your phone: malware can infect the OS, yet the master secret stays sealed away.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> Three kinds of vault</h2>
+    <p class="lead">The same idea shows up at three scales &mdash; a chip on your motherboard, an enclave in your phone&rsquo;s processor, and an appliance in the cloud. Click each:</p>
+    <div class="widget" id="vaults">
+      <h4>TPM &middot; TEE &middot; HSM</h4>
+      <div class="controls" style="margin:0 0 14px" id="vbBtns"></div>
+      <div id="vbStage" style="background:var(--bg);border-radius:8px;padding:16px 18px;min-height:118px"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> Envelope encryption</h2>
+    <p class="lead">There&rsquo;s a catch: the vault is built to <strong>guard keys</strong>, not to crunch gigabytes &mdash; it won&rsquo;t directly encrypt a 1&nbsp;GB file (AWS KMS won&rsquo;t directly encrypt more than ~4&nbsp;KB). So we use <strong>two keys</strong>, like sealing a letter inside an envelope:</p>
+    <div class="widget" id="keys">
+      <h4>Master key vs working key</h4>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <div style="flex:1;min-width:230px;background:var(--bg);border-radius:9px;padding:15px 17px;border-left:3px solid #B45309">
+          <div style="font-family:'Barlow Condensed';font-weight:800;font-size:19px;color:#7d3a06">KEK &mdash; the master key</div>
+          <div style="font-size:12.5px;color:var(--text-muted);margin-top:4px;line-height:1.55"><b>Never leaves the vault.</b> Its only job is to encrypt (&ldquo;wrap&rdquo;) other keys &mdash; it never touches your actual data.</div>
+        </div>
+        <div style="flex:1;min-width:230px;background:var(--bg);border-radius:9px;padding:15px 17px;border-left:3px solid #0E7490">
+          <div style="font-family:'Barlow Condensed';font-weight:800;font-size:19px;color:#0B5567">DEK &mdash; the working key</div>
+          <div style="font-size:12.5px;color:var(--text-muted);margin-top:4px;line-height:1.55"><b>Generated by the vault, used by the CPU.</b> It encrypts the actual data out in fast main memory, then the plaintext copy is destroyed.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> The workflow</h2>
+    <p class="lead">Watch a data key&rsquo;s round trip. Notice the <strong>master key (KEK) never leaves the vault</strong> &mdash; only the data key travels, and only ever <em>wrapped</em> when it&rsquo;s stored. Flip between the two directions:</p>
+    <div class="widget" id="flow">
+      <h4>Encrypt &middot; decrypt</h4>
+      <div class="controls" style="margin:0 0 14px">
+        <button class="ui" data-w="enc">Encrypting</button>
+        <button class="ui ghost" data-w="dec">Decrypting</button>
+      </div>
+      <div id="flowStage"></div>
+      <p id="flowCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:48px"></p>
+    </div>
+    <div class="notebox">
+      <div class="lbl">What gets stored next to your data</div>
+      Only the <b>encrypted DEK</b> &mdash; the data key locked by the KEK. Without the vault (and permission to use the KEK), that wrapped key is useless, so an attacker who copies your encrypted file <i>and</i> the wrapped key still can&rsquo;t read anything.
+    </div>
+  </section>
+
+  <div class="assessment-box">
+    <div class="assess-label">Remember</div>
+    <p>A key is only safe if it lives in an <strong>isolated vault</strong> that both stores it and does the crypto inside &mdash; so the key never leaves, even if the OS is owned. Those vaults are the <strong>TPM</strong> (a motherboard chip), the <strong>TEE / Secure Enclave</strong> (an enclave in the processor), and the <strong>HSM</strong> (a cloud-scale appliance). Because a vault guards keys rather than bulk data, we use <strong>envelope encryption</strong>: a <strong>KEK</strong> (master key, never leaves the vault) wraps a <strong>DEK</strong> (working key) that the CPU uses to encrypt the data. Only the <strong>wrapped DEK</strong> is stored next to the ciphertext; decrypting means sending it back to the vault to be unwrapped.</p>
+  </div>
+
+</div>
+
+<footer class="pagenav foot"><div class="pagenav-inner">
+  <span class="brand">Module 9 &middot; KMS &amp; HSM</span>
+  <nav class="navbtns">
+    <a class="navbtn" href="../index.html">&#8962; Home</a>
+    <a class="navbtn disabled" href="#">&larr; Prev</a>
+    <a class="navbtn" href="02-aws-kms.html">Next &rarr;</a>
+  </nav>
+</div></footer>
+
+<script>
+/* ---------- 1. Vault vs memory ---------- */
+(function(){
+  const stage=document.getElementById('vaultStage'),cap=document.getElementById('vaultCap');
+  let v='naive';
+  function key(x,y,c){return `<circle cx="${x}" cy="${y}" r="9" fill="none" stroke="${c}" stroke-width="2.4"/><rect x="${x+6}" y="${y-2}" width="16" height="4" fill="${c}"/><rect x="${x+18}" y="${y-2}" width="3" height="7" fill="${c}"/>`;}
+  function render(){
+    const safe=v==='vault';
+    let s=`<svg viewBox="0 0 520 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    // OS box
+    s+=`<rect x="40" y="24" width="300" height="132" rx="10" fill="#fff" stroke="#cfd6db" stroke-width="1.4"/>`;
+    s+=`<text x="54" y="44" font-size="10" font-weight="800" letter-spacing=".5" fill="#9aa3a8">OPERATING SYSTEM (CPU + MEMORY)</text>`;
+    // malware
+    s+=`<text x="392" y="58" font-size="26">&#128127;</text><text x="405" y="82" text-anchor="middle" font-size="9" font-weight="700" fill="#c0392b">malware</text>`;
+    if(!safe){
+      // key in memory
+      s+=key(150,96,'#B45309');
+      s+=`<text x="170" y="120" font-size="9" fill="#5f5e5a">master key in plain memory</text>`;
+      s+=`<line x1="388" y1="64" x2="190" y2="92" stroke="#c0392b" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#va)"/>`;
+      s+=`<text x="270" y="150" text-anchor="middle" font-size="10" font-weight="800" fill="#c0392b">&#10007; key stolen</text>`;
+    } else {
+      // vault inside OS, locked
+      s+=`<rect x="120" y="64" width="150" height="74" rx="9" fill="#0E7490"/>`;
+      s+=`<text x="195" y="86" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">VAULT (TPM / HSM)</text>`;
+      s+=key(160,112,'#fff');
+      s+=`<text x="195" y="128" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,.85)">key + crypto sealed inside</text>`;
+      s+=`<line x1="388" y1="64" x2="278" y2="96" stroke="#c0392b" stroke-width="2" stroke-dasharray="5 4"/>`;
+      s+=`<circle cx="285" cy="100" r="11" fill="#fff" stroke="#2e7d57" stroke-width="2.2"/><text x="285" y="105" text-anchor="middle" font-size="13" font-weight="900" fill="#2e7d57">&#10003;</text>`;
+      s+=`<text x="195" y="156" text-anchor="middle" font-size="10" font-weight="800" fill="#2e7d57">malware can&rsquo;t reach the key</text>`;
+    }
+    s+=`<defs><marker id="va" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#c0392b"/></marker></defs>`;
+    s+=`</svg>`;
+    stage.className='fade'; stage.innerHTML=s;
+    cap.innerHTML = safe
+      ? '<b>In the vault.</b> The key lives inside an isolated chip that also does the encrypting. Malware can own the OS and still never touch the key &mdash; it can only ask the vault to do work.'
+      : '<b>In plain memory.</b> The master key sits in normal RAM, so any malware that compromises the OS can read it straight out &mdash; and now every encrypted file is exposed.';
+    document.querySelectorAll('#vault [data-v]').forEach(b=>b.className='ui'+(b.dataset.v===v?'':' ghost'));
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  render();
+  document.querySelectorAll('#vault [data-v]').forEach(b=>b.onclick=()=>{v=b.dataset.v;render();});
+})();
+
+/* ---------- 2. TPM / TEE / HSM ---------- */
+(function(){
+  const btns=document.getElementById('vbBtns'),stage=document.getElementById('vbStage');
+  const V=[
+    ['TPM','#0E7490','Trusted Platform Module','A dedicated <b>chip soldered onto a motherboard</b>. Serves a single device. Used for device integrity, secure boot, and full-disk encryption.'],
+    ['TEE','#8E5CA8','Trusted Execution Environment','A secure, isolated <b>region inside the main processor</b> &mdash; like Apple&rsquo;s Secure Enclave. Acts like a separate chip; common for protecting keys on a phone.'],
+    ['HSM','#B45309','Hardware Security Module','A dedicated <b>appliance</b> built for scale. Where a TPM serves one device, a cloud HSM handles huge volumes of crypto requests &mdash; the backbone of enterprise key management and PKI.']
+  ];
+  let sel=0;
+  btns.innerHTML=V.map((v,i)=>`<button class="ui${i===0?'':' ghost'}" data-i="${i}">${v[0]}</button>`).join('');
+  function render(){
+    btns.querySelectorAll('button').forEach((b,i)=>b.className='ui'+(i===sel?'':' ghost'));
+    stage.className='fade';
+    stage.innerHTML=`<div style="font-family:'Barlow Condensed';font-weight:900;font-size:23px;color:${V[sel][1]}">${V[sel][0]} <span style="font-size:14px;font-weight:600;color:var(--text-muted)">&mdash; ${V[sel][2]}</span></div>`+
+      `<div style="font-size:13.5px;line-height:1.65;color:var(--text);margin-top:6px">${V[sel][3]}</div>`;
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  btns.querySelectorAll('button').forEach(b=>b.onclick=()=>{sel=+b.dataset.i;render();});
+  render();
+})();
+
+/* ---------- 4. Envelope workflow ---------- */
+(function(){
+  const stage=document.getElementById('flowStage'),cap=document.getElementById('flowCap');
+  let w='enc';
+  function key(x,y,c,s){s=s||1;return `<g transform="translate(${x},${y}) scale(${s})"><circle cx="0" cy="0" r="7" fill="none" stroke="${c}" stroke-width="2.2"/><rect x="5" y="-2" width="13" height="4" fill="${c}"/><rect x="15" y="-2" width="3" height="6" fill="${c}"/></g>`;}
+  function render(){
+    const enc=w==='enc';
+    let s=`<svg viewBox="0 0 520 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    // CPU (left), Vault (middle), Storage (right)
+    s+=`<rect x="14" y="40" width="120" height="110" rx="9" fill="#2D3748"/><text x="74" y="60" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">CPU / memory</text><text x="74" y="74" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.7)">fast, but exposed</text>`;
+    s+=`<rect x="200" y="40" width="120" height="110" rx="9" fill="#0E7490"/><text x="260" y="60" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">VAULT (HSM)</text>`;
+    s+=key(238,86,'#fff',1.1)+`<text x="260" y="104" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,.9)">KEK stays here</text>`;
+    s+=`<rect x="386" y="40" width="120" height="110" rx="9" fill="#fff" stroke="#cfd6db" stroke-width="1.3"/><text x="446" y="60" text-anchor="middle" font-size="11" font-weight="800" fill="#1a1a18">Stored data</text>`;
+    const A=(x1,y1,x2,y2,c,dash)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c}" stroke-width="2" ${dash?'stroke-dasharray="5 4"':''} marker-end="url(#fa)"/>`;
+    if(enc){
+      s+=A(200,78,134,78,'#2e7d57');                  // vault -> CPU plaintext DEK
+      s+=key(150,78,'#2e7d57')+`<text x="167" y="82" font-size="8" fill="#2e7d57">DEK</text>`;
+      s+=`<text x="167" y="70" font-size="8" font-weight="700" fill="#2e7d57">1 plaintext DEK</text>`;
+      s+=A(320,118,386,118,'#B45309');                // vault -> storage encrypted DEK
+      s+=`<rect x="338" y="110" width="34" height="16" rx="3" fill="#B45309"/><text x="355" y="122" text-anchor="middle" font-size="7.5" font-weight="700" fill="#fff">enc DEK</text>`;
+      s+=`<text x="446" y="92" text-anchor="middle" font-size="8.5" fill="#5f5e5a">ciphertext +</text><text x="446" y="104" text-anchor="middle" font-size="8.5" fill="#5f5e5a">wrapped DEK</text>`;
+      s+=`<text x="74" y="138" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.85)">encrypts data,</text><text x="74" y="148" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.85)">then wipes DEK</text>`;
+    } else {
+      s+=A(386,118,322,118,'#B45309',true);           // storage -> vault encrypted DEK
+      s+=`<rect x="344" y="110" width="34" height="16" rx="3" fill="#B45309"/><text x="361" y="122" text-anchor="middle" font-size="7.5" font-weight="700" fill="#fff">enc DEK</text>`;
+      s+=A(200,78,134,78,'#2e7d57');                  // vault -> CPU plaintext DEK
+      s+=key(150,78,'#2e7d57')+`<text x="167" y="82" font-size="8" fill="#2e7d57">DEK</text>`;
+      s+=`<text x="260" y="138" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.85)">validates caller,</text><text x="260" y="148" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.85)">unwraps DEK</text>`;
+      s+=`<text x="74" y="142" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.85)">decrypts the data</text>`;
+    }
+    s+=`<defs><marker id="fa" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#7a8589"/></marker></defs>`;
+    s+=`</svg>`;
+    stage.className='fade'; stage.innerHTML=s;
+    cap.innerHTML = enc
+      ? '<b>Encrypting.</b> The CPU asks the vault for a key. The vault returns a <b>plaintext DEK</b> (to use now) and a <b>wrapped DEK</b> (to keep). The CPU encrypts the data, then <b>deletes the plaintext DEK</b> &mdash; only the ciphertext and the wrapped DEK are stored.'
+      : '<b>Decrypting.</b> The CPU sends the <b>wrapped DEK</b> back to the vault. The vault checks you&rsquo;re allowed, <b>unwraps</b> it with the KEK, and returns the plaintext DEK so the CPU can decrypt &mdash; then the DEK is discarded again.';
+    document.querySelectorAll('#flow [data-w]').forEach(b=>b.className='ui'+(b.dataset.w===w?'':' ghost'));
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  render();
+  document.querySelectorAll('#flow [data-w]').forEach(b=>b.onclick=()=>{w=b.dataset.w;render();});
+})();
+</script>
+</body></html>
