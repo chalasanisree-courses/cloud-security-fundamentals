@@ -145,7 +145,7 @@ input[type=range]{ accent-color:var(--accent); }
       <li>Explain why the web, application, and database tiers live on separate subnets</li>
       <li>Distinguish network-level firewalls from host-level firewalls (AWS security groups)</li>
       <li>Break a server down into its hardware (CPU, memory, disk, GPU) and its infrastructure &rarr; OS &rarr; application stack</li>
-      <li>Name a security control at each of the four layers: network, device, application, data</li>
+      <li>Name a security control at each of the five layers: network, device, application, data, identity</li>
       <li>Define threat, vulnerability, and risk, and state how they relate</li>
     </ul>
   </div>
@@ -219,9 +219,9 @@ input[type=range]{ accent-color:var(--accent); }
 
   <section>
     <h2><span class="num">6</span> Security is multi-tiered</h2>
-    <p>Put it together and security wraps the enterprise in <strong>four concentric layers</strong>. This is the spine of the entire course &mdash; every later module is one of these rings. Click each:</p>
+    <p>Put it together and security wraps the enterprise in <strong>five concentric layers</strong>. This is the spine of the entire course &mdash; every later module is one of these rings. Click each:</p>
     <div class="widget" id="layers">
-      <h4>The four layers of defense</h4>
+      <h4>The five layers of defense</h4>
       <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center">
         <div id="layerSvg" style="flex:1;min-width:240px"></div>
         <div id="layerDetail" style="flex:1.1;min-width:240px;background:var(--bg);border-radius:8px;padding:16px 18px;min-height:150px"></div>
@@ -253,7 +253,7 @@ input[type=range]{ accent-color:var(--accent); }
 
   <div class="assessment-box">
     <div class="assess-label">Remember</div>
-    <p>Defense in depth means <strong>layers, not a single wall</strong>. Tiers live on separate <strong>subnets</strong>; <strong>network-level</strong> firewalls guard the wires while <strong>host-level</strong> firewalls (AWS <strong>security groups</strong>) guard each machine. A server is hardware (CPU/memory/disk/<strong>GPU</strong>) running an <strong>OS</strong> that must stay patched, running <strong>applications</strong> that must be coded securely, storing <strong>data</strong> that must be encrypted. The four rings &mdash; <strong>network, device, application, data</strong> &mdash; are the rest of this course. And <strong>risk = threat &cap; vulnerability</strong>.</p>
+    <p>Defense in depth means <strong>layers, not a single wall</strong>. Tiers live on separate <strong>subnets</strong>; <strong>network-level</strong> firewalls guard the wires while <strong>host-level</strong> firewalls (AWS <strong>security groups</strong>) guard each machine. A server is hardware (CPU/memory/disk/<strong>GPU</strong>) running an <strong>OS</strong> that must stay patched, running <strong>applications</strong> that must be coded securely, storing <strong>data</strong> that must be encrypted. The five rings &mdash; <strong>network, device, application, data, identity</strong> &mdash; are the rest of this course. And <strong>risk = threat &cap; vulnerability</strong>.</p>
   </div>
 
 </div>
@@ -346,14 +346,15 @@ input[type=range]{ accent-color:var(--accent); }
   patchBtn.onclick=()=>{patched=!patched;renderPatch();};
 })();
 
-/* ---------- 6. Four layers ---------- */
+/* ---------- 6. Five layers ---------- */
 (function(){
   const svg=document.getElementById('layerSvg'),det=document.getElementById('layerDetail');
   const L=[
-    {k:'Network',c:'#0E7490',r:118,ctrl:'Only authorized data is allowed onto the network.',how:'Firewalls, IDS, IPS, network segmentation.',aws:'VPC, Security Groups, NACLs'},
-    {k:'Device',c:'#2E86C8',r:92,ctrl:'The host/server itself is hardened and watched.',how:'OS patching, disk encryption, antivirus / EDR.',aws:'EC2, Systems Manager, Inspector'},
-    {k:'Application',c:'#8E5CA8',r:66,ctrl:'The code is written so it can\u2019t be exploited.',how:'Secure coding, input validation, dependency hygiene.',aws:'Lambda, API Gateway, WAF'},
-    {k:'Data',c:'#B45309',r:40,ctrl:'The information itself is protected at rest.',how:'Encryption, backups, access control.',aws:'S3 + KMS, RDS encryption'}
+    {k:'Network',c:'#0E7490',r:122,ctrl:'Only authorized data is allowed onto the network.',how:'Firewalls, IDS, IPS, network segmentation.',aws:'VPC, Security Groups, NACLs'},
+    {k:'Device',c:'#2E86C8',r:99,ctrl:'The host/server itself is hardened and watched.',how:'OS patching, disk encryption, antivirus / EDR.',aws:'EC2, Systems Manager, Inspector'},
+    {k:'Application',c:'#8E5CA8',r:76,ctrl:'The code is written so it can\u2019t be exploited.',how:'Secure coding, input validation, dependency hygiene.',aws:'Lambda, API Gateway, WAF'},
+    {k:'Data',c:'#B45309',r:53,ctrl:'The information itself is protected at rest.',how:'Encryption, backups, access control.',aws:'S3 + KMS, RDS encryption'},
+    {k:'Identity',c:'#6D2E46',r:30,ctrl:'Who can do anything at all \u2014 the core every other layer leans on.',how:'IAM users & roles, least privilege, MFA.',aws:'IAM, Cognito, IAM Identity Center'}
   ];
   let sel=0;
   function render(){

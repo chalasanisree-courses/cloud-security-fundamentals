@@ -98,6 +98,14 @@ body { font-family: 'Barlow', -apple-system, BlinkMacSystemFont, sans-serif; bac
 footer { text-align:center; font-size:11px; color:#aaa9a4; padding:24px 0 40px; border-top:0.5px solid #e8e7e0; margin-top:20px; }
 footer a { color:#aaa9a4; }
 @media(max-width:640px){ .hero{padding-left:26px;padding-right:26px} }
+
+/* defense-in-depth ring course map */
+.ringmap{ background:#fff; border:0.5px solid var(--border); border-radius:12px; padding:22px 24px; margin:6px 0 26px; display:flex; gap:26px; flex-wrap:wrap; align-items:center; }
+.ringmap-svg{ flex:1; min-width:230px; max-width:320px; }
+.ringmap-detail{ flex:1.05; min-width:230px; }
+.rm-jump{ font-family:'Barlow',sans-serif; display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:700; color:#fff; background:var(--accent); border:none; border-radius:6px; padding:8px 15px; cursor:pointer; margin-top:13px; }
+.rm-jump:hover{ background:var(--slate-dark); }
+.rm-intro{ font-size:13.5px; color:var(--text-muted); line-height:1.6; margin:0 0 14px; max-width:660px; }
 </style>
 </head>
 <body>
@@ -116,6 +124,13 @@ footer a { color:#aaa9a4; }
 
 
 <div class="page" id="modules">
+
+  <div class="section-label">The defense-in-depth model</div>
+  <p class="rm-intro">Every module below is one ring of a single security model &mdash; network on the outside, identity at the core &mdash; with logging cutting across them all. Click a ring (or the logging slice) to jump to its module.</p>
+  <div class="ringmap">
+    <div class="ringmap-svg" id="rmSvg"></div>
+    <div class="ringmap-detail" id="rmDetail"></div>
+  </div>
 
   <div class="section-label">Course materials by module</div>
 
@@ -447,6 +462,48 @@ function openSection(id){
   }
   /* if saved is an empty array, the user had everything collapsed — honor that */
 })();
+
+/* ---- defense-in-depth ring course map ---- */
+(function(){
+  var svgBox=document.getElementById('rmSvg'), det=document.getElementById('rmDetail');
+  if(!svgBox) return;
+  var C=140;
+  var L=[
+    {k:'Network', mod:5, r:130, c:'#0E7490', sub:'Module 5', d:'The outermost ring. VPCs, subnets, security groups and NACLs decide which traffic ever reaches your systems.'},
+    {k:'Device', mod:6, r:106, c:'#2E86C8', sub:'Module 6', d:'The machines themselves. EC2 host hardening — patching, the host firewall, anti-malware.'},
+    {k:'Application', mod:11, r:82, c:'#8E5CA8', sub:'Module 11', d:'The software running on the host. WAF, secure coding, the segmented 3-tier app. (Taught later, “up the stack.”)'},
+    {k:'Data', mod:7, r:58, c:'#B45309', sub:'Module 7', d:'The information itself. S3 access control and encryption — the last line before your most sensitive data.'},
+    {k:'Identity', mod:8, r:34, c:'#6D2E46', sub:'Module 8', d:'The core. IAM, least privilege, MFA — who can do anything at all. Compromise identity and an attacker walks past every outer ring as a legitimate user.'}
+  ];
+  var LOG={k:'Logging', mod:10, sub:'Module 10', d:'Cross-cutting visibility. CloudTrail, VPC Flow Logs and S3 access logs cut through every layer at once — you can’t defend what you can’t see. That’s why it’s drawn as a slice across all the rings.'};
+  var sel=0;
+  function pt(a,R){ var rad=a*Math.PI/180; return [(C+R*Math.cos(rad)).toFixed(1),(C+R*Math.sin(rad)).toFixed(1)]; }
+  function wedge(a0,a1,R){ var s0=pt(a0,R), s1=pt(a1,R); return 'M '+C+' '+C+' L '+s0[0]+' '+s0[1]+' A '+R+' '+R+' 0 0 1 '+s1[0]+' '+s1[1]+' Z'; }
+  function render(){
+    var isLog=(sel==='log'), i, s='<svg viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:inherit">';
+    for(i=0;i<L.length;i++){ var l=L[i], on=(sel===i);
+      s+='<circle cx="'+C+'" cy="'+C+'" r="'+l.r+'" fill="'+l.c+'" fill-opacity="'+(on?0.95:0.55)+'" stroke="'+l.c+'" stroke-width="'+(on?3.5:1.5)+'" data-i="'+i+'" style="cursor:pointer"/>';
+    }
+    s+='<path d="'+wedge(70,110,130)+'" fill="#1A202C" fill-opacity="'+(isLog?0.92:0.72)+'" stroke="'+(isLog?'#0E7490':'#1A202C')+'" stroke-width="'+(isLog?3.5:0.5)+'" data-log="1" style="cursor:pointer"/>';
+    for(i=0;i<L.length;i++){ var ll=L[i];
+      s+='<text x="'+C+'" y="'+(C-ll.r+15)+'" text-anchor="middle" font-size="11" font-weight="800" fill="#fff" stroke="rgba(0,0,0,.45)" stroke-width="1.6" paint-order="stroke" style="pointer-events:none">'+ll.k+'</text>';
+    }
+    s+='<text x="'+C+'" y="228" text-anchor="middle" font-size="8" font-weight="800" letter-spacing="1" fill="#fff" style="pointer-events:none">LOGGING</text>';
+    s+='</svg>';
+    svgBox.innerHTML=s;
+    var rings=svgBox.querySelectorAll('[data-i]'), a;
+    for(a=0;a<rings.length;a++){ rings[a].onclick=(function(idx){return function(){sel=idx;render();};})(+rings[a].getAttribute('data-i')); }
+    svgBox.querySelector('[data-log]').onclick=function(){sel='log';render();};
+    var d=isLog?LOG:L[sel], col=isLog?'#1A202C':L[sel].c;
+    det.innerHTML='<div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#aaa9a4;margin-bottom:4px">'+d.sub+(isLog?' · cross-cutting':' · layer')+'</div>'+
+      '<div style="font-family:\'Barlow Condensed\',sans-serif;font-weight:900;font-size:26px;color:'+col+';line-height:1;margin-bottom:8px">'+d.k+(isLog?'':' security')+'</div>'+
+      '<p style="font-size:13.5px;line-height:1.65;color:var(--text);margin:0">'+d.d+'</p>'+
+      '<button class="rm-jump" onclick="goToModule('+d.mod+')">Go to Module '+d.mod+' →</button>';
+  }
+  render();
+})();
+function goToModule(n){ try{ openSection('m'+n); }catch(e){} var el=document.getElementById('m'+n); if(el){ el.scrollIntoView({behavior:'smooth',block:'center'}); } }
+
 </script>
 
 </body>
