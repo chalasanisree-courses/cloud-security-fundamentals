@@ -226,6 +226,7 @@ input[type=range]{ accent-color:var(--accent); }
         <div id="layerSvg" style="flex:1;min-width:240px"></div>
         <div id="layerDetail" style="flex:1.1;min-width:240px;background:var(--bg);border-radius:8px;padding:16px 18px;min-height:150px"></div>
       </div>
+      <p style="font-size:13px;color:var(--text-muted);line-height:1.6;margin:14px 2px 0">Modern networks push this further with <strong>Zero Trust</strong> &mdash; &ldquo;never trust, always verify.&rdquo; Rather than trusting anything already inside the perimeter, every request must prove its identity and is granted only least-privilege access &mdash; on the assumption that a breach may already have happened.</p>
     </div>
   </section>
 
@@ -350,27 +351,27 @@ input[type=range]{ accent-color:var(--accent); }
 (function(){
   const svg=document.getElementById('layerSvg'),det=document.getElementById('layerDetail');
   const L=[
-    {k:'Network',c:'#0E7490',r:122,ctrl:'Only authorized data is allowed onto the network.',how:'Firewalls, IDS, IPS, network segmentation.',aws:'VPC, Security Groups, NACLs'},
-    {k:'Device',c:'#2E86C8',r:99,ctrl:'The host/server itself is hardened and watched.',how:'OS patching, disk encryption, antivirus / EDR.',aws:'EC2, Systems Manager, Inspector'},
-    {k:'Application',c:'#8E5CA8',r:76,ctrl:'The code is written so it can\u2019t be exploited.',how:'Secure coding, input validation, dependency hygiene.',aws:'Lambda, API Gateway, WAF'},
-    {k:'Data',c:'#B45309',r:53,ctrl:'The information itself is protected at rest.',how:'Encryption, backups, access control.',aws:'S3 + KMS, RDS encryption'},
-    {k:'Identity',c:'#6D2E46',r:30,ctrl:'Who can do anything at all \u2014 the core every other layer leans on.',how:'IAM users & roles, least privilege, MFA.',aws:'IAM, Cognito, IAM Identity Center'}
+    {k:'Network',c:'#DBEAFE',t:'#1E3A8A',r:122,ctrl:'Only authorized data is allowed onto the network.',how:'Firewalls, IDS, IPS, network segmentation.',aws:'VPC, Security Groups, NACLs'},
+    {k:'Device',c:'#FEF3C7',t:'#78350F',r:99,ctrl:'The host/server itself is hardened and watched.',how:'OS patching, disk encryption, antivirus / EDR.',aws:'EC2, Systems Manager, Inspector'},
+    {k:'Application',c:'#DCFCE7',t:'#166534',r:76,ctrl:'The code is written so it can\u2019t be exploited.',how:'Secure coding, input validation, dependency hygiene.',aws:'Lambda, API Gateway, WAF'},
+    {k:'Data',c:'#FCE7F3',t:'#831843',r:53,ctrl:'The information itself is protected at rest.',how:'Encryption, backups, access control.',aws:'S3 + KMS, RDS encryption'},
+    {k:'Identity',c:'#F3E8FF',t:'#581C87',r:30,ctrl:'Who can do anything at all \u2014 the core every other layer leans on.',how:'IAM users & roles, least privilege, MFA.',aws:'IAM, Cognito, IAM Identity Center'}
   ];
   let sel=0;
   function render(){
     let s=`<svg viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-width:280px;font-family:Barlow,Arial,sans-serif">`;
     L.forEach((l,i)=>{
       const on=i===sel;
-      s+=`<circle cx="140" cy="140" r="${l.r}" fill="${l.c}" fill-opacity="${on?0.95:0.5}" stroke="${l.c}" stroke-width="${on?3.5:1.5}" data-i="${i}" style="cursor:pointer"/>`;
+      s+=`<circle cx="140" cy="140" r="${l.r}" fill="${l.c}" stroke="${on?l.t:'rgba(0,0,0,0.12)'}" stroke-width="${on?4:1.5}" data-i="${i}" style="cursor:pointer"/>`;
     });
     // labels at top of each ring
-    L.forEach((l,i)=>{ s+=`<text x="140" y="${140-l.r+15}" text-anchor="middle" font-size="11" font-weight="800" fill="#fff" stroke="rgba(0,0,0,.45)" stroke-width="1.6" paint-order="stroke" style="pointer-events:none">${l.k}</text>`; });
+    L.forEach((l,i)=>{ s+=`<text x="140" y="${140-l.r+15}" text-anchor="middle" font-size="11" font-weight="800" fill="${l.t}" style="pointer-events:none">${l.k}</text>`; });
     s+=`</svg>`;
     svg.innerHTML=s;
     svg.querySelectorAll('circle').forEach(c=>c.onclick=()=>{sel=+c.dataset.i;render();});
     const l=L[sel];
     det.className='fade';
-    det.innerHTML=`<div style="font-family:'Barlow Condensed';font-weight:800;font-size:24px;color:${l.c};margin-bottom:8px">${l.k} layer</div>
+    det.innerHTML=`<div style="font-family:'Barlow Condensed';font-weight:800;font-size:24px;color:${l.t};margin-bottom:8px">${l.k} layer</div>
       <p style="font-size:13.5px;line-height:1.6;margin:0 0 8px"><b>Goal:</b> ${l.ctrl}</p>
       <p style="font-size:13.5px;line-height:1.6;margin:0 0 8px"><b>How:</b> ${l.how}</p>
       <p style="font-size:12px;line-height:1.5;margin:0;color:var(--text-muted)"><b>AWS:</b> ${l.aws}</p>`;
