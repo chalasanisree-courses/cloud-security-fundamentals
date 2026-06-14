@@ -111,6 +111,10 @@ button.ui.ghost:hover{ background:var(--accent-soft); }
       <div class="lbl">The broker idea</div>
       The <b>identity provider</b> (Duo, Okta, Microsoft Entra) becomes a <b>trusted broker</b>. You authenticate once with it; it then vouches for you to Canvas, Zoom, and the rest &mdash; so those apps never handle your password at all.
     </div>
+    <div class="keybox">
+      <div class="lbl">IAM vs IdP &mdash; don&rsquo;t mix them up</div>
+      The terms overlap, but they name different scopes. An <b>IdP</b> (Identity Provider) focuses on the <b>enforcement</b> moment &mdash; checking credentials at login and issuing a token. <b>IAM</b> (Identity &amp; Access Management) is the broader discipline: the whole user <b>lifecycle</b>, &ldquo;hire to retire&rdquo; &mdash; onboarding, role/department changes, and off-boarding (revoking access when someone leaves). One verifies you at the door; the other manages your identity over its entire life. <span style="opacity:.85">(Heads-up: the next page covers <b>AWS IAM</b> &mdash; that&rsquo;s Amazon&rsquo;s <em>service</em> named &ldquo;IAM,&rdquo; a specific product, not the same as this general idea.)</span>
+    </div>
   </section>
 
   <section>
