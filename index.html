@@ -49,15 +49,17 @@ body { font-family: 'Barlow', -apple-system, BlinkMacSystemFont, sans-serif; bac
 .phase-divider span { font-size:11px; font-weight:700; color:var(--text-muted); white-space:nowrap; text-transform:uppercase; letter-spacing:0.07em; }
 .phase-divider hr { flex:1; border:none; border-top:0.5px solid #D3D1C7; }
 
+.act-divider { display:flex; align-items:center; gap:13px; margin:44px 0 4px; }
+.act-divider .act-no { font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:12px; letter-spacing:0.12em; color:#fff; background:var(--accent); border-radius:5px; padding:4px 11px; text-transform:uppercase; white-space:nowrap; }
+.act-divider .act-name { font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:22px; color:var(--text); letter-spacing:0.04em; text-transform:uppercase; white-space:nowrap; }
+.act-divider hr { flex:1; border:none; border-top:1.5px solid var(--accent); opacity:0.35; }
+.act-desc { font-size:12.5px; color:var(--text-muted); line-height:1.55; margin:2px 0 18px; max-width:680px; }
+
 .module-card { background:#fff; border-radius:10px; border:0.5px solid var(--border); margin-bottom:8px; overflow:hidden; }
 .module-header { display:flex; align-items:center; gap:14px; padding:13px 18px; cursor:pointer; user-select:none; transition:background 0.15s; }
 .module-header:hover { background:#f9f9f7; }
 .module-num { font-size:10px; font-weight:700; color:#fff; background:var(--slate); border-radius:5px; padding:3px 10px; white-space:nowrap; min-width:78px; text-align:center; letter-spacing:0.04em; text-transform:uppercase; }
-.module-num.frame { background:var(--p-frame); }
-.module-num.layer { background:var(--p-layer); }
-.module-num.cross { background:var(--p-cross); }
-.module-num.stack { background:var(--p-stack); }
-.module-num.breach { background:var(--p-breach); }
+.module-num.frame, .module-num.layer, .module-num.cross, .module-num.stack, .module-num.breach { background:var(--slate); }
 .module-title { flex:1; font-size:13.5px; font-weight:600; color:var(--text); }
 .module-domain { font-size:11px; color:#aaa9a4; white-space:nowrap; }
 .module-chevron { font-size:11px; color:#aaa9a4; transition:transform 0.2s; }
@@ -114,7 +116,7 @@ footer a { color:#aaa9a4; }
 <div class="hero">
   <div class="hero-eyebrow">Computer Information Systems</div>
   <h1><em>Cloud Security</em><br>Fundamentals</h1>
-  <p class="hero-sub">One security model, taught one layer at a time. From how the internet works, down through the network, device, data, and identity layers, up to applications and SaaS — and finally, what to do when prevention fails. Every concept is grounded in a real AWS service and a real breach.</p>
+  <p class="hero-sub">A course in three parts: how the internet works and how its connections are secured; how enterprise networks are defended through risk, the NIST framework, and a layered security model; and how that model is implemented in the cloud — from IaaS to SaaS, including what to do when prevention fails. Every concept is grounded in a real AWS service and a real breach.</p>
   <div class="hero-meta">
     <div class="hero-meta-item"><div class="hero-meta-label">Structure</div><div class="hero-meta-value">13 Modules</div></div>
     <div class="hero-meta-item"><div class="hero-meta-label">Approach</div><div class="hero-meta-value">Defense in Depth</div></div>
@@ -127,7 +129,7 @@ footer a { color:#aaa9a4; }
 <div class="page" id="modules">
 
   <div class="section-label">The defense-in-depth model</div>
-  <p class="rm-intro">Every module below is one ring of a single security model &mdash; network on the outside, identity at the core &mdash; with logging cutting across them all. Click a ring (or the logging slice) to jump to its module.</p>
+  <p class="rm-intro">At the heart of the course is a single layered security model &mdash; network on the outside, identity at the core &mdash; with logging cutting across them all. Click a ring (or the logging slice) to jump to that layer’s module.</p>
   <div class="ringmap">
     <p class="rm-hint">click a layer</p>
     <div class="ringmap-svg"><div id="rmSvg"></div></div>
@@ -136,7 +138,8 @@ footer a { color:#aaa9a4; }
 
   <div class="section-label">Course materials by module</div>
 
-  <div class="phase-divider"><span>Part I — Foundations</span><hr></div>
+  <div class="act-divider"><span class="act-name">Internet</span><hr></div>
+  <p class="act-desc">This section provides a background on the internet: how devices came to be interconnected &mdash; across both consumer and enterprise networks &mdash; how those connections are secured, and the threats against them.</p>
 
   <div class="module-card">
     <div class="module-header" onclick="toggle('m1')">
@@ -146,7 +149,7 @@ footer a { color:#aaa9a4; }
       <span class="module-chevron" id="m1-chev">▶</span>
     </div>
     <div class="module-body" id="m1">
-      <p class="module-desc">How the internet actually works — the protocols, addressing, routing, and the TCP/IP stack — because you can't secure communications you don't understand. The ground everything else stands on.</p>
+      <p class="module-desc">How device interconnection came about and evolved — across consumer and enterprise networks — and how the internet actually works underneath: protocols, addressing, routing, and the TCP/IP stack.</p>
       <div class="resource-list">
         <a class="resource-link" href="module-1/01-evolution-of-the-internet.html"><span class="icon">◈</span> Evolution of the Internet — concept notes</a>
         <a class="resource-link" href="module-1/02-enterprise-trends.html"><span class="icon">◈</span> Enterprise Trends — concept notes</a>
@@ -173,7 +176,8 @@ footer a { color:#aaa9a4; }
     </div>
   </div>
 
-  <div class="phase-divider"><span>Part II — The Framework</span><hr></div>
+  <div class="act-divider"><span class="act-name">Enterprise</span><hr></div>
+  <p class="act-desc">This section provides a background on enterprise networks: how the corporate network is separated from the internet and defended &mdash; vulnerabilities, threats &amp; risk, the NIST framework, and the layered defense-in-depth model.</p>
 
   <div class="module-card">
     <div class="module-header" onclick="toggle('m3')">
@@ -183,7 +187,7 @@ footer a { color:#aaa9a4; }
       <span class="module-chevron" id="m3-chev">▶</span>
     </div>
     <div class="module-body" id="m3">
-      <p class="module-desc">The layered model is named here: defense in depth and enterprise risk. First breach case studies — Target (2013) and Log4j — show what a broken layer costs.</p>
+      <p class="module-desc">How the corporate network is separated from the internet and defended. The course's framework is named here — vulnerabilities, threats &amp; risk, the NIST functions, and the layered defense-in-depth model.</p>
       <div class="resource-list">
         <a class="resource-link" href="module-3/01-enterprise-architecture.html"><span class="icon">◈</span> Enterprise Security Architecture — concept notes</a>
         <a class="resource-link" href="module-3/02-defense-in-depth.html"><span class="icon">◈</span> Defense in Depth — concept notes</a>
@@ -192,6 +196,10 @@ footer a { color:#aaa9a4; }
       </div>
     </div>
   </div>
+
+  <div class="act-divider"><span class="act-name">Cloud</span><hr></div>
+  <p class="act-desc">This section puts the layered model into practice in the cloud: securing each ring on AWS, how the security model shifts from IaaS to SaaS, and detecting and responding when prevention fails.</p>
+  <div class="phase-divider"><span>Cloud foundations</span><hr></div>
 
   <div class="module-card">
     <div class="module-header" onclick="toggle('m4')">
@@ -210,7 +218,7 @@ footer a { color:#aaa9a4; }
     </div>
   </div>
 
-  <div class="phase-divider"><span>Part III — The Layers · Defense in Depth</span><hr></div>
+  <div class="phase-divider"><span>The layers · defense in depth</span><hr></div>
 
   <div class="module-card">
     <div class="module-header" onclick="toggle('m5')">
@@ -280,7 +288,7 @@ footer a { color:#aaa9a4; }
     </div>
   </div>
 
-  <div class="phase-divider"><span>Part IV — Cross-Cutting Controls</span><hr></div>
+  <div class="phase-divider"><span>Cross-cutting controls</span><hr></div>
 
   <div class="module-card">
     <div class="module-header" onclick="toggle('m9')">
@@ -316,7 +324,7 @@ footer a { color:#aaa9a4; }
     </div>
   </div>
 
-  <div class="phase-divider"><span>Part V — Up the Stack</span><hr></div>
+  <div class="phase-divider"><span>Up the stack</span><hr></div>
 
   <div class="module-card">
     <div class="module-header" onclick="toggle('m11')">
@@ -352,7 +360,7 @@ footer a { color:#aaa9a4; }
     </div>
   </div>
 
-  <div class="phase-divider"><span>Part VI — Assume Breach</span><hr></div>
+  <div class="phase-divider"><span>Assume breach</span><hr></div>
 
   <div class="module-card">
     <div class="module-header" onclick="toggle('m13')">
@@ -459,8 +467,6 @@ function openSection(id){
   try{ saved=JSON.parse(sessionStorage.getItem(CSF_OPEN_KEY)); }catch(e){}
   if(saved && saved.length){
     saved.forEach(openSection);
-  } else if(saved===null){
-    openSection('m1');   // first load this session: open Module 1 by default
   }
   /* if saved is an empty array, the user had everything collapsed — honor that */
 })();
@@ -471,11 +477,11 @@ function openSection(id){
   if(!svgBox) return;
   var C=140;
   var L=[
-    {k:'Network', mod:5, r:130, c:'#0E7490', sub:'Module 5', d:'The outermost ring. VPCs, subnets, security groups and NACLs decide which traffic ever reaches your systems.'},
-    {k:'Device', mod:6, r:106, c:'#2E86C8', sub:'Module 6', d:'The machines themselves. EC2 host hardening — patching, the host firewall, anti-malware.'},
-    {k:'Application', mod:11, r:82, c:'#8E5CA8', sub:'Module 11', d:'The software running on the host. WAF, secure coding, the segmented 3-tier app. (Taught later, “up the stack.”)'},
-    {k:'Data', mod:7, r:58, c:'#B45309', sub:'Module 7', d:'The information itself. S3 access control and encryption — the last line before your most sensitive data.'},
-    {k:'Identity', mod:8, r:34, c:'#6D2E46', sub:'Module 8', d:'The core. IAM, least privilege, MFA — who can do anything at all. Compromise identity and an attacker walks past every outer ring as a legitimate user.'}
+    {k:'Network', mod:5, r:130, c:'#DBEAFE', t:'#1E3A8A', sub:'Module 5', d:'The outermost ring. VPCs, subnets, security groups and NACLs decide which traffic ever reaches your systems.'},
+    {k:'Device', mod:6, r:106, c:'#FEF3C7', t:'#78350F', sub:'Module 6', d:'The machines themselves. EC2 host hardening — patching, the host firewall, anti-malware.'},
+    {k:'Application', mod:11, r:82, c:'#DCFCE7', t:'#166534', sub:'Module 11', d:'The software running on the host. WAF, secure coding, the segmented 3-tier app. (Taught later, “up the stack.”)'},
+    {k:'Data', mod:7, r:58, c:'#FCE7F3', t:'#831843', sub:'Module 7', d:'The information itself. S3 access control and encryption — the last line before your most sensitive data.'},
+    {k:'Identity', mod:8, r:34, c:'#F3E8FF', t:'#581C87', sub:'Module 8', d:'The core. IAM, least privilege, MFA — who can do anything at all. Compromise identity and an attacker walks past every outer ring as a legitimate user.'}
   ];
   var LOG={k:'Logging', mod:10, sub:'Module 10', d:'Cross-cutting visibility. CloudTrail, VPC Flow Logs and S3 access logs cut through every layer at once — you can’t defend what you can’t see. That’s why it’s drawn as a slice across all the rings.'};
   var sel=0;
@@ -484,11 +490,11 @@ function openSection(id){
   function render(){
     var isLog=(sel==='log'), i, s='<svg viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:inherit">';
     for(i=0;i<L.length;i++){ var l=L[i], on=(sel===i);
-      s+='<circle cx="'+C+'" cy="'+C+'" r="'+l.r+'" fill="'+l.c+'" fill-opacity="'+(on?0.95:0.55)+'" stroke="'+l.c+'" stroke-width="'+(on?3.5:1.5)+'" data-i="'+i+'" style="cursor:pointer"/>';
+      s+='<circle cx="'+C+'" cy="'+C+'" r="'+l.r+'" fill="'+l.c+'" stroke="'+(on?l.t:'rgba(0,0,0,0.12)')+'" stroke-width="'+(on?4:1.5)+'" data-i="'+i+'" style="cursor:pointer"/>';
     }
     s+='<path d="'+wedge(70,110,130)+'" fill="#1A202C" fill-opacity="'+(isLog?0.92:0.72)+'" stroke="'+(isLog?'#0E7490':'#1A202C')+'" stroke-width="'+(isLog?3.5:0.5)+'" data-log="1" style="cursor:pointer"/>';
     for(i=0;i<L.length;i++){ var ll=L[i];
-      s+='<text x="'+C+'" y="'+(C-ll.r+15)+'" text-anchor="middle" font-size="11" font-weight="800" fill="#fff" stroke="rgba(0,0,0,.45)" stroke-width="1.6" paint-order="stroke" style="pointer-events:none">'+ll.k+'</text>';
+      s+='<text x="'+C+'" y="'+(C-ll.r+15)+'" text-anchor="middle" font-size="11" font-weight="800" fill="'+ll.t+'" style="pointer-events:none">'+ll.k+'</text>';
     }
     s+='<text x="'+C+'" y="228" text-anchor="middle" font-size="8" font-weight="800" letter-spacing="1" fill="#fff" style="pointer-events:none">LOGGING</text>';
     s+='</svg>';
@@ -496,7 +502,7 @@ function openSection(id){
     var rings=svgBox.querySelectorAll('[data-i]'), a;
     for(a=0;a<rings.length;a++){ rings[a].onclick=(function(idx){return function(){sel=idx;render();};})(+rings[a].getAttribute('data-i')); }
     svgBox.querySelector('[data-log]').onclick=function(){sel='log';render();};
-    var d=isLog?LOG:L[sel], col=isLog?'#1A202C':L[sel].c;
+    var d=isLog?LOG:L[sel], col=isLog?'#1A202C':L[sel].t;
     det.innerHTML='<div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#aaa9a4;margin-bottom:4px">'+d.sub+(isLog?' · cross-cutting':' · layer')+'</div>'+
       '<div style="font-family:\'Barlow Condensed\',sans-serif;font-weight:900;font-size:26px;color:'+col+';line-height:1;margin-bottom:8px">'+d.k+(isLog?'':' security')+'</div>'+
       '<p style="font-size:13.5px;line-height:1.65;color:var(--text);margin:0">'+d.d+'</p>'+
