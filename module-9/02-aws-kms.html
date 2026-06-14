@@ -214,13 +214,13 @@ button.ui.ghost:hover{ background:var(--accent-soft); }
       s+=`<line x1="62" y1="85" x2="120" y2="85" stroke="#b9c0c6" stroke-width="1.8" marker-end="url(#ga)"/>`;
       s+=`<line x1="240" y1="85" x2="280" y2="85" stroke="#b9c0c6" stroke-width="1.8" marker-end="url(#ga)"/>`;
       s+=`<line x1="390" y1="85" x2="418" y2="85" stroke="#b9c0c6" stroke-width="1.8" marker-end="url(#ga)"/>`;
-      s+=`<text x="255" y="160" text-anchor="middle" font-size="10" font-weight="800" fill="#B45309">BOTH gates must allow &mdash; key policy first</text>`;
+      s+=`<text x="255" y="160" text-anchor="middle" font-size="10" font-weight="800" fill="#B45309">BOTH must allow &mdash; key policy is the root of trust</text>`;
     }
     s+=`<defs><marker id="ga" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#7a8589"/></marker></defs>`;
     s+=`</svg>`;
     stage.className='fade'; stage.innerHTML=s;
     cap.innerHTML = kms
-      ? '<b>KMS &mdash; the key policy rules.</b> A key policy is <b>required</b> on every key. The default key policy hands control to IAM, so in practice you need <b>both</b>: the key policy must permit it <i>and</i> an IAM policy must grant the action. An IAM policy alone is never enough.'
+      ? '<b>KMS &mdash; the key policy rules.</b> A key policy is <b>required</b> on every key. The default key policy hands control to IAM, so in practice you need <b>both</b>: the key policy must permit it <i>and</i> an IAM policy must grant the action. The key policy must permit the access &mdash; IAM alone cannot override it.'
       : '<b>S3 &mdash; either side grants.</b> A bucket policy is optional. Access is granted if <b>either</b> the IAM policy <b>or</b> the bucket policy allows it (and nothing denies). One path is enough.';
     document.querySelectorAll('#gate [data-g]').forEach(b=>b.className='ui'+(b.dataset.g===g?'':' ghost'));
     setTimeout(()=>stage.classList.remove('fade'),360);
