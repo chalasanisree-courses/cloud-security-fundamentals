@@ -116,7 +116,7 @@ footer a { color:#aaa9a4; }
 <div class="hero">
   <div class="hero-eyebrow">Computer Information Systems</div>
   <h1><em>Cloud Security</em><br>Fundamentals</h1>
-  <p class="hero-sub">A course in three parts: how the internet works and how its connections are secured; how enterprise networks are defended through risk, the NIST framework, and a layered security model; and how that model is implemented in the cloud — from IaaS to SaaS, including what to do when prevention fails. Every concept is grounded in a real AWS service and a real breach.</p>
+  <p class="hero-sub">A course in three parts: how the internet works and how its connections are secured; how enterprise networks are built and secured — risk, the NIST framework, and a layered security model; and how enterprise security changes upon cloud migration, from IaaS to SaaS.</p>
   <div class="hero-meta">
     <div class="hero-meta-item"><div class="hero-meta-label">Structure</div><div class="hero-meta-value">13 Modules</div></div>
     <div class="hero-meta-item"><div class="hero-meta-label">Approach</div><div class="hero-meta-value">Defense in Depth</div></div>
@@ -477,14 +477,14 @@ function openSection(id){
   if(!svgBox) return;
   var C=140;
   var L=[
-    {k:'Network', mod:5, r:130, c:'#DBEAFE', t:'#1E3A8A', sub:'Module 5', d:'The outermost ring. VPCs, subnets, security groups and NACLs decide which traffic ever reaches your systems.'},
-    {k:'Device', mod:6, r:106, c:'#FEF3C7', t:'#78350F', sub:'Module 6', d:'The machines themselves. EC2 host hardening — patching, the host firewall, anti-malware.'},
-    {k:'Application', mod:11, r:82, c:'#DCFCE7', t:'#166534', sub:'Module 11', d:'The software running on the host. WAF, secure coding, the segmented 3-tier app. (Taught later, “up the stack.”)'},
-    {k:'Data', mod:7, r:58, c:'#FCE7F3', t:'#831843', sub:'Module 7', d:'The information itself. S3 access control and encryption — the last line before your most sensitive data.'},
-    {k:'Identity', mod:8, r:34, c:'#F3E8FF', t:'#581C87', sub:'Module 8', d:'The core. IAM, least privilege, MFA — who can do anything at all. Compromise identity and an attacker walks past every outer ring as a legitimate user.'}
+    {k:'Network', mod:5, r:130, c:'#DBEAFE', t:'#1E3A8A', sub:'Module 5', d:'This module discusses how to separate the corporate network from the internet, and how to protect the enterprise network from malware coming in from the internet.'},
+    {k:'Device', mod:6, r:106, c:'#FEF3C7', t:'#78350F', sub:'Module 6', d:'This module discusses how to secure the individual machines — the servers and hosts — that run inside the enterprise network.'},
+    {k:'Application', mod:11, r:82, c:'#DCFCE7', t:'#166534', sub:'Module 11', d:'This module discusses how to secure the applications running on enterprise networks.'},
+    {k:'Data', mod:7, r:58, c:'#FCE7F3', t:'#831843', sub:'Module 7', d:'This module discusses the crown jewels of an enterprise — its data — and how to keep it secure.'},
+    {k:'Identity', mod:8, r:34, c:'#F3E8FF', t:'#581C87', sub:'Module 8', d:'This module discusses how to verify the identity of the people (and services) using the applications.'}
   ];
-  var LOG={k:'Logging', mod:10, sub:'Module 10', d:'Cross-cutting visibility. CloudTrail, VPC Flow Logs and S3 access logs cut through every layer at once — you can’t defend what you can’t see. That’s why it’s drawn as a slice across all the rings.'};
-  var sel=0;
+  var LOG={k:'Logging', mod:10, sub:'Module 10', d:'This module discusses how the enterprise records who did what across every layer — the visibility that lets you spot and investigate threats. Logging cuts across all the rings.'};
+  var sel='log';
   function pt(a,R){ var rad=a*Math.PI/180; return [(C+R*Math.cos(rad)).toFixed(1),(C+R*Math.sin(rad)).toFixed(1)]; }
   function wedge(a0,a1,R){ var s0=pt(a0,R), s1=pt(a1,R); return 'M '+C+' '+C+' L '+s0[0]+' '+s0[1]+' A '+R+' '+R+' 0 0 1 '+s1[0]+' '+s1[1]+' Z'; }
   function render(){
