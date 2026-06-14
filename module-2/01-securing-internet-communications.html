@@ -169,27 +169,59 @@ input[type=range]{ accent-color:var(--accent); }
   <section>
     <h2><span class="num">1</span> Where we are</h2>
     <p>In Module 1 we followed a packet from your browser, across the internet, to a website &mdash; say a <strong>bank's web server</strong>. It arrives. But arriving isn't the same as arriving <em>safely</em>. In this module we ask: <strong>how do we secure data as it travels over the open internet?</strong></p>
-    <p>Think about logging into that bank. For the connection to be trustworthy, you need <strong>two assurances</strong>:</p>
-    <div class="widget"><h4>The two assurances of a secure connection</h4>
-      <svg viewBox="0 0 700 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">
-        <g class="goA" data-target="assurance1" style="cursor:pointer"><rect x="20" y="20" width="320" height="118" rx="10" fill="#f1f9fb" stroke="#0E7490" stroke-width="1.5"/>
-        <text x="180" y="50" text-anchor="middle" fill="#0B5567" font-size="14" font-weight="800">&#9312; No one is snooping</text>
-        <text x="180" y="76" text-anchor="middle" fill="#2D3748" font-size="11.5">Whoever sits in the middle of the connection</text>
-        <text x="180" y="93" text-anchor="middle" fill="#2D3748" font-size="11.5">cannot read your data.</text>
-        <text x="180" y="121" text-anchor="middle" fill="#0E7490" font-size="11.5" font-weight="700" font-family="'JetBrains Mono',monospace">&rarr; encryption</text></g>
-        <g class="goA" data-target="assurance2" style="cursor:pointer"><rect x="360" y="20" width="320" height="118" rx="10" fill="#fbf6ef" stroke="#B45309" stroke-width="1.5"/>
-        <text x="520" y="50" text-anchor="middle" fill="#7c3d06" font-size="14" font-weight="800">&#9313; You're talking to the real bank</text>
-        <text x="520" y="76" text-anchor="middle" fill="#2D3748" font-size="11.5">The server at the other end is genuinely</text>
-        <text x="520" y="93" text-anchor="middle" fill="#2D3748" font-size="11.5">your bank &mdash; not an imposter's copy of it.</text>
-        <text x="520" y="121" text-anchor="middle" fill="#B45309" font-size="11.5" font-weight="700" font-family="'JetBrains Mono',monospace">&rarr; digital certificates</text></g>
-      </svg>
-    <p style="font-size:12px;color:var(--text-muted);margin:10px 0 0">Click either box to jump straight to that assurance.</p>
+    <p>Think about logging into that bank. A secure conversation has to satisfy <strong>four assurances</strong> &mdash; two the <strong>sender</strong> cares about, two the <strong>receiver</strong> cares about. Click each to see the worry it answers and the tool that delivers it:</p>
+    <div class="widget" id="assure"><h4>What a secure conversation needs</h4>
+      <div id="assureSvg"></div>
+      <div id="assureBtns" style="display:flex;gap:20px;flex-wrap:wrap;margin:14px 0 0"></div>
+      <div id="assureDetail" class="fade" style="margin-top:14px;background:var(--bg);border:0.5px solid var(--border);border-radius:8px;padding:14px 16px;min-height:104px"></div>
     </div>
-    <p>Miss either one and the connection is unsafe: perfect encryption to an <em>imposter</em> just means you've privately handed your password to an attacker. The rest of this note builds up both assurances, then shows how <strong>TLS</strong> &mdash; the technology behind <strong>HTTPS</strong> &mdash; delivers them together.</p>
+    <script>
+    (function(){
+      var svgBox=document.getElementById('assureSvg'),btnBox=document.getElementById('assureBtns'),det=document.getElementById('assureDetail');
+      if(!svgBox) return;
+      var A=[
+       {k:'secrecy',who:'sender',t:'Secrecy',c:'#0E7490',q:'Will what I send stay private?',bad:'A man&#8209;in&#8209;the&#8209;middle reads your username and password straight off the wire.',mech:'Encryption',goal:'Confidentiality'},
+       {k:'recipient',who:'sender',t:'Right recipient',c:'#B45309',q:'Am I really talking to my bank &mdash; not an imposter?',bad:'A look&#8209;alike site poses as the bank; you privately hand it your credentials.',mech:'A digital certificate, signed by a trusted CA',goal:'Authentication'},
+       {k:'integrity',who:'receiver',t:'Unaltered',c:'#6D2E46',q:'Did the message arrive exactly as it was sent?',bad:'An attacker quietly changes &ldquo;transfer $100&rdquo; into &ldquo;transfer $100,000&rdquo; in transit.',mech:'A hash &mdash; carried inside a digital signature',goal:'Integrity'},
+       {k:'sender',who:'receiver',t:'Genuine sender',c:'#8E5CA8',q:'Did this really come from who it claims?',bad:'A forger sends an instruction in the bank&rsquo;s name.',mech:'A digital signature, made with the sender&rsquo;s private key',goal:'Authentication'}
+      ];
+      var sel=0;
+      function chan(){
+        var k=A[sel].k,col=A[sel].c,wireOn=(k==='secrecy'||k==='integrity'),recvOn=(k==='recipient'),sendOn=(k==='sender'),msgOn=(k==='integrity');
+        var s='<svg viewBox="0 0 700 122" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-width:640px;display:block;margin:0 auto;font-family:Barlow,Arial,sans-serif">';
+        s+='<rect x="20" y="40" width="132" height="50" rx="9" fill="'+(sendOn?col:'#2D3748')+'"/><text x="86" y="62" text-anchor="middle" fill="#fff" font-size="13" font-weight="800">Sender</text><text x="86" y="78" text-anchor="middle" fill="#cbd5e0" font-size="9.5">you</text>';
+        s+='<rect x="548" y="40" width="132" height="50" rx="9" fill="'+(recvOn?col:'#2D3748')+'"/><text x="614" y="62" text-anchor="middle" fill="#fff" font-size="13" font-weight="800">Receiver</text><text x="614" y="78" text-anchor="middle" fill="#cbd5e0" font-size="9.5">the bank</text>';
+        s+='<line x1="152" y1="65" x2="548" y2="65" stroke="'+(wireOn?col:'#9aa3a8')+'" stroke-width="'+(wireOn?5:2.5)+'" stroke-dasharray="'+(wireOn?'1 0':'7 5')+'"/>';
+        s+='<rect x="328" y="51" width="44" height="28" rx="6" fill="#fff" stroke="'+(msgOn?col:'#9aa3a8')+'" stroke-width="'+(msgOn?2.5:1.5)+'"/><text x="350" y="69" text-anchor="middle" font-size="10" fill="#5f5e5a">msg</text>';
+        s+='<text x="350" y="103" text-anchor="middle" font-size="10.5" font-weight="700" fill="#c0392b">&#9888; attacker in the middle</text>';
+        s+='</svg>';return s;
+      }
+      function grp(label,who){
+        var hh='<div style="flex:1;min-width:215px"><div style="font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:7px">'+label+'</div>';
+        A.forEach(function(a,i){ if(a.who!==who) return; var on=(i===sel);
+          hh+='<button data-i="'+i+'" style="display:block;width:100%;text-align:left;margin-bottom:6px;cursor:pointer;border-radius:7px;padding:9px 12px;font-family:Barlow,sans-serif;font-size:13px;font-weight:700;'+(on?('color:#fff;background:'+a.c+';border:1px solid '+a.c):('color:var(--text);background:#fff;border:1px solid var(--border)'))+'"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:'+(on?'#fff':a.c)+';margin-right:9px;vertical-align:middle"></span>'+a.t+'</button>';
+        });
+        return hh+'</div>';
+      }
+      function render(){
+        svgBox.innerHTML=chan();
+        btnBox.innerHTML=grp('What the sender needs','sender')+grp('What the receiver needs','receiver');
+        btnBox.querySelectorAll('button').forEach(function(b){ b.onclick=function(){ sel=+b.getAttribute('data-i'); render(); }; });
+        var a=A[sel];
+        det.className='';void det.offsetWidth;det.className='fade';
+        det.innerHTML='<div style="font-family:\'Barlow Condensed\',sans-serif;font-weight:800;font-size:20px;color:'+a.c+';line-height:1.1;margin-bottom:7px">'+a.t+'</div>'
+          +'<p style="font-size:13.5px;margin:0 0 7px;line-height:1.55"><b>The worry:</b> '+a.q+'</p>'
+          +'<p style="font-size:13px;margin:0 0 7px;line-height:1.55;color:#7a1f1f"><b>Without it:</b> '+a.bad+'</p>'
+          +'<p style="font-size:13px;margin:0;line-height:1.55"><b>Delivered by:</b> '+a.mech+' &nbsp;&middot;&nbsp; <span style="color:var(--text-muted)">security goal: '+a.goal+'</span></p>';
+      }
+      render();
+    })();
+    </script>
+    <p>Miss any one and the connection is unsafe: perfect encryption to an <em>imposter</em> just means you've privately handed your password to an attacker. Below we build the first two in depth &mdash; encryption (secrecy) and certificates (the right recipient); integrity and a genuine sender &mdash; hashing and digital signatures &mdash; come right after. Finally <strong>TLS</strong> &mdash; the technology behind <strong>HTTPS</strong> &mdash; delivers them together.</p>
   </section>
 
 <section id="assurance1">
-    <h2><span class="num">2</span> Assurance &#9312;: no one can read your data</h2>
+    <h2><span class="num">2</span> Secrecy: no one can read your data</h2>
     <p>You open <code class="inline">examplebank.com</code> and type your <strong>username and password</strong>. Those credentials travel back over the open session &mdash; and <strong>anyone in the middle</strong>, tapping the wire or listening to the Wi-Fi, can read them straight off the network. That's a <strong>man-in-the-middle attack</strong>. Now toggle the fix:</p>
     <div class="widget" id="mitm2">
       <h4>The man in the middle &mdash; with and without encryption</h4>
@@ -213,7 +245,7 @@ input[type=range]{ accent-color:var(--accent); }
       </svg>
       <p id="mitmCap" style="font-size:13px;color:var(--text-muted);margin:12px 0 0;line-height:1.65">The channel is <b>open</b>: the attacker reads your credentials in plaintext, then logs into your account.</p>
     </div>
-    <p>That's the fix in action. The mechanics behind it &mdash; what encryption actually <em>is</em>, and the two kinds you'll meet everywhere &mdash; are below; expand what you want to go deeper on, then continue to assurance &#9313;.</p>
+    <p>That's the fix in action. The mechanics behind it &mdash; what encryption actually <em>is</em>, and the two kinds you'll meet everywhere &mdash; are below; expand what you want to go deeper on, then continue to the next assurance &mdash; the right recipient.</p>
     <div class="kc">
       <div class="era">
         <button type="button" class="era-head"><span class="era-ico">&#128274;</span><span class="era-title">What is encryption?<span class="era-sub">Algorithm + key &middot; try a shift cipher &middot; symmetric vs asymmetric &mdash; try the locks</span></span><span class="era-tw">&rsaquo;</span></button>
@@ -262,7 +294,7 @@ input[type=range]{ accent-color:var(--accent); }
   </section>
 
 <section id="assurance2">
-    <h2><span class="num">3</span> Assurance &#9313;: you're talking to the real bank</h2>
+    <h2><span class="num">3</span> The right recipient: you're talking to the real bank</h2>
     <p>Encryption hides the message &mdash; but how do you know the public key really belongs to your bank, and not an attacker? You could be sent to a <strong>fake bank site</strong> by a <strong>phishing</strong> email, or by <strong>DNS spoofing</strong> (the DNS lookup resolves <code class="inline">examplebank.com</code> to a bad, attacker-controlled <strong>IP address</strong> instead of the real one). Encryption to the wrong party is no protection at all.</p>
     <p>The answer is a <strong>digital certificate</strong>. The bank gives its public key and identifying details to a <strong>Certificate Authority (CA)</strong> &mdash; a small set of highly trusted organizations (e.g. DigiCert, Let's Encrypt). The CA verifies the bank is who it claims to be, then <strong>signs</strong> the certificate with the CA's own private key. Your browser ships with the CAs' public keys, so it can <strong>validate</strong> the signature and trust the bank's public key inside.</p>
     <div class="notebox">
@@ -313,8 +345,61 @@ input[type=range]{ accent-color:var(--accent); }
   </section>
 
 <section>
-    <h2><span class="num">4</span> Putting it together: the TLS handshake</h2>
-    <p>Both assurances now combine, in three moves: <strong>first</strong>, get the bank's public key (from its certificate &mdash; assurance &#9313; proven); <strong>second</strong>, agree on a symmetric session key (delivered safely using that public key); <strong>third</strong>, encrypt everything else with the session key (assurance &#9312;, at full speed). Step through it:</p>
+    <h2><span class="num">4</span> Integrity &amp; a genuine sender: digital signatures</h2>
+    <p>The first two assurances protected the <strong>sender</strong>. The <strong>receiver</strong> has two worries of their own: was the message <strong>altered in transit</strong>, and did it <strong>really come from the claimed sender</strong>? A single tool answers both &mdash; the <strong>digital signature</strong>, built from a <strong>hash</strong>.</p>
+    <p>A <strong>hash</strong> is a one&#8209;way fingerprint of a message: change one character and the fingerprint changes completely. The sender hashes the message and <strong>signs that hash with their private key</strong>. The receiver re&#8209;hashes the message they actually received and checks it against the signature using the sender&rsquo;s <strong>public key</strong>. If the fingerprints match, the message is <strong>unaltered</strong> and could only have been signed by the holder of that private key. Tamper with it in transit:</p>
+    <div class="widget" id="sign">
+      <div class="controls" style="margin:0 0 14px"><button class="ui" id="tamperBtn"></button></div>
+      <div id="signStage"></div>
+      <p id="signCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:48px"></p>
+    </div>
+    <div class="keybox">
+      <div class="lbl">One tool, two assurances</div>
+      A digital signature proves <b>integrity</b> (the message wasn&rsquo;t changed) <em>and</em> a <b>genuine sender</b> (only their private key could sign it). It&rsquo;s the mirror image of encryption: encryption uses the <em>recipient&rsquo;s</em> key to keep data secret; a signature uses the <em>sender&rsquo;s</em> key to prove who sent it.
+    </div>
+  </section>
+  <script>
+  (function(){
+    var stage=document.getElementById('signStage'),cap=document.getElementById('signCap'),btn=document.getElementById('tamperBtn');
+    if(!stage) return;
+    var ORIG='Transfer $100 to Bob',tampered=false;
+    function hash(s){var x=5381;for(var i=0;i<s.length;i++){x=((x*33)^s.charCodeAt(i))>>>0;}return ('0000000'+x.toString(16)).slice(-8);}
+    function render(){
+      var recvd=tampered?'Transfer $100,000 to Bob':ORIG, sh=hash(ORIG), rh=hash(recvd), ok=(sh===rh), col=ok?'#0E7490':'#c0392b';
+      stage.innerHTML=
+      '<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:stretch;font-size:12.5px">'
+      +'<div style="flex:1;min-width:205px;background:#fff;border:1px solid var(--border);border-radius:9px;padding:12px 14px">'
+        +'<div style="font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px">Sender</div>'
+        +'<div style="margin-bottom:6px">message: <b>'+ORIG+'</b></div>'
+        +'<div style="color:var(--text-muted);margin-bottom:8px">hash &rarr; <code class="inline">'+sh+'</code></div>'
+        +'<div style="background:#eef7f9;border-radius:6px;padding:7px 9px">signature = that hash signed with the <b>private key</b> &#128273;</div>'
+      +'</div>'
+      +'<div style="flex:0 0 120px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:'+(tampered?'#c0392b':'var(--text-muted)')+'">'
+        +'<div style="font-size:20px;line-height:1">&rarr;</div><div style="font-size:11px;font-weight:700;margin-top:2px">in transit</div>'
+        +'<div style="font-size:10.5px">'+(tampered?'&#9888; attacker alters it':'untouched')+'</div>'
+      +'</div>'
+      +'<div style="flex:1;min-width:205px;background:#fff;border:1px solid var(--border);border-radius:9px;padding:12px 14px">'
+        +'<div style="font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px">Receiver</div>'
+        +'<div style="margin-bottom:6px">received: <b style="color:'+(tampered?'#c0392b':'inherit')+'">'+recvd+'</b></div>'
+        +'<div style="color:var(--text-muted);margin-bottom:6px">re&#8209;hash &rarr; <code class="inline">'+rh+'</code></div>'
+        +'<div style="color:var(--text-muted)">signature opened with <b>public key</b> &rarr; <code class="inline">'+sh+'</code></div>'
+      +'</div></div>'
+      +'<div style="margin-top:12px;text-align:center;font-weight:800;font-size:13.5px;color:#fff;background:'+col+';border-radius:7px;padding:9px">'
+        +(ok?'&#10003; '+rh+' = '+sh+' &mdash; VERIFIED &middot; unaltered &amp; genuine sender':'&#10007; '+rh+' &ne; '+sh+' &mdash; REJECTED &middot; altered or not genuine')
+      +'</div>';
+      btn.textContent=tampered?'Send it untouched':'Tamper with the message in transit';
+      cap.innerHTML=ok
+        ?'<b>Verified.</b> The receiver&rsquo;s fingerprint matches the one inside the signature &mdash; the message is <b>unaltered</b>, and only the sender&rsquo;s <b>private key</b> could have produced a signature that opens with their <b>public key</b>. Integrity &#10003; and a genuine sender &#10003;.'
+        :'<b>Rejected.</b> The fingerprints no longer match &mdash; the message was <b>changed in transit</b> (or never signed by the real sender). Either way the tampering is caught.';
+    }
+    btn.onclick=function(){tampered=!tampered;render();};
+    render();
+  })();
+  </script>
+
+  <section>
+    <h2><span class="num">5</span> Putting it together: the TLS handshake</h2>
+    <p>The first two assurances now combine, in three moves: <strong>first</strong>, get the bank's public key (from its certificate &mdash; the right recipient, proven); <strong>second</strong>, agree on a symmetric session key (delivered safely using that public key); <strong>third</strong>, encrypt everything else with the session key (secrecy, at full speed). Step through it:</p>
     <div class="widget" id="tls">
       <h4>TLS handshake: HTTP &rarr; HTTPS</h4>
       <div id="tlsStage" style="min-height:60px"></div>
@@ -371,16 +456,16 @@ input[type=range]{ accent-color:var(--accent); }
   </section>
 
 <section>
-    <h2><span class="num">5</span> The bigger picture: the CIA triad</h2>
-    <p>The two assurances you just built are part of a standard framework. Security professionals group <em>all</em> protection goals into three:</p>
+    <h2><span class="num">6</span> The bigger picture: the CIA triad</h2>
+    <p>The four assurances you just explored roll up into a broader, standard framework. Security professionals group <em>all</em> protection goals into three:</p>
     <ul>
-      <li><strong>Confidentiality</strong> &mdash; no one in the middle can read the conversation. (Solved by <em>encryption</em>.)</li>
-      <li><strong>Integrity</strong> &mdash; no one can alter the message (&ldquo;send $1,000&rdquo; must not become &ldquo;send $100,000&rdquo;), and we're talking to the <em>right</em> party. (Solved by <em>signatures</em> and <em>certificates</em>.)</li>
-      <li><strong>Availability</strong> &mdash; the other party is reachable when we need it.</li>
+      <li><strong>Confidentiality</strong> &mdash; your data stays secret &mdash; the <em>secrecy</em> assurance, delivered by encryption.</li>
+      <li><strong>Integrity</strong> &mdash; the message can&rsquo;t be altered undetected &mdash; the <em>unaltered</em> assurance, via hashing and signatures. Authentication &mdash; confirming the <em>right recipient</em> and a <em>genuine sender</em> &mdash; backs it up (certificates and signatures).</li>
+      <li><strong>Availability</strong> &mdash; the other party is reachable when you need it &mdash; a goal that appears once you look beyond a single message.</li>
     </ul>
     <div class="keybox">
       <div class="lbl">Next</div>
-      These three assurances &mdash; <b>Confidentiality, Integrity, Availability</b> &mdash; are the <b>CIA triad</b>, the framework that organizes every security decision in this course. That's the next page.
+      These three <em>goals</em> &mdash; <b>Confidentiality, Integrity, Availability</b> &mdash; are the <b>CIA triad</b>, the framework that organizes every security decision in this course. That's the next page.
     </div>
   </section>
 

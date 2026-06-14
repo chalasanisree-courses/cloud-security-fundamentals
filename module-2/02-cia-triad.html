@@ -169,6 +169,7 @@ input[type=range]{ accent-color:var(--accent); }
 
   <section>
     <h2><span class="num">1</span> Why we need information security</h2>
+    <p>On the previous page you secured a single conversation with <strong>four assurances</strong> &mdash; secrecy, the right recipient, an unaltered message, and a genuine sender. Zoom out from one message to an entire enterprise and those roll up into <strong>three broad goals</strong>: secrecy becomes <strong>Confidentiality</strong>; the unaltered&#8209;message check becomes <strong>Integrity</strong> (with authentication &mdash; the right recipient and a genuine sender &mdash; underpinning it); and a goal a single message never needed now appears &mdash; <strong>Availability</strong>, keeping systems reachable. Together they are the <strong>CIA triad</strong>, the framework the rest of the course hangs on.</p>
     <p>Modern systems communicate over networks we don't fully control &mdash; above all, the internet. Whenever data is stored or moved, three risks arise naturally:</p>
     <ul>
       <li>Someone may <strong>see</strong> information they shouldn't.</li>
@@ -216,12 +217,12 @@ input[type=range]{ accent-color:var(--accent); }
       <div class="era" data-goal="goalI">
         <button type="button" class="era-head"><span class="era-ico" style="width:14px;height:14px;border-radius:50%;background:#8E5CA8;display:inline-block"></span><span class="era-title">Integrity &mdash; can we trust the data?<span class="era-sub">Digital signatures &middot; hashing (try it live) &middot; audit trails &amp; logging</span></span><span class="era-tw">&rsaquo;</span></button>
         <div class="era-bd"><div class="inner">
-          <p>Integrity ensures that data has <strong>not been altered without detection</strong>. It's about the <strong>trustworthiness</strong> of data, not secrecy: when one bank tells another "transfer $100," the receiver must be able to verify the message really came from the sender bank <em>and</em> wasn't changed to "$1,000" along the way. Three mechanisms, with depth below: <strong>digital signatures</strong> (bind data to a sender and detect modification), <strong>hashing</strong> (a fingerprint that changes if the data changes), and <strong>audit trails &amp; logging</strong> (record every access and change, so tampering is noticed).</p>
+          <p>Integrity ensures that data has <strong>not been altered without detection</strong>. It's about the <strong>trustworthiness</strong> of data, not secrecy: when one bank tells another "transfer $100," the receiver must be able to verify the message really came from the sender bank <em>and</em> wasn't changed to "$1,000" along the way. You built the first two of these on the previous page &mdash; <strong>digital signatures</strong> and <strong>hashing</strong> &mdash; here they serve the Integrity goal, alongside <strong>audit trails &amp; logging</strong> (record every access and change, so tampering is noticed).</p>
     <div class="kc">
       <div class="era">
         <button type="button" class="era-head"><span class="era-ico">&#9997;&#65039;</span><span class="era-title">Digital signatures &mdash; sign it, then seal it<span class="era-sub">The two-bank transfer &middot; why signing alone leaks the message &middot; step through</span></span><span class="era-tw">&rsaquo;</span></button>
         <div class="era-bd"><div class="inner">
-          <p>Remember the lock simulator: <strong>locked with the private key, opened with the public key</strong>. That direction is a <strong>signature</strong> &mdash; anyone can verify it, but only the private-key holder could have produced it.</p>
+          <p>You verified a signature on the previous page &mdash; it delivered <strong>integrity</strong> and a <strong>genuine sender</strong>. Here is the rest of the story: a signature can be <strong>combined with encryption</strong> &mdash; <em>sign, then seal</em> &mdash; so a message is unaltered <em>and</em> secret at once. Step through it:</p>
           <div class="widget" id="sigStep">
             <h4>Blue Bank sends "transfer $100" to Green Bank</h4>
             <svg viewBox="0 0 700 150" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">
@@ -240,7 +241,7 @@ input[type=range]{ accent-color:var(--accent); }
       <div class="era">
         <button type="button" class="era-head"><span class="era-ico">&#128290;</span><span class="era-title">Password hashing &mdash; try it live<span class="era-sub">Real SHA-256 in your browser &middot; change one letter, watch everything change</span></span><span class="era-tw">&rsaquo;</span></button>
         <div class="era-bd"><div class="inner">
-          <p>Banks never store your password &mdash; they store its <strong>hash</strong>: a one-way mathematical fingerprint. Type below, then add <code class="inline">der</code> to the end and watch the entire hash change:</p>
+          <p>On the previous page you hashed a <em>message</em> in order to sign it; hashing has another everyday job &mdash; protecting <em>stored passwords</em>. Banks never store your password &mdash; they store its <strong>hash</strong>: a one-way mathematical fingerprint. Type below, then add <code class="inline">der</code> to the end and watch the entire hash change:</p>
           <div class="widget" id="hashDemo">
             <h4>Live hash &mdash; SHA-256</h4>
             <div class="code-label">Password</div>
