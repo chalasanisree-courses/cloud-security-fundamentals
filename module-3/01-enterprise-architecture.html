@@ -155,6 +155,10 @@ input[type=range]{ accent-color:var(--accent); }
     <h2><span class="num">1</span> From one connection to the whole bank</h2>
     <p>In the previous module we secured a <strong>single connection</strong> &mdash; a customer reaching a bank's web server, protected with encryption and a digital certificate that verifies the bank is really the bank. That solved confidentiality on the wire.</p>
     <p>But now let's peek <em>inside</em> the bank. Behind that one web server is an entire <strong>enterprise architecture</strong> &mdash; many machines, many networks, and a whole class of equipment whose only job is to keep attackers out. That architecture is what this module is about.</p>
+    <div class="keybox">
+      <div class="lbl">Where this fits in the course</div>
+      The course runs in three parts &mdash; <b>the Internet</b> (Modules 1&ndash;2), <b>Enterprise Networks</b> (you are here), and <b>the Cloud</b> (Modules 4 onward). Having secured a single connection across the internet, we now zoom out to the whole organization: how a corporate network is <b>built</b>, <b>walled off from the internet</b>, and <b>defended</b>. This note covers the <b>architecture</b> and the <b>NIST framework</b>; the next note builds the <b>layered defense&#8209;in&#8209;depth model</b>; the third covers <b>vulnerabilities, threats &amp; risk</b>.
+    </div>
   </section>
 
   <section>
@@ -231,14 +235,9 @@ input[type=range]{ accent-color:var(--accent); }
   </section>
 
   <section>
-    <h2><span class="num">6</span> Your house is a castle too</h2>
-    <p>Forget the castle for a moment &mdash; think of your house. You have <strong>locks and window bars</strong> to keep intruders out (that's your firewall and antivirus). But you also have <strong>cameras</strong>, because even with locks you want to know if something's wrong (that's intrusion detection). If a camera catches a burglar, you <strong>call the security company</strong> (response), and afterward you <strong>replace what was stolen</strong> (recovery).</p>
-    <p>That sequence &mdash; figure out what to protect, protect it, watch for trouble, respond, recover &mdash; is exactly how professionals structure security. It has a name.</p>
-  </section>
-
-  <section>
-    <h2><span class="num">7</span> The NIST framework</h2>
-    <p>The <strong>NIST</strong> (National Institute of Standards and Technology) Cybersecurity Framework organizes security into <strong>Functions</strong> &mdash; five core ones that follow the sequence you just walked through at home. Most security products on the market are built to serve one or more of them. Click each Function:</p>
+    <h2><span class="num">6</span> The NIST framework: naming the lifecycle</h2>
+    <p>The castle and its moat describe the <em>shape</em> of a defense. Security is also a <em>lifecycle</em> &mdash; and it is the same one you already run at home. You fit <strong>locks and window bars</strong> to keep intruders out (your firewall and antivirus); you add <strong>cameras</strong> because even with locks you want to know if something is wrong (intrusion detection); if a camera catches a burglar you <strong>call the security company</strong> (response); and afterward you <strong>replace what was stolen</strong> (recovery). Before any of that, you decided <strong>what was worth protecting</strong> in the first place.</p>
+    <p>Identify what to protect &rarr; protect it &rarr; watch for trouble &rarr; respond &rarr; recover. That sequence is exactly how professionals structure security, and it has a name: the <strong>NIST</strong> (National Institute of Standards and Technology) <strong>Cybersecurity Framework</strong>, which organizes security into five core <strong>Functions</strong>. Most security products serve one or more of them. Click each:</p>
     <div class="widget" id="nist">
       <h4>The five core NIST Functions</h4>
       <div id="nistRow" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px"></div>
@@ -251,7 +250,7 @@ input[type=range]{ accent-color:var(--accent); }
   </section>
 
   <section>
-    <h2><span class="num">8</span> Moving to the cloud changes the address, not the architecture</h2>
+    <h2><span class="num">7</span> Moving to the cloud changes the address, not the architecture</h2>
     <p>Here's the punchline of the whole module. When you move to the cloud, your servers might move to AWS, or you might drop some servers entirely and adopt SaaS. Either way, <strong>the architecture stays the same</strong>: you still create an isolated environment, you still separate your infrastructure from the outside world, and you still protect what's inside.</p>
     <p>The walls become security groups and VPCs, the moat becomes cloud networking, but the <em>shape</em> &mdash; perimeter, layers, identify-protect-detect-respond-recover &mdash; carries over. That's why this model is worth learning once and reusing everywhere, which is exactly what the rest of this course does.</p>
   </section>
@@ -431,13 +430,13 @@ input[type=range]{ accent-color:var(--accent); }
     s+=`<rect x="338" y="20" width="208" height="170" rx="10" fill="#f1f9fb" stroke="${T}" stroke-width="1.5"/><text x="442" y="38" text-anchor="middle" font-size="9.5" font-weight="800" fill="${T}" letter-spacing="1">ENTERPRISE NETWORK</text>`;
     s+=comp('net',20,92,120,'Internet','outside','net',S);
     s+=comp('web',183,92,120,(flow===2?'Email gateway':(flow===1?'Secure Web GW':'Web server')),'in DMZ','web',R);
-    s+=comp('app',360,92,164,(flow===2?'Mail server':'App / internal'),'inside','app',T);
+    s+=comp('app',360,92,164,(flow===2?'Mail server':flow===1?'Client':'App / internal'),'inside','app',T);
     // arrows
     s+=`<line x1="140" y1="115" x2="183" y2="115" stroke="#c4c9cc" stroke-width="2" marker-end="url(#ah)"/>`;
     s+=`<line x1="303" y1="115" x2="360" y2="115" stroke="#c4c9cc" stroke-width="2" marker-end="url(#ah)"/>`;
     s+=`<defs><marker id="ah" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa3a8"/></marker></defs>`;
     s+=`</svg>`;
-    stage.innerHTML=s; cap.textContent=f.steps[step].cap;
+    stage.innerHTML=s; cap.textContent=(step+1)+'. '+f.steps[step].cap;
     document.querySelectorAll('#dmz [data-flow]').forEach(b=>{const a=+b.dataset.flow===flow;b.className='ui'+(a?'':' ghost');});
   }
   render();
