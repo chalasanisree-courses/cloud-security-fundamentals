@@ -88,16 +88,15 @@ button.ui.ghost:hover{ background:var(--accent-soft); }
   <div class="objectives">
     <div class="obj-label">In this note</div>
     <ul>
-      <li>The 3-tier app and the &ldquo;golden rule&rdquo; of network segmentation</li>
-      <li>Identity in two stages: who you are (Cognito) vs what you own (the app)</li>
-      <li>Mapping real application threats to the AWS service that stops each one</li>
-      <li>End-to-end encryption, in motion and at rest</li>
+      <li>The high-level system &mdash; the application and the AWS infrastructure it runs on</li>
+      <li>How a request flows in &mdash; and the attack at each stop, including the two identity checks (who you are, and what you&rsquo;re allowed to touch)</li>
+      <li>How data flows out and back &mdash; and how it&rsquo;s kept from being stolen</li>
     </ul>
   </div>
 
   <section>
-    <h2><span class="num">1</span> The shape of a secured app</h2>
-    <p class="lead">This is the <strong>application ring</strong> of the layered model &mdash; the software itself, defended after the network and host layers below it. Take a photo-viewer app on AWS. The <strong>golden rule</strong>: only the load balancer faces the internet; everything else hides in private subnets. Click a piece to see its job:</p>
+    <h2><span class="num">1</span> The system &mdash; app &amp; infrastructure</h2>
+    <p class="lead">This is the <strong>application ring</strong> of the layered model &mdash; the software, plus the AWS infrastructure it runs on. Take a photo-viewer app. The <strong>golden rule</strong>: only the load balancer faces the internet; everything else hides in private subnets. Click a piece to see its job:</p>
     <div class="widget" id="arch">
       <h4>A 3-tier app, segmented</h4>
       <div id="archStage"></div>
@@ -107,36 +106,27 @@ button.ui.ghost:hover{ background:var(--accent-soft); }
   </section>
 
   <section>
-    <h2><span class="num">2</span> Two stages of identity</h2>
-    <p class="lead">When Mary opens her photos, two different systems answer two different questions. Step through:</p>
-    <div class="widget" id="id">
-      <h4>Authentication vs authorization</h4>
-      <div class="controls" style="margin:0 0 14px">
-        <button class="ui" data-i="authn">1 &middot; Who are you?</button>
-        <button class="ui ghost" data-i="authz">2 &middot; What do you own?</button>
+    <h2><span class="num">2</span> How a request flows &mdash; and where it&rsquo;s attacked</h2>
+    <p class="lead">Walk Mary&rsquo;s request from her browser into the app. At every stop a different attack becomes possible &mdash; and a different AWS service stops it. Step through:</p>
+    <div class="widget" id="flow">
+      <div id="flowSvg"></div>
+      <div class="controls" style="margin:14px 0 0">
+        <button class="ui ghost" id="flowPrev">&larr; Back</button>
+        <button class="ui" id="flowNext">Next stop &rarr;</button>
+        <button class="ui ghost" id="flowReset">Reset</button>
       </div>
-      <div id="idStage"></div>
-      <p id="idCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:48px"></p>
+      <div id="flowDetail" class="fade" style="background:var(--bg);border-radius:8px;padding:14px 16px;margin-top:14px;min-height:150px"></div>
     </div>
+
     <div class="keybox">
-      <div class="lbl">The split that trips people up</div>
-      <b>Cognito</b> (the identity provider) knows <i>who</i> Mary is and issues her a token; the <b>load balancer</b> checks that token&rsquo;s signature on every request. But only the <b>application</b> knows <i>what</i> Mary owns &mdash; it runs <code class="inline">SELECT * FROM photos WHERE owner='Mary'</code> so she sees her photos and no one else&rsquo;s. <b>The IdP knows who; the app knows what.</b>
+      <div class="lbl">Identity shows up twice on this path</div>
+      At the <b>login</b> stop, <b>Cognito</b> proves <i>who</i> you are (authentication) and issues a token the load balancer checks. At the <b>app</b> stop, the application decides <i>what</i> you may touch (authorization) &mdash; it runs <code class="inline">SELECT * FROM photos WHERE owner='Mary'</code>, so Mary sees only her own. <b>The IdP knows who; the app knows what.</b>
     </div>
   </section>
 
   <section>
-    <h2><span class="num">3</span> Threats &rarr; defenses</h2>
-    <p class="lead">Securing the app means matching each threat to the AWS service that stops it. Click a threat:</p>
-    <div class="widget" id="threat">
-      <h4>The defense matrix</h4>
-      <div class="controls" style="margin:0 0 14px" id="thBtns"></div>
-      <div id="thStage" style="background:var(--bg);border-radius:8px;padding:16px 18px;min-height:120px"></div>
-    </div>
-  </section>
-
-  <section>
-    <h2><span class="num">4</span> Encryption, end to end</h2>
-    <p class="lead">Finally, protect the data itself &mdash; in motion and at rest:</p>
+    <h2><span class="num">3</span> How data flows &mdash; and how it&rsquo;s stolen or secured</h2>
+    <p class="lead">The whole point of the app is the data &mdash; Mary&rsquo;s photos. It has to move safely (in motion) and sit safely (at rest) &mdash; and the uploads themselves can be weaponized.</p>
     <div class="widget" id="enc">
       <h4>In motion &middot; at rest</h4>
       <div id="encStage"></div>
@@ -145,11 +135,15 @@ button.ui.ghost:hover{ background:var(--accent-soft); }
       <div class="lbl">Keep S3 traffic off the internet</div>
       The app&rsquo;s hop to S3 can use a <b>VPC endpoint</b>, so that traffic stays on the <b>private AWS network</b> and never crosses the public internet &mdash; even though S3 lives outside your VPC.
     </div>
+    <div class="notebox">
+      <div class="lbl">When the upload itself is the attack</div>
+      A user can upload a <b>malicious file</b> to S3 instead of a photo. <b>Amazon GuardDuty</b> (Malware Protection for S3) scans new objects and <b>flags</b> infected ones &mdash; you then act on the flag (it detects, it doesn&rsquo;t auto-delete).
+    </div>
   </section>
 
   <div class="assessment-box">
     <div class="assess-label">Remember</div>
-    <p>Secure a 3-tier app by <strong>segmentation</strong> &mdash; only the load balancer in the public subnet, everything else private. Identity is two stages: <strong>Cognito</strong> authenticates and issues a token the load balancer validates, while the <strong>application</strong> authorizes what data you own. Match each threat to a service: MITM&nbsp;&rarr;&nbsp;<strong>TLS</strong>, DDoS&nbsp;&rarr;&nbsp;<strong>Shield</strong>, SQL injection&nbsp;&rarr;&nbsp;<strong>WAF</strong>, malicious uploads&nbsp;&rarr;&nbsp;<strong>GuardDuty</strong>, vulnerable packages&nbsp;&rarr;&nbsp;<strong>Inspector</strong>, and origin-bypass&nbsp;&rarr;&nbsp;<strong>locking the load balancer to CloudFront</strong>. And encrypt everything &mdash; <strong>TLS</strong> on every hop (with a <strong>VPC endpoint</strong> to S3) and <strong>server-side encryption</strong> at rest.</p>
+    <p>Three views of one app. <strong>System:</strong> a 3-tier app, segmented &mdash; only the load balancer is public, everything else private. <strong>Request flow:</strong> each stop has an attack and a defense &mdash; MITM&nbsp;&rarr;&nbsp;TLS, DDoS&nbsp;&rarr;&nbsp;Shield, stolen password&nbsp;&rarr;&nbsp;Cognito&nbsp;+&nbsp;MFA, origin-bypass&nbsp;&rarr;&nbsp;allow only CloudFront in the load balancer&rsquo;s Security Group, SQL injection&nbsp;&rarr;&nbsp;WAF, vulnerable libraries&nbsp;&rarr;&nbsp;Inspector &mdash; and identity splits into <strong>who</strong> (Cognito) vs <strong>what you own</strong> (the app). <strong>Data flow:</strong> protect it in motion (TLS + a VPC endpoint to S3) and at rest (encryption / KMS), and scan uploads for malware (GuardDuty).</p>
   </div>
 
 </div>
@@ -205,62 +199,61 @@ button.ui.ghost:hover{ background:var(--accent-soft); }
   render();
 })();
 
-/* ---------- 2. AuthN vs AuthZ ---------- */
+/* ---------- 2/flow. Request flow + attacks at each stop ---------- */
 (function(){
-  const stage=document.getElementById('idStage'),cap=document.getElementById('idCap');
-  let i='authn';
-  function render(){
-    const authn=i==='authn';
-    let s=`<svg viewBox="0 0 520 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
-    s+=`<circle cx="40" cy="60" r="17" fill="#2D3748"/><text x="40" y="65" text-anchor="middle" font-size="14" fill="#fff">&#128100;</text><text x="40" y="92" text-anchor="middle" font-size="9" font-weight="700" fill="#5f5e5a">Mary</text>`;
-    if(authn){
-      s+=`<rect x="150" y="38" width="120" height="44" rx="9" fill="#8E5CA8"/><text x="210" y="58" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">Amazon Cognito</text><text x="210" y="72" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.85)">verifies + MFA</text>`;
-      s+=`<line x1="58" y1="58" x2="148" y2="58" stroke="#9aa3a8" stroke-width="1.8" marker-end="url(#ia)"/>`;
-      s+=`<rect x="320" y="44" width="170" height="32" rx="7" fill="#1A202C"/><text x="405" y="64" text-anchor="middle" font-size="10" font-weight="700" font-family="JetBrains Mono,monospace" fill="#7CF2C0">access token issued</text>`;
-      s+=`<line x1="270" y1="60" x2="318" y2="60" stroke="#9aa3a8" stroke-width="1.8" marker-end="url(#ia)"/>`;
-    } else {
-      s+=`<rect x="150" y="38" width="120" height="44" rx="9" fill="#2e7d57"/><text x="210" y="58" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">App + Database</text><text x="210" y="72" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.85)">decides what she sees</text>`;
-      s+=`<line x1="58" y1="58" x2="148" y2="58" stroke="#9aa3a8" stroke-width="1.8" marker-end="url(#ia)"/>`;
-      s+=`<rect x="300" y="40" width="200" height="42" rx="7" fill="#fff" stroke="#cfd6db" stroke-width="1.2"/><text x="312" y="58" font-size="9" font-family="JetBrains Mono,monospace" fill="#5f5e5a">WHERE owner =</text><text x="312" y="72" font-size="9" font-family="JetBrains Mono,monospace" fill="#0B5567">&#39;Mary&#39;  &rarr; her photos only</text>`;
-      s+=`<line x1="270" y1="60" x2="298" y2="60" stroke="#9aa3a8" stroke-width="1.8" marker-end="url(#ia)"/>`;
-    }
-    s+=`<defs><marker id="ia" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#7a8589"/></marker></defs>`;
-    s+=`</svg>`;
-    stage.className='fade'; stage.innerHTML=s;
-    cap.innerHTML = authn
-      ? '<b>Authentication &mdash; who are you?</b> Mary submits her credentials to <b>Cognito</b>, which verifies them (and MFA) and issues an <b>access token</b> to her browser. The load balancer then checks that token&rsquo;s signature on every request.'
-      : '<b>Authorization &mdash; what do you own?</b> The request reaches the <b>app</b>, which now knows it&rsquo;s Mary. It queries the database for <i>her</i> rows only, so she sees her photos &mdash; never someone else&rsquo;s. Cognito couldn&rsquo;t do this; only the app knows the data.';
-    document.querySelectorAll('#id [data-i]').forEach(b=>b.className='ui'+(b.dataset.i===i?'':' ghost'));
-    setTimeout(()=>stage.classList.remove('fade'),360);
-  }
-  render();
-  document.querySelectorAll('#id [data-i]').forEach(b=>b.onclick=()=>{i=b.dataset.i;render();});
-})();
-
-/* ---------- 3. Threat matrix ---------- */
-(function(){
-  const btns=document.getElementById('thBtns'),stage=document.getElementById('thStage');
-  const T=[
-    ['Man-in-the-middle','#0E7490','TLS / HTTPS','Encrypts traffic on every leg &mdash; client&rarr;CloudFront&rarr;load balancer. An eavesdropper sees only ciphertext, so stolen tokens are useless.'],
-    ['DDoS flood','#1E40AF','AWS Shield','Sits in front of CloudFront and absorbs volumetric Layer 3/4 floods. Shield Standard is always-on and free; Advanced adds Layer-7 protection.'],
-    ['SQL injection','#B45309','AWS WAF','A web application firewall inspects Layer-7 HTTP traffic and blocks malicious patterns like <code class="inline">DROP TABLE</code> before they reach the app.'],
-    ['Malicious upload','#8E5CA8','Amazon GuardDuty','Malware Protection for S3 scans newly uploaded objects with multiple engines and <b>flags</b> infected files &mdash; you wire up the removal (it detects, it doesn&rsquo;t auto-delete).'],
-    ['Vulnerable libraries','#2e7d57','Amazon Inspector','Continuously scans EC2 instances for known vulnerabilities (CVEs) in OS and software packages &mdash; e.g. an outdated Log4j.'],
-    ['Origin bypass','#c0392b','Lock ALB to CloudFront','Stop attackers hitting the load balancer&rsquo;s IP directly: allow only CloudFront &mdash; via the CloudFront-managed prefix list, or a secret header CloudFront adds and WAF checks.']
+  var svgBox=document.getElementById('flowSvg'),det=document.getElementById('flowDetail'),
+      bP=document.getElementById('flowPrev'),bN=document.getElementById('flowNext'),bR=document.getElementById('flowReset');
+  if(!svgBox) return;
+  var N={user:['User',12],cf:['CloudFront',140],alb:['Load balancer',268],app:['Web / App',396],data:['DB / S3',524]};
+  var order=['user','cf','alb','app','data'];
+  var STEPS=[
+    {hi:['user','cf'],title:'On the wire &mdash; browser to CloudFront',rows:[
+      ['Man&#8209;in&#8209;the&#8209;middle','an eavesdropper reads credentials or tokens in transit.','TLS / HTTPS','every hop is encrypted, so a snoop sees only ciphertext.'],
+      ['DDoS flood','a botnet hurls millions of bogus requests to knock the app offline.','AWS Shield','sits in front of CloudFront and absorbs volumetric Layer&nbsp;3/4 floods.']
+    ]},
+    {hi:['user','cognito'],title:'Logging in &mdash; Amazon Cognito',rows:[
+      ['Stolen or weak password','an attacker reuses credentials leaked somewhere else.','Cognito + MFA','the app never checks passwords itself &mdash; Cognito verifies identity, adds MFA, and issues a signed access token (the &ldquo;who are you?&rdquo; check).']
+    ]},
+    {hi:['cf','alb'],title:'The front door &mdash; the load balancer',rows:[
+      ['Origin / CDN bypass','an attacker skips CloudFront and hits the load balancer&rsquo;s IP directly, dodging Shield and WAF.','Allow only CloudFront','restrict the load balancer&rsquo;s <b>Security Group</b> to CloudFront (via the CloudFront&#8209;managed prefix list), so direct hits are dropped. The LB also validates the token&rsquo;s signature here.']
+    ]},
+    {hi:['alb','app'],title:'Into the application',rows:[
+      ['SQL injection','a legitimate user types <code class="inline">DROP TABLE photos</code> into the search box.','AWS WAF','inspects Layer&#8209;7 HTTP and blocks malicious patterns before they reach the app (and the app sanitizes input).'],
+      ['Vulnerable library','the app depends on a flawed package (e.g. Log4j).','Amazon Inspector','continuously scans the servers for known vulnerabilities (CVEs) in the OS and packages.'],
+      ['Broken access control','a logged-in user tries to open someone else&rsquo;s photos.','Authorization in the app','Cognito proved <i>who</i> she is; the app decides <i>what</i> she may touch &mdash; <code class="inline">WHERE owner=&#39;Mary&#39;</code> returns only her rows.']
+    ]}
   ];
-  let sel=0;
-  btns.innerHTML=T.map((t,i)=>`<button class="ui${i===0?'':' ghost'}" data-i="${i}" style="font-size:11.5px;padding:6px 11px">${t[0]}</button>`).join('');
+  var step=0;
   function render(){
-    btns.querySelectorAll('button').forEach((b,i)=>b.className='ui'+(i===sel?'':' ghost'));
-    stage.className='fade';
-    stage.innerHTML=`<div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">`+
-      `<span style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#c0392b">${T[sel][0]}</span>`+
-      `<span style="font-size:16px;color:#cfd6db;font-weight:900">&rarr;</span>`+
-      `<span style="font-family:'Barlow Condensed';font-weight:900;font-size:21px;color:${T[sel][1]}">${T[sel][2]}</span></div>`+
-      `<div style="font-size:13px;line-height:1.65;color:var(--text)">${T[sel][3]}</div>`;
-    setTimeout(()=>stage.classList.remove('fade'),360);
+    var st=STEPS[step],hi=st.hi;
+    var s='<svg viewBox="0 0 640 196" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">';
+    for(var i=0;i<order.length-1;i++){
+      var a=order[i],b=order[i+1],x1=N[a][1]+100,x2=N[b][1],active=(hi.indexOf(a)>-1&&hi.indexOf(b)>-1);
+      s+='<line x1="'+x1+'" y1="134" x2="'+(x2-2)+'" y2="134" stroke="'+(active?'#c0392b':'#cdd3d8')+'" stroke-width="'+(active?3:1.8)+'" marker-end="url(#'+(active?'far':'fag')+')"/>';
+    }
+    var cogOn=hi.indexOf('cognito')>-1;
+    s+='<line x1="62" y1="112" x2="208" y2="72" stroke="'+(cogOn?'#c0392b':'#cdd3d8')+'" stroke-width="'+(cogOn?3:1.6)+'" stroke-dasharray="5 4"/>';
+    s+='<rect x="200" y="36" width="124" height="36" rx="8" fill="'+(cogOn?'#8E5CA8':'#eef1f3')+'" stroke="'+(cogOn?'#8E5CA8':'#dcdcd6')+'"/><text x="262" y="58" text-anchor="middle" font-size="10.5" font-weight="800" fill="'+(cogOn?'#fff':'#5f5e5a')+'">Cognito &middot; identity</text>';
+    order.forEach(function(k){var n=N[k],on=hi.indexOf(k)>-1, isData=(k==='data');
+      s+='<rect x="'+n[1]+'" y="112" width="100" height="44" rx="8" fill="'+(on?'#0E7490':'#eef1f3')+'" stroke="'+(on?'#0E7490':'#dcdcd6')+'" stroke-width="'+(on?2.2:1)+'"'+(isData?' stroke-dasharray="4 3"':'')+'/>'
+       +'<text x="'+(n[1]+50)+'" y="138" text-anchor="middle" font-size="9.5" font-weight="800" fill="'+(on?'#fff':'#5f5e5a')+'">'+n[0]+'</text>';
+    });
+    s+='<text x="574" y="170" text-anchor="middle" font-size="8" fill="#9aa3a8">secured in &sect;3</text>';
+    s+='<defs><marker id="far" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#c0392b"/></marker><marker id="fag" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#cdd3d8"/></marker></defs></svg>';
+    svgBox.innerHTML=s;
+    var hh='<div style="font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:3px">Stop '+(step+1)+' of '+STEPS.length+'</div>'
+      +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-weight:800;font-size:19px;margin-bottom:11px">'+st.title+'</div>';
+    st.rows.forEach(function(r){
+      hh+='<div style="margin-bottom:11px;line-height:1.55">'
+        +'<div style="font-size:13px;margin-bottom:2px"><span style="color:#c0392b;font-weight:800">&#9888; '+r[0]+'</span> &mdash; '+r[1]+'</div>'
+        +'<div style="font-size:13px"><span style="color:#0B5567;font-weight:800">&#128737;&#65039; '+r[2]+'</span> &mdash; '+r[3]+'</div></div>';
+    });
+    det.className='';void det.offsetWidth;det.className='fade';det.innerHTML=hh;
+    bP.style.opacity=step===0?.4:1; bN.style.opacity=step===STEPS.length-1?.4:1;
   }
-  btns.querySelectorAll('button').forEach(b=>b.onclick=()=>{sel=+b.dataset.i;render();});
+  bN.onclick=function(){if(step<STEPS.length-1){step++;render();}};
+  bP.onclick=function(){if(step>0){step--;render();}};
+  bR.onclick=function(){step=0;render();};
   render();
 })();
 
@@ -268,15 +261,15 @@ button.ui.ghost:hover{ background:var(--accent-soft); }
 (function(){
   const stage=document.getElementById('encStage');
   let s=`<svg viewBox="0 0 560 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
-  const nodes=[['Client',40],['CloudFront',170],['Load bal.',310],['S3 / DB',470]];
+  const nodes=[['Client',64],['CloudFront',204],['Load bal.',344],['S3 / DB',484]];
   nodes.forEach((n,i)=>{ s+=`<rect x="${n[1]-46}" y="40" width="92" height="36" rx="8" fill="#2D3748"/><text x="${n[1]}" y="62" text-anchor="middle" font-size="10.5" font-weight="700" fill="#fff">${n[0]}</text>`; });
   for(let i=0;i<3;i++){ const x1=nodes[i][1]+46,x2=nodes[i+1][1]-46,mid=(x1+x2)/2;
     s+=`<line x1="${x1}" y1="58" x2="${x2}" y2="58" stroke="#0E7490" stroke-width="2.4"/>`;
     s+=`<rect x="${mid-7}" y="50" width="14" height="11" rx="2" fill="#0E7490"/><path d="M${mid-4} 50 v-3 a4 4 0 0 1 8 0 v3" fill="none" stroke="#0E7490" stroke-width="1.6"/>`;
     s+=`<text x="${mid}" y="84" text-anchor="middle" font-size="8.5" font-weight="700" fill="#0E7490">TLS</text>`;
   }
-  s+=`<text x="40" y="100" text-anchor="middle" font-size="8.5" fill="#5f5e5a">in motion: every hop encrypted</text>`;
-  s+=`<rect x="424" y="80" width="92" height="16" rx="4" fill="#B45309"/><text x="470" y="92" text-anchor="middle" font-size="8.5" font-weight="700" fill="#fff">SSE at rest</text>`;
+  s+=`<text x="18" y="104" text-anchor="start" font-size="8.5" fill="#5f5e5a">in motion: every hop encrypted</text>`;
+  s+=`<rect x="438" y="80" width="92" height="16" rx="4" fill="#B45309"/><text x="484" y="92" text-anchor="middle" font-size="8.5" font-weight="700" fill="#fff">SSE at rest</text>`;
   s+=`</svg>`;
   stage.innerHTML=s;
 })();
