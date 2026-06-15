@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Past, Present &amp; Future &mdash; Course Wrap-Up</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --slate-dark:#1A202C;--slate:#2D3748;--accent:#0E7490;--accent-dark:#0B5567;--accent-soft:#CFF1F6;
+  --text:#1a1a18;--text-muted:#5f5e5a;--text-light:#888780;--border:rgba(0,0,0,0.09);
+  --bg:#fafaf8;--bg-card:#fff;--rust:#B45309;
+}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);line-height:1.65}
+.pagenav{background:var(--slate-dark)}
+.pagenav.foot{margin-top:48px}
+.pagenav-inner{max-width:920px;margin:0 auto;padding:11px 32px;display:flex;justify-content:space-between;align-items:center;gap:16px}
+.pagenav .brand{color:rgba(255,255,255,0.45);font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;white-space:nowrap}
+.navbtns{display:flex;gap:8px}
+.navbtn{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#fff;background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.22);border-radius:6px;padding:7px 13px;text-decoration:none;transition:.15s;white-space:nowrap}
+.navbtn:hover{background:var(--accent);border-color:var(--accent)}
+.navbtn.disabled{opacity:.28;pointer-events:none}
+@media(max-width:560px){.pagenav .brand{display:none}.pagenav-inner{justify-content:center}}
+.header{background:#fff;padding:56px 0 44px;border-bottom:0.5px solid var(--border)}
+.header-inner{max-width:920px;margin:0 auto;padding:0 32px}
+.header-eyebrow{font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-light);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+.header-eyebrow::after{content:'';flex:1;height:0.5px;background:var(--border);max-width:120px}
+.header h1{font-family:'Barlow Condensed',sans-serif;font-size:clamp(34px,4.8vw,54px);font-weight:900;letter-spacing:-0.01em;line-height:1.03;color:var(--text);margin-bottom:18px}
+.header h1 em{font-style:normal;color:var(--accent)}
+.header-sub{font-size:16px;color:var(--text-muted);line-height:1.6;max-width:660px}
+.wrap{max-width:920px;margin:0 auto;padding:8px 32px 40px}
+section{padding:30px 0 4px}
+.era-tag{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#fff;background:var(--accent);border-radius:5px;padding:3px 11px;display:inline-block;margin-bottom:10px}
+.era-tag.past{background:var(--slate)}
+.era-tag.why{background:var(--rust)}
+.era-tag.future{background:var(--accent-dark)}
+h2{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:26px;margin-bottom:12px;line-height:1.05}
+p{margin-bottom:12px}
+.lead{font-size:16px;color:var(--text)}
+.keybox{background:var(--accent-soft);border-left:3px solid var(--accent);border-radius:0 6px 6px 0;padding:13px 18px;margin:16px 0 0;font-size:13.5px;line-height:1.6}
+.keybox .lbl{font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent-dark);margin-bottom:5px}
+.keybox b{color:var(--accent-dark)}
+.widget{background:#fff;border:0.5px solid var(--border);border-radius:10px;padding:18px 20px;margin:16px 0 0}
+.widget h4{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:16px;margin-bottom:14px;color:var(--text)}
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.ui{font-family:'Barlow',sans-serif;font-size:12.5px;font-weight:700;color:#fff;background:var(--accent);border:1px solid var(--accent);border-radius:6px;padding:8px 14px;cursor:pointer}
+.ui.ghost{color:var(--accent);background:#fff}
+.assessment-box{background:var(--bg-card);border:0.5px solid var(--border);border-left:3px solid var(--slate);border-radius:0 6px 6px 0;padding:18px 22px;margin:30px 0 0}
+.assessment-box .assess-label{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-light);margin-bottom:8px}
+.assessment-box p{font-size:14px;line-height:1.7;margin:0}
+.fade{animation:fade .35s ease}
+@keyframes fade{from{opacity:.25}to{opacity:1}}
+.cards{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+.card-btn{font-family:'Barlow',sans-serif;font-size:12.5px;font-weight:700;border-radius:7px;padding:8px 13px;cursor:pointer;border:1px solid var(--border);background:#fff;color:var(--text)}
+</style></head>
+<body>
+
+<header class="pagenav"><div class="pagenav-inner">
+  <div class="brand">Cloud Security Fundamentals</div>
+  <div class="navbtns">
+    <a class="navbtn" href="index.html">&#8962; Home</a>
+    <a class="navbtn" href="module-13/02-breach-studies.html">&larr; Prev</a>
+    <a class="navbtn disabled">Next &rarr;</a>
+  </div>
+</div></header>
+
+<div class="header"><div class="header-inner">
+  <div class="header-eyebrow">Course Wrap-Up &middot; Security &amp; the Cloud</div>
+  <h1>Past, Present &amp; <em>Future</em></h1>
+  <p class="header-sub">One trend has reshaped security more than any other: <strong>cloud migration</strong>. It moved the users and the data out of the building &mdash; and forced security to change with them. Here is the arc: where we <strong>were</strong>, why we <strong>moved</strong>, where we <strong>are</strong>, and where we&rsquo;re <strong>going</strong>.</p>
+</div></div>
+
+<div class="wrap">
+
+  <section>
+    <span class="era-tag past">Past</span>
+    <h2>The castle and the moat</h2>
+    <p class="lead">For decades, we secured a company like a medieval <strong>castle</strong>: build one strong <strong>perimeter</strong>, put everyone and everything inside it, and treat <em>inside</em> as trusted and <em>outside</em> as dangerous.</p>
+    <p>It worked because it matched reality. Employees sat at desks <em>inside</em> the office. The applications and data lived on servers <em>inside</em> the data center. So a firewall at the gate &mdash; deciding who crosses the moat &mdash; really did protect almost everything that mattered.</p>
+    <p>That castle is most of what this course covered. On a <strong>foundation</strong> of how the internet works and how a single connection is secured &mdash; TCP/IP, cryptography, TLS, and the CIA triad &mdash; we stacked the layers of defense: <strong>network</strong>, <strong>device</strong>, <strong>identity</strong>, <strong>application</strong>, and <strong>data</strong>, wrapped with cross-cutting <strong>key management</strong> and <strong>logging</strong>. The chapters that follow are how that whole picture is now changing.</p>
+    <div class="keybox"><div class="lbl">The assumption</div>Trust is based on <b>location</b>. If you&rsquo;re inside the network, you&rsquo;re trusted; if you&rsquo;re outside, you&rsquo;re not. The whole model rests on that one idea.</div>
+  </section>
+
+  <section>
+    <span class="era-tag why">Why we moved</span>
+    <h2>Cloud migration broke the perimeter</h2>
+    <p class="lead">Then the cloud changed where everything lives. Toggle before and after:</p>
+    <div class="widget" id="mig">
+      <div class="controls"><button class="ui" id="migBtn"></button></div>
+      <div id="migSvg"></div>
+      <p id="migCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:42px"></p>
+    </div>
+    <div class="keybox"><div class="lbl">The wall now surrounds nothing</div>The <b>users left the building</b> (working from home, from a cafe) and the <b>data left the building</b> (apps now live in SaaS and public clouds like AWS). Once the people and the data are <em>outside</em> the wall, &ldquo;inside vs outside&rdquo; no longer means &ldquo;safe vs dangerous.&rdquo; The perimeter still exists &mdash; it just doesn&rsquo;t contain what we care about anymore.</div>
+  </section>
+
+  <section>
+    <span class="era-tag">Present</span>
+    <h2>Zero Trust &mdash; never trust, always verify</h2>
+    <p class="lead">If location can no longer earn trust, then nothing should be trusted by default. That is <strong>Zero Trust</strong>: every request must prove itself, every time &mdash; no matter where it comes from. Watch the same request hit each model:</p>
+    <div class="widget" id="zt">
+      <div class="controls"><button class="ui" id="ztBtn"></button></div>
+      <div id="ztSvg"></div>
+      <p id="ztCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:54px"></p>
+    </div>
+    <div class="keybox"><div class="lbl">What Zero Trust actually means</div>No implicit trust from being &ldquo;on the network.&rdquo; Every request re-verifies <b>identity</b> (who), <b>device</b> (is it healthy), and <b>context</b> (is this normal), and is granted only <b>least privilege</b> &mdash; the minimum needed, for this action, right now. In short: <b>identity becomes the new perimeter.</b></div>
+  </section>
+
+  <section>
+    <span class="era-tag future">Future</span>
+    <h2>Three trends to watch</h2>
+    <p class="lead">Zero Trust is where we are. Three forces are shaping what comes next &mdash; each one extends something you already learned. Click each:</p>
+    <div class="widget" id="fut">
+      <div id="futBtns" class="cards"></div>
+      <div id="futDetail" class="fade" style="background:var(--bg);border-radius:8px;padding:15px 17px;min-height:150px"></div>
+    </div>
+  </section>
+
+  <div class="assessment-box">
+    <div class="assess-label">The whole trend in one line</div>
+    <p>Security used to trust a <strong>place</strong> (inside the castle). Cloud migration moved the people and the data out of that place, so security shifted to trusting a <strong>verified identity</strong> instead (<strong>Zero Trust</strong>). What&rsquo;s next &mdash; AI on both sides, passwordless identity, and quantum-safe cryptography &mdash; all push the same idea further: <em>verify everything, trust nothing by default.</em></p>
+  </div>
+
+</div>
+
+<footer class="pagenav foot"><div class="pagenav-inner">
+  <div class="brand">Cloud Security Fundamentals</div>
+  <div class="navbtns">
+    <a class="navbtn" href="index.html">&#8962; Home</a>
+    <a class="navbtn" href="module-13/02-breach-studies.html">&larr; Prev</a>
+    <a class="navbtn disabled">Next &rarr;</a>
+  </div>
+</div></footer>
+
+<script>
+/* ---------- cloud migration: before / after ---------- */
+(function(){
+  var box=document.getElementById('migSvg'),cap=document.getElementById('migCap'),btn=document.getElementById('migBtn');
+  if(!box) return;
+  var after=false;
+  function node(x,y,w,label,sub,fill){
+    return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="44" rx="8" fill="'+fill+'"/>'
+      +'<text x="'+(x+w/2)+'" y="'+(y+22)+'" text-anchor="middle" fill="#fff" font-size="12" font-weight="800">'+label+'</text>'
+      +'<text x="'+(x+w/2)+'" y="'+(y+36)+'" text-anchor="middle" fill="#cbd5e0" font-size="9">'+sub+'</text>';
+  }
+  function render(){
+    var s='<svg viewBox="0 0 700 210" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-width:660px;display:block;margin:0 auto;font-family:Barlow,Arial,sans-serif">';
+    // the perimeter wall
+    s+='<rect x="210" y="20" width="280" height="170" rx="12" fill="#fbfaf7" stroke="'+(after?'#c9ccc4':'#0E7490')+'" stroke-width="2.5" stroke-dasharray="'+(after?'7 6':'1 0')+'"/>';
+    s+='<text x="350" y="14" text-anchor="middle" font-size="10.5" font-weight="800" letter-spacing=".06em" fill="'+(after?'#9aa3a8':'#0B5567')+'">PERIMETER (the castle wall)</text>';
+    if(!after){
+      // everything inside
+      s+=node(250,40,200,'Users','at their desks','#2D3748');
+      s+=node(250,92,200,'Apps + Data','on internal servers','#2D3748');
+      s+=node(250,144,200,'Security stack','firewalls, etc.','#0E7490');
+    } else {
+      // users + data outside; only security left inside
+      s+=node(250,96,200,'Security stack','still in the data center','#0E7490');
+      s+='<text x="350" y="150" text-anchor="middle" font-size="9.5" fill="#9aa3a8">(guarding an almost-empty building)</text>';
+      s+=node(20,40,165,'Users','home &middot; cafe','#B45309');
+      s+=node(515,40,165,'Apps + Data','SaaS &middot; AWS','#B45309');
+      // arrows leaving
+      s+='<path d="M250 62 C 210 62, 195 55, 185 52" fill="none" stroke="#B45309" stroke-width="2" marker-end="url(#a)"/>';
+      s+='<path d="M450 62 C 490 62, 505 55, 515 52" fill="none" stroke="#B45309" stroke-width="2" marker-end="url(#a)"/>';
+    }
+    s+='<defs><marker id="a" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#B45309"/></marker></defs></svg>';
+    box.innerHTML=s;
+    btn.textContent=after?'Show: before the cloud':'Show: after cloud migration';
+    cap.innerHTML=after
+      ?'<b>After.</b> The users moved out (home, cafe) and the apps and data moved out (SaaS, AWS). The wall still stands, but it now surrounds little more than the old security stack.'
+      :'<b>Before.</b> Users, apps, data and security all sat <b>inside</b> one perimeter. A strong wall at the edge protected nearly everything that mattered.';
+  }
+  btn.onclick=function(){after=!after;render();};
+  render();
+})();
+
+/* ---------- castle vs zero trust ---------- */
+(function(){
+  var box=document.getElementById('ztSvg'),cap=document.getElementById('ztCap'),btn=document.getElementById('ztBtn');
+  if(!box) return;
+  var zt=false;
+  function render(){
+    var col=zt?'#0E7490':'#2D3748';
+    var s='<svg viewBox="0 0 700 150" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-width:660px;display:block;margin:0 auto;font-family:Barlow,Arial,sans-serif">';
+    // request from a device already inside the network
+    s+='<rect x="20" y="52" width="150" height="46" rx="9" fill="#2D3748"/><text x="95" y="72" text-anchor="middle" fill="#fff" font-size="11.5" font-weight="800">Request</text><text x="95" y="88" text-anchor="middle" fill="#cbd5e0" font-size="9">already inside the network</text>';
+    // the check (or lack of)
+    if(!zt){
+      s+='<rect x="285" y="52" width="170" height="46" rx="9" fill="#2D3748"/><text x="370" y="72" text-anchor="middle" fill="#fff" font-size="11.5" font-weight="800">It&rsquo;s inside &rArr; trusted</text><text x="370" y="88" text-anchor="middle" fill="#cbd5e0" font-size="9">no further checks</text>';
+    } else {
+      s+='<rect x="285" y="40" width="170" height="70" rx="9" fill="#0E7490"/><text x="370" y="60" text-anchor="middle" fill="#fff" font-size="11" font-weight="800">Verify every time</text><text x="370" y="76" text-anchor="middle" fill="#cff1f6" font-size="9">identity &middot; device &middot; context</text><text x="370" y="90" text-anchor="middle" fill="#cff1f6" font-size="9">&rarr; least privilege</text>';
+    }
+    s+='<rect x="560" y="52" width="120" height="46" rx="9" fill="'+col+'"/><text x="620" y="78" text-anchor="middle" fill="#fff" font-size="11.5" font-weight="800">Resource</text>';
+    s+='<line x1="170" y1="75" x2="285" y2="75" stroke="'+col+'" stroke-width="3" marker-end="url(#z)"/>';
+    s+='<line x1="455" y1="75" x2="560" y2="75" stroke="'+col+'" stroke-width="3" marker-end="url(#z)"/>';
+    s+='<defs><marker id="z" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="'+col+'"/></marker></defs></svg>';
+    box.innerHTML=s;
+    btn.textContent=zt?'Show the castle &amp; moat model':'Show the Zero Trust model';
+    cap.innerHTML=zt
+      ?'<b>Zero Trust.</b> Being &ldquo;inside&rdquo; earns nothing. The same request is re-checked &mdash; who is it, is the device healthy, is this normal &mdash; and granted only the least privilege it needs. If an attacker slips in, they still can&rsquo;t move freely: every step is re-verified.'
+      :'<b>Castle &amp; moat.</b> The request came from inside the perimeter, so it is trusted automatically &mdash; no further checks. The danger: an attacker who gets past the wall <b>once</b> is then trusted everywhere, free to roam.';
+  }
+  btn.onclick=function(){zt=!zt;render();};
+  render();
+})();
+
+/* ---------- future trends ---------- */
+(function(){
+  var btns=document.getElementById('futBtns'),det=document.getElementById('futDetail');
+  if(!btns) return;
+  var F=[
+   {k:'AI on every side',c:'#6D2E46',
+    d:'<p style="margin:0 0 8px"><b>AI reshapes attack and defense at once &mdash; in three ways:</b></p>'
+      +'<p style="margin:0 0 6px"><b>1. Defenders get faster.</b> AI sifts oceans of logs for anomalies, triages alerts, and can auto-respond &mdash; the SOC gets a tireless assistant.</p>'
+      +'<p style="margin:0 0 6px"><b>2. Human attackers get sharper.</b> AI writes flawless phishing, clones voices and faces (deepfakes), and generates malware variants at scale.</p>'
+      +'<p style="margin:0 0 6px"><b>3. The AI attacks on its own.</b> The newer worry is <b>autonomous (agentic) AI</b> &mdash; software agents that, with little or no human in the loop, scan for weaknesses, chain exploits, and adapt their attack at machine speed. And the AI systems themselves become a target to defend (poisoned training data, prompt injection, model theft).</p>'
+      +'<p style="margin:0;color:var(--text-muted);font-size:12.5px">Extends <b>Module 13</b> &mdash; detection and response, now an AI-vs-AI race.</p>'},
+   {k:'Passwordless identity',c:'#0E7490',
+    d:'<p style="margin:0 0 8px"><b>If identity is the new perimeter, the password is its weakest brick.</b></p>'
+      +'<p style="margin:0 0 6px">The shift is to <b>passkeys</b> &mdash; phishing-resistant login built on public-key cryptography, with nothing to steal or reuse &mdash; and to <b>continuous verification</b>: trust is re-checked <em>during</em> a session, not just at login, reacting to a changed device, location, or behavior.</p>'
+      +'<p style="margin:0;color:var(--text-muted);font-size:12.5px">Extends <b>Module 8</b> and Zero Trust &mdash; verification gets stronger and never really stops.</p>'},
+   {k:'Quantum-safe crypto',c:'#B45309',
+    d:'<p style="margin:0 0 8px"><b>The course’s very foundation has to evolve.</b></p>'
+      +'<p style="margin:0 0 6px">We began with <b>PKI and TLS</b> as the &ldquo;trust anchor&rdquo; of the internet. A powerful enough <b>quantum computer</b> could break the public-key math behind them. So new <b>quantum-resistant algorithms</b> (standardized by NIST in 2024) are starting to replace today’s &mdash; urgently, because of <b>&ldquo;harvest now, decrypt later&rdquo;</b>: attackers can store encrypted data today and crack it once quantum arrives.</p>'
+      +'<p style="margin:0;color:var(--text-muted);font-size:12.5px">Extends <b>Module 2</b> &mdash; the trust anchor itself is being re-engineered.</p>'}
+  ];
+  var sel=0;
+  function render(){
+    btns.innerHTML=F.map(function(f,i){return '<button class="card-btn" data-i="'+i+'" style="'+(i===sel?('background:'+f.c+';color:#fff;border-color:'+f.c):'')+'">'+f.k+'</button>';}).join('');
+    btns.querySelectorAll('button').forEach(function(b){b.onclick=function(){sel=+b.getAttribute('data-i');render();};});
+    det.classList.remove('fade');void det.offsetWidth;det.classList.add('fade');
+    det.innerHTML='<div style="font-family:\'Barlow Condensed\',sans-serif;font-weight:800;font-size:19px;color:'+F[sel].c+';margin-bottom:8px">'+F[sel].k+'</div>'+F[sel].d;
+  }
+  render();
+})();
+</script>
+</body></html>
