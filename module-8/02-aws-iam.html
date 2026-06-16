@@ -111,6 +111,10 @@ button.ui.ghost:hover{ background:var(--accent-soft); }
       <div class="lbl">Two things students always miss</div>
       A <b>group is not an identity</b> &mdash; it&rsquo;s just a bucket of users you attach policies to; it can never be a <code class="inline">Principal</code> or make a request itself. And a <b>role has no password</b> &mdash; you <i>assume</i> it for short-lived credentials, which is how AWS does federation.
     </div>
+    <div class="keybox">
+      <div class="lbl">A role carries two policies</div>
+      A role has a <b>permission policy</b> (what it can do, like any identity) <i>and</i> a <b>trust policy</b> that says <b>who is allowed to assume it</b> &mdash; which users, services, or accounts. If the trust policy doesn&rsquo;t name you, you can&rsquo;t take on the role at all. That trust policy is what makes a role the clean way to give a specific set of people &mdash; or another AWS account &mdash; scoped, temporary access.
+    </div>
   </section>
 
   <section>
@@ -157,7 +161,7 @@ button.ui.ghost:hover{ background:var(--accent-soft); }
 
   <div class="assessment-box">
     <div class="assess-label">Remember</div>
-    <p>IAM&rsquo;s identities are the <strong>root user</strong> (all-powerful &mdash; lock it away), <strong>IAM users</strong> (long-lived people), <strong>groups</strong> (containers for users, never a principal), and <strong>roles</strong> (temporary, assumed for short-lived credentials &mdash; AWS&rsquo;s federation mechanism). Permissions are JSON policies: <strong>identity-based</strong> (attached to a user/group/role, no <code class="inline">Principal</code>) and <strong>resource-based</strong> (attached to a resource, with a <code class="inline">Principal</code>). AWS evaluates all of them together: an <strong>explicit deny always wins</strong>, otherwise you need an <strong>explicit allow</strong>, and silence is an <strong>implicit deny</strong>. The AWS twist: identities are <strong>ephemeral roles</strong>, access is <strong>resource-level</strong> (no general admission), and one <strong>unified policy</strong> covers both entry and actions.</p>
+    <p>IAM&rsquo;s identities are the <strong>root user</strong> (all-powerful &mdash; lock it away), <strong>IAM users</strong> (long-lived people), <strong>groups</strong> (containers for users, never a principal), and <strong>roles</strong> (temporary, assumed for short-lived credentials &mdash; AWS&rsquo;s federation mechanism). Permissions are JSON policies: <strong>identity-based</strong> (attached to a user/group/role, no <code class="inline">Principal</code>) and <strong>resource-based</strong> (attached to a resource, naming a <code class="inline">Principal</code> or <code class="inline">NotPrincipal</code>). AWS evaluates all of them together: an <strong>explicit deny always wins</strong>, otherwise you need an <strong>explicit allow</strong>, and silence is an <strong>implicit deny</strong>. The AWS twist: identities are <strong>ephemeral roles</strong>, access is <strong>resource-level</strong> (no general admission), and one <strong>unified policy</strong> covers both entry and actions.</p>
   </div>
 
 </div>
@@ -216,7 +220,7 @@ button.ui.ghost:hover{ background:var(--accent-soft); }
     code.innerHTML=`<pre>${p==='identity'?IDENTITY:RESOURCE}</pre>`;
     cap.innerHTML = p==='identity'
       ? '<b>Identity-based.</b> Attached to a user, group, or role. It says what <i>that</i> identity may do, so there&rsquo;s <b>no <code class="inline">Principal</code></b> &mdash; the &ldquo;who&rdquo; is whoever the policy is attached to. <i>&ldquo;Mike may read this bucket.&rdquo;</i>'
-      : '<b>Resource-based.</b> Attached to the resource itself (here, the S3 bucket). It must name a <b><code class="inline">Principal</code></b> &mdash; the actor it allows. <i>&ldquo;This bucket lets Mike read it.&rdquo;</i> This is what enables <b>cross-account</b> access.';
+      : '<b>Resource-based.</b> Attached to the resource itself (here, the S3 bucket). It includes a <b><code class="inline">Principal</code></b> element &mdash; the actor it allows (or <code class="inline">NotPrincipal</code> to mean &ldquo;everyone except&rdquo;). <i>&ldquo;This bucket lets Mike read it.&rdquo;</i> This is what enables <b>cross-account</b> access.';
     document.querySelectorAll('#pol [data-p]').forEach(b=>b.className='ui'+(b.dataset.p===p?'':' ghost'));
     setTimeout(()=>code.classList.remove('fade'),360);
   }
