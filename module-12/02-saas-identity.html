@@ -139,7 +139,7 @@ button.ui.ghost:hover{ background:var(--accent-soft); }
     </div>
     <div class="notebox">
       <div class="lbl">The trap that forces delegation</div>
-      Your password and your API key are both <b>master keys</b> &mdash; long-term, and able to do <i>everything</i> you can. So when a third-party app wants your data in <i>another</i> app (Spotify reading your Google contacts), you must <b>never hand it your password or API key</b>. There has to be a safer way to let an app act for you &mdash; that&rsquo;s <b>delegated access</b>.
+      Your password and your API key are both <b>master keys</b> &mdash; long-term, and able to do <i>everything</i> you can. So when a third-party app wants your data in <i>another</i> app (YouTube reading your Spotify playlists), you must <b>never hand it your password or API key</b>. There has to be a safer way to let an app act for you &mdash; that&rsquo;s <b>delegated access</b>.
     </div>
   </section>
 
@@ -152,7 +152,7 @@ button.ui.ghost:hover{ background:var(--accent-soft); }
     </div>
 
     <div class="subhead"><span class="tag">3a</span> Delegated authorization &mdash; OAuth</div>
-    <p class="lead">An app is authorized to act for you. A music app (Spotify) wants to find friends by reading your <strong>Google contacts</strong>. Instead of your Google password, OAuth hands it a <strong>valet key</strong> &mdash; an access token <strong>scoped</strong> to just your contacts, enforced by the API. Compare:</p>
+    <p class="lead">An app is authorized to act for you. You want <strong>YouTube</strong> to sync the playlists from your <strong>Spotify</strong> account. Instead of your Spotify password, OAuth hands YouTube a <strong>valet key</strong> &mdash; an access token <strong>scoped</strong> to just your playlists, enforced by the API. Compare:</p>
     <div class="widget" id="oauth">
       <h4>Master key vs valet key</h4>
       <div class="controls" style="margin:0 0 14px">
@@ -164,13 +164,13 @@ button.ui.ghost:hover{ background:var(--accent-soft); }
     </div>
     <div class="notebox">
       <div class="lbl">The handshake (Authorization Code flow)</div>
-      <div class="step"><span class="n">1</span><span class="t">Spotify redirects you to Google and you <b>log in + consent</b> (&ldquo;Spotify wants to read your contacts&rdquo;).</span></div>
-      <div class="step"><span class="n">2</span><span class="t">Google hands back a short-lived <b>authorization code</b> &mdash; not the token itself.</span></div>
-      <div class="step"><span class="n">3</span><span class="t">Spotify&rsquo;s server swaps that code <b>plus its own client secret</b> for the <b>access token</b>. A malicious app that grabbed the code can&rsquo;t use it without the secret.</span></div>
+      <div class="step"><span class="n">1</span><span class="t">YouTube redirects you to Spotify and you <b>log in + consent</b> (&ldquo;YouTube wants to read your playlists&rdquo;).</span></div>
+      <div class="step"><span class="n">2</span><span class="t">Spotify hands back a short-lived <b>authorization code</b> &mdash; not the token itself.</span></div>
+      <div class="step"><span class="n">3</span><span class="t">YouTube&rsquo;s server swaps that code <b>plus its own client secret</b> for the <b>access token</b>. A malicious app that grabbed the code can&rsquo;t use it without the secret.</span></div>
     </div>
     <div class="keybox">
       <div class="lbl">The four players &middot; and what a scope is</div>
-      The <b>resource owner</b> (you), the <b>client</b> (the app, e.g. Spotify), the <b>authorization server</b> (issues the token, e.g. Google Auth), and the <b>resource server</b> (the API that holds the data). A <b>scope</b> is a coarse permission &mdash; a <i>resource&nbsp;+&nbsp;action</i> like <code class="inline">contacts.readonly</code> &mdash; stamped on the token and enforced by the API. (Whether you may see a <i>specific</i> record is a finer check the app does itself.)
+      The <b>resource owner</b> (you), the <b>client</b> (the app, e.g. YouTube), the <b>authorization server</b> (issues the token, e.g. Spotify Auth), and the <b>resource server</b> (the API that holds the data, e.g. the Spotify API). A <b>scope</b> is a coarse permission &mdash; a <i>resource&nbsp;+&nbsp;action</i> like <code class="inline">playlist-read</code> &mdash; stamped on the token and enforced by the API. (Whether it&rsquo;s <i>your</i> playlist is a finer check the app does itself.)
     </div>
 
     <div class="subhead"><span class="tag">3b</span> Delegated authentication &mdash; OIDC</div>
@@ -271,11 +271,11 @@ button.ui.ghost:hover{ background:var(--accent-soft); }
 (function(){
   const stage=document.getElementById('oauthStage'),cap=document.getElementById('oauthCap');
   let o='pw';
-  const ABIL=['Read your contacts','See your basic profile','Read your Gmail','Delete your Drive files','Change your password'];
+  const ABIL=['Read your playlists','Create a playlist','See your account email','Delete your account','Change your password'];
   function render(){
     const pw=o==='pw';
     let s=`<div style="display:flex;gap:18px;flex-wrap:wrap;align-items:center">`;
-    s+=`<div style="flex:0 0 auto;text-align:center"><div style="width:74px;height:74px;border-radius:14px;background:#2e7d57;display:flex;align-items:center;justify-content:center;font-size:30px">&#127925;</div><div style="font-size:11px;font-weight:800;margin-top:5px">Spotify</div><div style="font-size:9px;color:var(--text-muted)">the app</div></div>`;
+    s+=`<div style="flex:0 0 auto;text-align:center"><div style="width:74px;height:74px;border-radius:14px;background:#c0392b;display:flex;align-items:center;justify-content:center;font-size:28px">&#9654;</div><div style="font-size:11px;font-weight:800;margin-top:5px">YouTube</div><div style="font-size:9px;color:var(--text-muted)">the app (client)</div></div>`;
     s+=`<div style="flex:1;min-width:230px">`;
     if(pw) s+=`<div style="background:#fdecec;color:#c0392b;font-size:11px;font-weight:800;border-radius:7px;padding:7px 11px;margin-bottom:7px">&#9888; Spotify can now do ALL of these &mdash; far more than it needs</div>`;
     ABIL.forEach((a,i)=>{
@@ -288,8 +288,8 @@ button.ui.ghost:hover{ background:var(--accent-soft); }
     s+=`</div></div>`;
     stage.className='fade'; stage.innerHTML=s;
     cap.innerHTML = pw
-      ? '<b style="color:#c0392b">Master key.</b> Hand over your password and Spotify can do <b>everything you can</b> &mdash; read your Gmail, delete your Drive files, even change your password. And if Spotify is ever breached, so is your whole Google account.'
-      : '<b style="color:#2e7d57">Valet key.</b> OAuth gives Spotify a token <b>scoped</b> to just what it needs &mdash; your contacts, nothing else. Your password never leaves Google, and you can revoke the token anytime.';
+      ? '<b style="color:#c0392b">Master key.</b> Hand over your Spotify password and YouTube can do <b>everything you can</b> &mdash; see your account email, delete your account, even change your password. And if YouTube is ever breached, so is your whole Spotify account.'
+      : '<b style="color:#2e7d57">Valet key.</b> OAuth gives YouTube a token <b>scoped</b> to just what it needs &mdash; read and create playlists, nothing else. Your password never leaves Spotify, and you can revoke the token anytime.';
     document.querySelectorAll('#oauth [data-o]').forEach(b=>b.className='ui'+(b.dataset.o===o?'':' ghost'));
     setTimeout(()=>stage.classList.remove('fade'),360);
   }
@@ -311,7 +311,7 @@ button.ui.ghost:hover{ background:var(--accent-soft); }
         s+=`<div style="display:flex;gap:8px;padding:3px 0"><span style="flex:0 0 44px;font-size:10px;color:#7CF2C0">${r[0]}</span><span style="font-size:11.5px;color:#e7ecee">${r[1]}</span></div>`;
       });
     } else {
-      [['type','Access token'],['scope','contacts.readonly'],['','profile'],['exp','in 60 min'],['holder','(no name &mdash; bearer)']].forEach(r=>{
+      [['type','Access token'],['scope','playlist-read'],['','playlist-modify'],['exp','in 60 min'],['holder','(no name &mdash; bearer)']].forEach(r=>{
         s+=`<div style="display:flex;gap:8px;padding:3px 0"><span style="flex:0 0 44px;font-size:10px;color:#7CF2C0">${r[0]}</span><span style="font-size:11.5px;color:#e7ecee">${r[1]}</span></div>`;
       });
     }
@@ -323,7 +323,7 @@ button.ui.ghost:hover{ background:var(--accent-soft); }
     stage.className='fade'; stage.innerHTML=s;
     cap.innerHTML = id
       ? '<b>ID token (OIDC).</b> A signed JWT of <b>claims</b> &mdash; name, email, a stable user id (<code class="inline">sub</code>), and who issued it. It lets the app say &ldquo;Welcome, Mary&rdquo; without ever seeing her password.'
-      : '<b>Access token (OAuth).</b> Proves the holder is <b>allowed to do</b> something (read your contacts), but says nothing about <i>who</i> they are. Using it to identify a user is the &ldquo;movie ticket&rdquo; mistake OIDC was built to fix.';
+      : '<b>Access token (OAuth).</b> Proves the holder is <b>allowed to do</b> something (read your playlists), but says nothing about <i>who</i> they are. Using it to identify a user is the &ldquo;movie ticket&rdquo; mistake OIDC was built to fix.';
     document.querySelectorAll('#tok [data-t]').forEach(b=>b.className='ui'+(b.dataset.t===t?'':' ghost'));
     setTimeout(()=>stage.classList.remove('fade'),360);
   }
