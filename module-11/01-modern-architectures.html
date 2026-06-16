@@ -68,8 +68,8 @@ button.ui.ghost:hover{ background:var(--accent-soft); }
   <span class="brand">Cloud Security Fundamentals</span>
   <nav class="navbtns">
     <a class="navbtn" href="../index.html">&#8962; Home</a>
-    <a class="navbtn disabled" href="#">&larr; Prev</a>
-    <a class="navbtn" href="02-securing-the-app.html">Next &rarr;</a>
+    <a class="navbtn" href="02-securing-the-app.html">&larr; Prev</a>
+    <a class="navbtn disabled" href="#">Next &rarr;</a>
   </nav>
 </div></header>
 
@@ -88,16 +88,31 @@ button.ui.ghost:hover{ background:var(--accent-soft); }
   <div class="objectives">
     <div class="obj-label">In this note</div>
     <ul>
-      <li>Two evolutions at once: how we <em>run</em> code, and how we <em>structure</em> it</li>
-      <li>Physical &rarr; VM &rarr; container &rarr; serverless &mdash; and what you stop managing at each step</li>
-      <li>Monolith vs microservices, and why big apps split apart</li>
-      <li>Serverless: Fargate vs Lambda, and the shift from load balancer to API Gateway</li>
+      <li>Every app is two layers: how the code is <em>structured</em> (application) and what it <em>runs on</em> (infrastructure)</li>
+      <li><strong>Infrastructure layer</strong>: hardware &rarr; VM &rarr; container &rarr; serverless &mdash; handing more to the vendor at each step</li>
+      <li><strong>Application layer</strong>: monolith &rarr; microservices, and why big apps split apart</li>
+      <li>Modern apps put them together: <strong>microservices on containers/serverless</strong>, fronted by an API Gateway</li>
+      <li>The security angle: the same defenses <strong>carry over but reposition</strong> &mdash; and serverless shifts who owns what</li>
     </ul>
   </div>
 
   <section>
-    <h2><span class="num">1</span> How we run code: four steps</h2>
-    <p class="lead">Computing keeps handing more of the stack to the cloud vendor. Each step packs apps tighter and leaves you managing less. Step through them &mdash; the <strong>shipping analogy</strong> rides along:</p>
+    <h2><span class="num">1</span> Two layers, two evolutions</h2>
+    <p class="lead">Every application is really two things stacked: <strong>how its code is structured</strong> (the application layer) and <strong>what that code runs on</strong> (the infrastructure layer). Modern architecture changed <em>both</em> &mdash; independently. Click each layer to reveal how it evolved:</p>
+    <div class="widget" id="layers">
+      <h4>The application layer sits on the infrastructure layer</h4>
+      <div class="controls" style="margin:0 0 14px">
+        <button class="ui" data-l="app">Application layer</button>
+        <button class="ui ghost" data-l="infra">Infrastructure layer</button>
+      </div>
+      <div id="layStage"></div>
+      <p id="layCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:48px"></p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> Infrastructure layer &mdash; how we run code</h2>
+    <p class="lead">The bottom layer kept handing more of the stack to the cloud vendor. Each step packs apps tighter and leaves you managing less. Step through them &mdash; the <strong>shipping analogy</strong> rides along:</p>
     <div class="widget" id="infra">
       <h4>Physical &rarr; VM &rarr; container &rarr; serverless</h4>
       <div class="controls" style="margin:0 0 14px" id="infraBtns"></div>
@@ -108,13 +123,13 @@ button.ui.ghost:hover{ background:var(--accent-soft); }
     </div>
     <div class="notebox">
       <div class="lbl">Why containers exist</div>
-      Two apps that need different library versions (Python 3.12 vs 3.14) used to need <b>separate machines</b> &mdash; &ldquo;dependency hell.&rdquo; A <b>container</b> packages an app <i>with its own libraries</i>, so many isolated apps share one machine. That solves both the dependency clash <i>and</i> the waste of a whole OS per app.
+      Two apps that need different library versions (Python 3.12 vs 3.14) used to need <b>separate machines</b> &mdash; &ldquo;dependency hell.&rdquo; A <b>container</b> packages an app <i>with its own libraries</i>, so many isolated apps share one machine. That solves both the dependency clash <i>and</i> the waste of a whole OS per app. <b>Kubernetes</b> is the software that runs and scales fleets of containers across many machines.
     </div>
   </section>
 
   <section>
-    <h2><span class="num">2</span> How we structure code: monolith vs microservices</h2>
-    <p class="lead">Separately, the <em>shape</em> of the code changed. A small app can be one big program; a huge one (Netflix) can&rsquo;t. Flip between them:</p>
+    <h2><span class="num">3</span> Application layer &mdash; how we structure code</h2>
+    <p class="lead">The top layer changed too &mdash; the <em>shape</em> of the code. A small app can be one big program; a huge one (Netflix) can&rsquo;t. Flip between them:</p>
     <div class="widget" id="mono">
       <h4>One big program vs many small services</h4>
       <div class="controls" style="margin:0 0 14px">
@@ -127,26 +142,55 @@ button.ui.ghost:hover{ background:var(--accent-soft); }
   </section>
 
   <section>
-    <h2><span class="num">3</span> Serverless, and the new front door</h2>
-    <p class="lead">At the far end of the evolution, you stop managing servers entirely &mdash; and with no servers to balance, the <strong>load balancer gives way to an API Gateway</strong>. Compare the two serverless flavors:</p>
-    <div class="widget" id="srvless">
-      <h4>Fargate vs Lambda &middot; and LB &rarr; API Gateway</h4>
+    <h2><span class="num">4</span> Putting it together: microservices on serverless</h2>
+    <p class="lead">Modern apps sit at the intersection of both axes: a <strong>microservices</strong> app (application layer) where each service <strong>scales on its own</strong>, all running on <strong>serverless</strong> infrastructure (infrastructure layer) the vendor manages. Add instances and watch each service scale independently:</p>
+    <div class="widget" id="conv">
+      <h4>Microservices behind an API Gateway, scaling on a serverless platform</h4>
       <div class="controls" style="margin:0 0 14px">
-        <button class="ui" data-x="fargate">Fargate (containers)</button>
-        <button class="ui ghost" data-x="lambda">Lambda (functions)</button>
+        <button class="ui" data-add="0">More Search</button>
+        <button class="ui" data-add="1" style="background:#166534;border-color:#166534">More Orders</button>
+        <button class="ui" data-add="2" style="background:#B45309;border-color:#B45309">More Billing</button>
+        <button class="ui ghost" data-reset="1">Reset</button>
       </div>
-      <div id="srvStage"></div>
-      <p id="srvCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:48px"></p>
+      <div id="convStage"></div>
+      <p id="convCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:48px"></p>
     </div>
     <div class="keybox">
       <div class="lbl">The front-door swap</div>
-      A <b>load balancer</b> spreads requests across servers. In serverless there are no servers, so an <b>API Gateway</b> takes its place &mdash; it validates each API request and <b>triggers the right Lambda function</b> to handle it. Same job (the front door), different world.
+      A <b>load balancer</b> spreads requests across a fixed pool of servers. In serverless there are no servers to balance, so an <b>API Gateway</b> takes the front-door role &mdash; it validates each request and <b>routes it to the right service</b> (triggering a Lambda function, or reaching a Fargate container). Same job, no servers underneath.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">5</span> Does the security still apply?</h2>
+    <p class="lead">The application-security defenses shift when the architecture moves from a traditional 3-tier app to the modern principles above &mdash; some carry over, some change <em>where</em> they live and <em>who</em> owns them. Click a control to see what happens to it:</p>
+    <div class="widget" id="sec">
+      <h4>Securing the app, in containers &amp; serverless</h4>
+      <div class="controls" id="secChips" style="margin:0 0 14px"></div>
+      <div id="secDetail" style="min-height:74px"></div>
+    </div>
+    <div class="keybox">
+      <div class="lbl">The pattern</div>
+      As you move <b>VM &rarr; container &rarr; serverless</b>, shared responsibility slides toward the vendor for the infrastructure and toward you for <b>code, identity, and data</b>. Same defense-in-depth &mdash; repositioned, with a bigger <b>internal</b> attack surface (many services, many APIs) to watch.
     </div>
   </section>
 
   <div class="assessment-box">
     <div class="assess-label">Remember</div>
-    <p>Two evolutions run in parallel. <strong>How we run code</strong>: physical servers &rarr; <strong>VMs</strong> (one OS per app, wasteful) &rarr; <strong>containers</strong> (package an app with its libraries, pack many on one machine, end dependency hell) &rarr; <strong>serverless</strong> (the vendor runs the OS and runtime; you bring only code). <strong>How we structure code</strong>: a <strong>monolith</strong> (everything in one program) &rarr; <strong>microservices</strong> (independent services that scale and ship on their own). Serverless comes in two forms &mdash; <strong>Fargate</strong> (you hand over a container) and <strong>Lambda</strong> (you hand over a function) &mdash; and because there are no servers to balance, the load balancer becomes an <strong>API Gateway</strong>.</p>
+    <div style="font-size:13px;line-height:1.55">
+      <p style="margin:0 0 6px"><strong>Two evolutions, one app:</strong></p>
+      <ul style="list-style:none;margin:0 0 12px;padding:0">
+        <li style="padding:3px 0 3px 18px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">&#9671;</span> How code is <strong>structured</strong> &mdash; monolith &rarr; microservices</li>
+        <li style="padding:3px 0 3px 18px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">&#9671;</span> How code <strong>runs</strong> &mdash; hardware &rarr; VM &rarr; container &rarr; serverless</li>
+      </ul>
+      <p style="margin:0 0 12px"><strong>Put together:</strong> microservices on containers or serverless, behind an <strong>API Gateway</strong>.</p>
+      <p style="margin:0 0 6px"><strong>Security repositions</strong> (it doesn&rsquo;t disappear):</p>
+      <ul style="list-style:none;margin:0;padding:0">
+        <li style="padding:3px 0 3px 18px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">&#9671;</span> WAF &amp; Shield move to the <strong>API Gateway</strong></li>
+        <li style="padding:3px 0 3px 18px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">&#9671;</span> Host duties shrink toward <strong>least-privilege functions</strong></li>
+        <li style="padding:3px 0 3px 18px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">&#9671;</span> Microservices add an <strong>internal</strong> attack surface</li>
+      </ul>
+    </div>
   </div>
 
 </div>
@@ -155,20 +199,65 @@ button.ui.ghost:hover{ background:var(--accent-soft); }
   <span class="brand">Module 11 &middot; Application Security</span>
   <nav class="navbtns">
     <a class="navbtn" href="../index.html">&#8962; Home</a>
-    <a class="navbtn disabled" href="#">&larr; Prev</a>
-    <a class="navbtn" href="02-securing-the-app.html">Next &rarr;</a>
+    <a class="navbtn" href="02-securing-the-app.html">&larr; Prev</a>
+    <a class="navbtn disabled" href="#">Next &rarr;</a>
   </nav>
 </div></footer>
 
 <script>
-/* ---------- 1. Infrastructure evolution ---------- */
+/* ---------- 1. The two layers ---------- */
+(function(){
+  const stage=document.getElementById('layStage'),cap=document.getElementById('layCap');
+  let sel='app';
+  function chain(bx,bw,y,items){
+    const ah=20;
+    const w=items.map(t=>Math.max(50,t.length*7+20));
+    const total=w.reduce((a,b)=>a+b,0)+ah*(items.length-1);
+    let x=bx+(bw-total)/2,s='';
+    items.forEach((t,i)=>{
+      s+=`<rect x="${x}" y="${y}" width="${w[i]}" height="26" rx="13" fill="rgba(255,255,255,.20)"/>`;
+      s+=`<text x="${x+w[i]/2}" y="${y+17.5}" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">${t}</text>`;
+      x+=w[i];
+      if(i<items.length-1){ s+=`<text x="${x+ah/2}" y="${y+18}" text-anchor="middle" font-size="13" font-weight="800" fill="rgba(255,255,255,.75)">&#8594;</text>`; x+=ah; }
+    });
+    return s;
+  }
+  function layer(x,y,w,h,active,fill,title,sub,steps){
+    const f=active?fill:'#dfe4e7',tc=active?'#fff':'#9aa3a0',sc=active?'rgba(255,255,255,.85)':'#aeb6b3';
+    let s=`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="11" fill="${f}"/>`;
+    s+=`<text x="${x+22}" y="${y+32}" font-size="16" font-weight="900" font-family="Barlow Condensed,sans-serif" letter-spacing="0.04em" fill="${tc}">${title}</text>`;
+    s+=`<text x="${x+22}" y="${y+51}" font-size="11.5" fill="${sc}">${sub}</text>`;
+    if(active) s+=chain(x,w,y+h-34,steps);
+    return s;
+  }
+  function render(){
+    const app=sel==='app';
+    let s=`<svg viewBox="0 0 520 234" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    s+=layer(30,14,460,96,app,'#0E7490','APPLICATION LAYER','how the code is structured',['Monolith','Microservices']);
+    s+=layer(30,124,460,96,!app,'#2D3748','INFRASTRUCTURE LAYER','what the code runs on',['HW','VM','Container','Serverless']);
+    // "sits on" connector ticks
+    s+=`<line x1="120" y1="110" x2="120" y2="124" stroke="#b8c0bd" stroke-width="2"/>`;
+    s+=`<line x1="400" y1="110" x2="400" y2="124" stroke="#b8c0bd" stroke-width="2"/>`;
+    s+=`</svg>`;
+    stage.className='fade'; stage.innerHTML=s;
+    cap.innerHTML = app
+      ? '<b>Application layer &mdash; how your code is organized.</b> Its big shift: from a single <b>monolith</b> to many independent <b>microservices</b>. See &sect;3.'
+      : '<b>Infrastructure layer &mdash; what your code runs on.</b> Its big shift: from owning <b>hardware</b> all the way to <b>serverless</b>, handing ever more to the vendor. See &sect;2.';
+    document.querySelectorAll('#layers [data-l]').forEach(b=>b.className='ui'+(b.dataset.l===sel?'':' ghost'));
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  render();
+  document.querySelectorAll('#layers [data-l]').forEach(b=>b.onclick=()=>{sel=b.dataset.l;render();});
+})();
+
+/* ---------- 2. Infrastructure evolution ---------- */
 (function(){
   const btns=document.getElementById('infraBtns'),stage=document.getElementById('infraStage'),det=document.getElementById('infraDetail');
   const S=[
     {k:'Physical',ship:'Own the truck',you:'Hardware, OS, runtime, app',d:'You buy and maintain the physical server and everything on it. One app per machine to avoid clashing dependencies &mdash; lots of idle hardware you still pay for.'},
     {k:'VM (EC2)',ship:'Rent the truck',you:'OS, runtime, app',d:'The vendor owns the hardware; you rent a virtual machine. But running a <b>whole OS for one small app</b> is like renting a whole truck to ship one box &mdash; wasted space.'},
     {k:'Container',ship:'Crates on the truck',you:'App + its libraries',d:'Pack each app with its libraries into a <b>container</b> and run many on one host. Like bin-packing crates into a truck &mdash; full utilization, no dependency clashes. Kubernetes orchestrates them at scale.'},
-    {k:'Serverless',ship:'Hand it to freight',you:'Just your code',d:'The vendor runs the OS <i>and</i> runtime; you hand over only code (or a container). Zero servers to patch or scale &mdash; you focus purely on what the app does.'}
+    {k:'Serverless',ship:'Hand it to freight',you:'Just your code',d:'The vendor runs the OS <i>and</i> runtime; you hand over only your code &mdash; <b>Function as a Service (FaaS)</b> &mdash; or a container. Zero servers to patch or scale; you focus purely on what the app does. (&sect;4 shows both flavors.)'}
   ];
   let sel=0;
   function box(x,y,w,h,c,t,fg){return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="${c}"/><text x="${x+w/2}" y="${y+h/2+3.5}" text-anchor="middle" font-size="9" font-weight="700" fill="${fg||'#fff'}">${t}</text>`;}
@@ -176,21 +265,21 @@ button.ui.ghost:hover{ background:var(--accent-soft); }
     const i=sel;
     let s=`<svg viewBox="0 0 300 170" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
     const V='#cfd6db', A='#0E7490';
-    if(i===0){ // physical: one column app/os/hardware (all yours)
+    if(i===0){
       s+=box(110,30,80,28,A,'App');
       s+=box(110,62,80,28,'#2D7D9A','OS');
       s+=box(90,94,120,30,'#7d8893','Hardware','#fff');
       s+=`<text x="150" y="142" text-anchor="middle" font-size="9" font-weight="700" fill="#5f5e5a">1 app, whole machine &mdash; all yours</text>`;
-    } else if(i===1){ // vm: hardware vendor, 2 VMs each app+os
+    } else if(i===1){
       s+=box(40,90,220,28,V,'Hardware (vendor)','#3a4750');
       [60,170].forEach(x=>{ s+=box(x,30,70,26,A,'App'); s+=box(x,60,70,26,'#2D7D9A','OS'); });
       s+=`<text x="150" y="142" text-anchor="middle" font-size="9" font-weight="700" fill="#5f5e5a">a full OS per app</text>`;
-    } else if(i===2){ // container: hardware + one OS + 3 app crates
+    } else if(i===2){
       s+=box(40,108,220,26,V,'Hardware (vendor)','#3a4750');
       s+=box(40,80,220,26,'#2D7D9A','Operating system');
       [54,124,194].forEach(x=>{ s+=box(x,40,56,34,A,'App+libs'); });
       s+=`<text x="150" y="150" text-anchor="middle" font-size="9" font-weight="700" fill="#5f5e5a">many apps, one host</text>`;
-    } else { // serverless: cloud with code
+    } else {
       s+=`<path d="M40 120 a18 18 0 0 1 4 -34 a20 20 0 0 1 40 5 a16 16 0 0 1 50 0 a18 18 0 0 1 -3 29 z" fill="${V}"/>`;
       s+=`<text x="200" y="60" text-anchor="middle" font-size="9" font-weight="700" fill="#3a4750">vendor runs everything</text>`;
       [120,180].forEach((x,j)=>{ s+=box(x,72,52,30,A,'your code'); });
@@ -213,7 +302,7 @@ button.ui.ghost:hover{ background:var(--accent-soft); }
   render();
 })();
 
-/* ---------- 2. Monolith vs microservices ---------- */
+/* ---------- 3. Monolith vs microservices ---------- */
 (function(){
   const stage=document.getElementById('monoStage'),cap=document.getElementById('monoCap');
   let m='monolith';
@@ -232,7 +321,7 @@ button.ui.ghost:hover{ background:var(--accent-soft); }
     stage.className='fade'; stage.innerHTML=s;
     cap.innerHTML = mono
       ? '<b>Monolith.</b> UI, logic, and data access live in one codebase &mdash; simple, perfect for a small app. But to scale just the Search feature, you must duplicate the <i>entire</i> application, and one team&rsquo;s change can break everything.'
-      : '<b>Microservices.</b> Split the app into independent services. Popular Search? Spin up more Search containers without touching Billing. Different teams can build different services in different languages, and deploy on their own schedule.';
+      : '<b>Microservices.</b> Split the app into independent services. Popular Search? Spin up more Search instances without touching Billing. Different teams can build different services in different languages, each with its own data, and deploy on their own schedule.';
     document.querySelectorAll('#mono [data-m]').forEach(b=>b.className='ui'+(b.dataset.m===m?'':' ghost'));
     setTimeout(()=>stage.classList.remove('fade'),360);
   }
@@ -240,34 +329,77 @@ button.ui.ghost:hover{ background:var(--accent-soft); }
   document.querySelectorAll('#mono [data-m]').forEach(b=>b.onclick=()=>{m=b.dataset.m;render();});
 })();
 
-/* ---------- 3. Serverless ---------- */
+/* ---------- 4. Putting it together: microservices on serverless ---------- */
 (function(){
-  const stage=document.getElementById('srvStage'),cap=document.getElementById('srvCap');
-  let x='fargate';
+  const stage=document.getElementById('convStage'),cap=document.getElementById('convCap');
+  const svc=[
+    {k:'Search', c:'#0E7490', n:2},
+    {k:'Orders', c:'#166534', n:1},
+    {k:'Billing',c:'#B45309', n:1}
+  ];
+  const CAP=9, PER=3, SQ=22, G=6, PT=152, colW=100, cols=[174,286,398];
   function render(){
-    const far=x==='fargate';
-    let s=`<svg viewBox="0 0 520 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
-    // user -> API Gateway -> compute
-    s+=`<circle cx="40" cy="60" r="16" fill="#2D3748"/><text x="40" y="65" text-anchor="middle" font-size="13" fill="#fff">&#128100;</text>`;
-    s+=`<rect x="160" y="40" width="110" height="40" rx="8" fill="#8E5CA8"/><text x="215" y="58" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">API Gateway</text><text x="215" y="71" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.85)">the front door</text>`;
-    s+=`<line x1="56" y1="60" x2="158" y2="60" stroke="#9aa3a8" stroke-width="1.8" marker-end="url(#sva)"/>`;
-    s+=`<line x1="270" y1="60" x2="346" y2="60" stroke="#9aa3a8" stroke-width="1.8" marker-end="url(#sva)"/>`;
-    if(far){
-      s+=`<rect x="350" y="34" width="150" height="52" rx="9" fill="#0E7490"/><text x="425" y="55" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">Fargate</text><text x="425" y="71" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,.85)">your container, vendor runs it</text>`;
-    } else {
-      s+=`<rect x="350" y="34" width="150" height="52" rx="9" fill="#B45309"/><text x="425" y="55" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">Lambda</text><text x="425" y="71" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,.85)">your function, run on trigger</text>`;
-    }
-    s+=`<defs><marker id="sva" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#7a8589"/></marker></defs>`;
+    const minTop=Math.min(...svc.map(g=>{const n=g.n,fr=Math.floor(n/PER),rem=n%PER,tr=fr+(rem>0?1:0);return PT-tr*SQ-(tr-1)*G;}));
+    const vbTop=minTop-32, vbH=(PT+58+10)-vbTop, CY=PT+29;
+    let s=`<svg viewBox="0 ${vbTop} 520 ${vbH}" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    s+=`<defs><marker id="cva" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#7a8589"/></marker></defs>`;
+    // left: user -> API Gateway (the front door), centered on the platform band
+    s+=`<circle cx="24" cy="${CY}" r="14" fill="#2D3748"/><text x="24" y="${CY+5}" text-anchor="middle" font-size="12" fill="#fff">&#128100;</text>`;
+    s+=`<line x1="40" y1="${CY}" x2="55" y2="${CY}" stroke="#9aa3a8" stroke-width="1.8" marker-end="url(#cva)"/>`;
+    s+=`<rect x="58" y="${CY-24}" width="94" height="48" rx="9" fill="#8E5CA8"/>`;
+    s+=`<text x="105" y="${CY-2}" text-anchor="middle" font-size="11.5" font-weight="800" fill="#fff">API Gateway</text>`;
+    s+=`<text x="105" y="${CY+12}" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,.85)">the front door</text>`;
+    s+=`<line x1="152" y1="${CY}" x2="166" y2="${CY}" stroke="#9aa3a8" stroke-width="1.8" marker-end="url(#cva)"/>`;
+    // right: microservice stacks pile upward, resting on the serverless platform
+    svc.forEach((g,gi)=>{
+      const cx=cols[gi], n=g.n;
+      const fullRows=Math.floor(n/PER), rem=n%PER, totalRows=fullRows+(rem>0?1:0);
+      for(let r=0;r<totalRows;r++){
+        const count=(r<fullRows)?PER:rem;
+        const rowTopY=PT-(r+1)*SQ-r*G;
+        const rw=count*SQ+(count-1)*G, startX=cx+(colW-rw)/2;
+        for(let c=0;c<count;c++) s+=`<rect x="${startX+c*(SQ+G)}" y="${rowTopY}" width="${SQ}" height="${SQ}" rx="4" fill="${g.c}"/>`;
+      }
+      const topRowTop=PT-totalRows*SQ-(totalRows-1)*G;
+      s+=`<text x="${cx+colW/2}" y="${topRowTop-9}" text-anchor="middle" font-size="12" font-weight="800" fill="${g.c}">${g.k} &times;${n}</text>`;
+    });
+    s+=`<rect x="162" y="${PT}" width="348" height="58" rx="11" fill="#2D3748"/>`;
+    s+=`<text x="336" y="${PT+28}" text-anchor="middle" font-size="13.5" font-weight="900" font-family="Barlow Condensed,sans-serif" letter-spacing="0.03em" fill="#fff">SERVERLESS PLATFORM</text>`;
+    s+=`<text x="336" y="${PT+45}" text-anchor="middle" font-size="10.5" fill="rgba(255,255,255,.82)">infrastructure managed by the cloud vendor</text>`;
     s+=`</svg>`;
     stage.className='fade'; stage.innerHTML=s;
-    cap.innerHTML = far
-      ? '<b>Fargate &mdash; serverless containers.</b> You still build a container, but you hand it to AWS to run &mdash; no VM to manage. Like a freight service: you pack the crate, they handle the logistics.'
-      : '<b>Lambda &mdash; functions.</b> You upload raw code; AWS stores it and runs it the instant a trigger arrives, then stops. Zero maintenance &mdash; no truck, no crate. The vendor even patches the OS underneath.';
-    document.querySelectorAll('#srvless [data-x]').forEach(b=>b.className='ui'+(b.dataset.x===x?'':' ghost'));
+    cap.innerHTML='Each microservice scales <b>on its own</b> &mdash; add <b>Search</b> instances when search is busy, without touching Orders or Billing. Every instance runs on <b>serverless</b> infrastructure: the cloud vendor provisions and manages the servers, so you just deploy services.';
     setTimeout(()=>stage.classList.remove('fade'),360);
   }
   render();
-  document.querySelectorAll('#srvless [data-x]').forEach(b=>b.onclick=()=>{x=b.dataset.x;render();});
+  document.querySelectorAll('#conv [data-add]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.add; if(svc[i].n<CAP) svc[i].n++; render(); });
+  const rb=document.querySelector('#conv [data-reset]'); if(rb) rb.onclick=()=>{ svc[0].n=2; svc[1].n=1; svc[2].n=1; render(); };
+})();
+
+/* ---------- 5. Security in the modern stack ---------- */
+(function(){
+  const chips=document.getElementById('secChips'),det=document.getElementById('secDetail');
+  const C=[
+    {k:'Encryption (TLS, KMS)', s:'Carries over', col:'#166534', d:'Unchanged &mdash; still encrypt in transit (TLS) and at rest (KMS), wherever the code runs.'},
+    {k:'Identity &amp; MFA (Cognito)', s:'Carries over', col:'#166534', d:'Still authenticate users at the front door &mdash; only now that front door is the <b>API Gateway</b>.'},
+    {k:'DDoS (Shield)', s:'Shifts', col:'#0E7490', d:'Shield and rate-limiting now front the <b>API Gateway</b> instead of the load balancer.'},
+    {k:'Input attacks (WAF)', s:'Shifts', col:'#0E7490', d:'The <b>WAF</b> attaches to the <b>API Gateway</b> instead of the load balancer &mdash; same job, new spot.'},
+    {k:'Vulnerable libraries (Inspector)', s:'Shifts', col:'#0E7490', d:'Inspector now scans <b>container images and function dependencies</b>, not a long-lived EC2 host.'},
+    {k:'Host hardening / EDR', s:'Shifts', col:'#0E7490', d:'With serverless the vendor patches the OS &mdash; you drop host hardening and focus on <b>least-privilege permissions per function</b>.'},
+    {k:'Service-to-service auth', s:'New concern', col:'#8E5CA8', d:'Many microservices means many internal APIs. Now you must authenticate and authorize <b>service-to-service</b> calls &mdash; not just the front door.'}
+  ];
+  let sel=0;
+  chips.innerHTML=C.map((c,i)=>`<button class="ui${i===0?'':' ghost'}" data-i="${i}">${c.k}</button>`).join('');
+  function render(){
+    chips.querySelectorAll('button').forEach((b,i)=>b.className='ui'+(i===sel?'':' ghost'));
+    const c=C[sel];
+    det.className='fade';
+    det.innerHTML=`<div style="display:inline-block;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:${c.col};padding:3px 11px;border-radius:20px;margin-bottom:9px">${c.s}</div>`+
+      `<p style="font-size:13.5px;line-height:1.65;margin:0;color:var(--text)">${c.d}</p>`;
+    setTimeout(()=>det.classList.remove('fade'),360);
+  }
+  chips.querySelectorAll('button').forEach(b=>b.onclick=()=>{sel=+b.dataset.i;render();});
+  render();
 })();
 </script>
 </body></html>
