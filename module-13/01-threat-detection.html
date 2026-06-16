@@ -121,21 +121,23 @@ input[type=range]{ accent-color:var(--accent); }
   </section>
 
   <section>
-    <h2><span class="num">3</span> The two clocks</h2>
-    <p class="lead">Detection is measured with two stopwatches. The whole goal is to shrink them from <strong>months to minutes</strong>. Drag the detection speed and watch the damage:</p>
+    <h2><span class="num">3</span> The two clocks: MTTD and MTTR</h2>
+    <p class="lead">Every incident runs two stopwatches back to back: <strong>MTTD</strong> (compromise&nbsp;&rarr;&nbsp;you detect them) and <strong>MTTR</strong> (detect&nbsp;&rarr;&nbsp;you evict them). Added together they are the <strong>total incident lifecycle</strong>. Drag the detection speed and watch the total &mdash; and which clock dominates it &mdash; change:</p>
     <div class="widget" id="clock">
-      <h4>MTTD &middot; MTTR &middot; dwell time</h4>
+      <h4>MTTD + MTTR = total incident lifecycle</h4>
       <div class="controls" style="margin:0 0 10px">
         <span style="font-size:12.5px;color:var(--text-muted)">How fast you detect:</span>
         <input type="range" id="spdRange" min="0" max="100" value="78" style="flex:1;min-width:160px">
         <span id="spdVal" style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12.5px;color:var(--accent)"></span>
       </div>
       <div id="clockStage"></div>
+      <div id="clockStats" style="display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 0"></div>
       <p id="clockCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:34px"></p>
+      <p style="font-size:11px;color:var(--text-light);margin:8px 0 0;line-height:1.5">The grey track is the worst case (8&nbsp;months) for reference; the coloured bar is <i>this</i> incident&rsquo;s total &mdash; watch it shrink as detection speeds up. Its split shows which clock dominates. Length uses a log scale so the full months-to-minutes range stays visible; the exact figures are the three numbers above. MTTR is held at a fixed <i>response-capability</i> floor &mdash; in reality it grows when the attacker has entrenched longer.</p>
     </div>
     <div class="notebox">
       <div class="lbl">One precise definition</div>
-      <b>Dwell time</b> is the stretch the attacker is inside <i>undetected</i> &mdash; from the moment of compromise to the moment you detect them. It lines up with <b>MTTD</b>. Add <b>MTTR</b> (detection&nbsp;&rarr;&nbsp;kicked out) and you get the <b>total incident lifecycle</b>, not dwell time. Shrinking dwell time is what limits how much an attacker can steal.
+      <b>Dwell time &asymp; MTTD</b> = compromise&nbsp;&rarr;&nbsp;detection &mdash; the stretch the attacker sits inside <i>undetected</i>. Then <b>MTTD + MTTR</b> = compromise&nbsp;&rarr;&nbsp;fully evicted = the <b>total incident lifecycle</b>. So dwell time is only the <i>first</i> clock; the total is both. Shrinking dwell is what limits how much an attacker can steal &mdash; but note <b>MTTR</b> is overloaded across the industry (Respond / Resolve / Recover / Repair), so here it always means <i>detection&nbsp;&rarr;&nbsp;evicted</i>.
     </div>
   </section>
 
@@ -215,45 +217,71 @@ input[type=range]{ accent-color:var(--accent); }
 
 /* ---------- 3. The clocks ---------- */
 (function(){
-  const range=document.getElementById('spdRange'),val=document.getElementById('spdVal'),stage=document.getElementById('clockStage'),cap=document.getElementById('clockCap');
-  function label(frac){ // frac 0..1 of "slowness"
-    if(frac>0.8) return ['8 months','slow'];
-    if(frac>0.55) return ['6 weeks','slow'];
-    if(frac>0.3) return ['4 days','better'];
-    if(frac>0.12) return ['9 hours','good'];
-    return ['12 minutes','fast'];
+  const range=document.getElementById('spdRange'),val=document.getElementById('spdVal'),
+        stage=document.getElementById('clockStage'),stats=document.getElementById('clockStats'),
+        cap=document.getElementById('clockCap');
+
+  // MTTR is the response-capability floor: detection -> evicted. Held ~constant
+  // here (it reflects your runbooks/automation, not how long the attacker dwelt).
+  const MTTR_H = 3;
+
+  // dwell buckets, keyed on slowness f (0..1). h = real hours; w = schematic px width.
+  function dwell(f){
+    if(f>0.8)  return {h:5760,txt:'8 months', w:360,tone:'#c0392b',mood:'slow'};
+    if(f>0.55) return {h:1008,txt:'6 weeks',  w:300,tone:'#c0392b',mood:'slow'};
+    if(f>0.3)  return {h:96,  txt:'4 days',   w:210,tone:'#B45309',mood:'mid'};
+    if(f>0.12) return {h:9,   txt:'9 hours',  w:120,tone:'#2e7d57',mood:'fast'};
+    return            {h:0.2, txt:'12 minutes',w:60,tone:'#2e7d57',mood:'fast'};
   }
+  function plur(x){ return Math.round(x)===1?'':'s'; }
+  function humanize(h){ // thresholds at 2 units so the total never rounds below MTTD
+    if(h>=1440) return Math.round(h/720)+' month'+plur(h/720);
+    if(h>=336)  return Math.round(h/168)+' week'+plur(h/168);
+    if(h>=48)   return Math.round(h/24)+' day'+plur(h/24);
+    if(h>=1)    return Math.round(h)+' hour'+plur(h);
+    return Math.round(h*60)+' min';
+  }
+  function chip(lbl,v,color){
+    return `<div style="flex:1;min-width:118px;border:0.5px solid var(--border);border-radius:8px;padding:11px 13px;background:#fff">
+      <div style="font-size:9.5px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--text-light)">${lbl}</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:700;color:${color};margin-top:3px">${v}</div></div>`;
+  }
+
   function render(){
-    const fast=+range.value; const slow=100-fast; const f=slow/100;
-    const [mttd] = label(f);
-    val.textContent='MTTD '+mttd;
-    // timeline: compromise --(MTTD/dwell)-- detected --(MTTR)-- contained
-    const dwellW = 60+f*300;     // dwell grows with slowness
-    const mttrW = 70;
-    let s=`<svg viewBox="0 0 520 110" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
-    const y=56, x0=20;
-    const xDet=x0+dwellW, xCon=xDet+mttrW;
-    // base line
-    s+=`<line x1="${x0}" y1="${y}" x2="${Math.min(xCon+10,505)}" y2="${y}" stroke="#cfd6db" stroke-width="2"/>`;
-    // dwell span (red = bad)
-    const dc = f>0.55?'#c0392b':f>0.3?'#B45309':'#2e7d57';
-    s+=`<rect x="${x0}" y="${y-9}" width="${dwellW}" height="18" rx="4" fill="${dc}" fill-opacity="0.18" stroke="${dc}" stroke-width="1"/>`;
-    s+=`<text x="${x0+dwellW/2}" y="${y-16}" text-anchor="middle" font-size="9" font-weight="800" fill="${dc}">DWELL TIME = MTTD (${mttd})</text>`;
-    // mttr span
-    s+=`<rect x="${xDet}" y="${y-9}" width="${mttrW}" height="18" rx="4" fill="#0E7490" fill-opacity="0.18" stroke="#0E7490" stroke-width="1"/>`;
-    s+=`<text x="${xDet+mttrW/2}" y="${y+30}" text-anchor="middle" font-size="9" font-weight="800" fill="#0E7490">MTTR</text>`;
-    // markers
-    function mark(x,label2,sub){ return `<circle cx="${x}" cy="${y}" r="5" fill="#1A202C"/><text x="${x}" y="${y-22}" text-anchor="middle" font-size="8.5" font-weight="700" fill="#1a1a18">${label2}</text>`; }
-    s+=mark(x0,'compromise');
-    s+=`<circle cx="${xDet}" cy="${y}" r="5" fill="#1A202C"/><text x="${xDet}" y="${y+44}" text-anchor="middle" font-size="8.5" font-weight="700" fill="#1a1a18">detected</text>`;
-    s+=`<circle cx="${xCon}" cy="${y}" r="5" fill="#1A202C"/><text x="${Math.min(xCon,498)}" y="${y-22}" text-anchor="middle" font-size="8.5" font-weight="700" fill="#1a1a18">contained</text>`;
+    const f=(100-(+range.value))/100, d=dwell(f);
+    const total=d.h+MTTR_H;
+    val.textContent='dwell '+d.txt;
+
+    // ---- incident bar on a worst-case reference track (log length + phase split) ----
+    const DWELL='#B45309', MTTR='#0E7490', TRACK='#e9ecee', MINT=3.2, MAXT=5763;
+    const tX=10,tW=460,tY=34,tH=26;
+    const barFrac=Math.max(0.08,Math.min(1,0.08+(Math.log10(total)-Math.log10(MINT))/(Math.log10(MAXT)-Math.log10(MINT))*0.92));
+    let dwellLen=tW*barFrac*(d.h/total), mttrLen=tW*barFrac-dwellLen; const MINSEG=4;
+    if(mttrLen<MINSEG){ dwellLen=Math.max(2,dwellLen-(MINSEG-mttrLen)); mttrLen=MINSEG; }
+    if(dwellLen<MINSEG){ mttrLen=Math.max(2,mttrLen-(MINSEG-dwellLen)); dwellLen=MINSEG; }
+    const L=dwellLen+mttrLen;
+    let s=`<svg viewBox="0 0 480 78" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    s+=`<rect x="${tX}" y="8" width="10" height="10" rx="2" fill="${DWELL}"/><text x="${tX+15}" y="17" font-size="10" font-weight="700" fill="#5f5e5a">MTTD &#183; undetected</text>`;
+    s+=`<rect x="${tX+150}" y="8" width="10" height="10" rx="2" fill="${MTTR}"/><text x="${tX+165}" y="17" font-size="10" font-weight="700" fill="#5f5e5a">MTTR &#183; response</text>`;
+    s+=`<rect x="${tX}" y="${tY}" width="${tW}" height="${tH}" rx="6" fill="${TRACK}"/>`;
+    s+=`<text x="${tX+tW-6}" y="${tY+tH+14}" text-anchor="end" font-size="8.5" fill="#aab0b4">worst-case scale: 8 months</text>`;
+    s+=`<clipPath id="ib"><rect x="${tX}" y="${tY}" width="${L}" height="${tH}" rx="6"/></clipPath>`;
+    s+=`<g clip-path="url(#ib)"><rect x="${tX}" y="${tY}" width="${dwellLen}" height="${tH}" fill="${DWELL}"/><rect x="${tX+dwellLen}" y="${tY}" width="${mttrLen}" height="${tH}" fill="${MTTR}"/></g>`;
     s+=`</svg>`;
-    stage.innerHTML=s;
-    cap.innerHTML = f>0.55
-      ? '<b style="color:#c0392b">Slow detection.</b> The attacker roams for '+mttd+' before anyone notices &mdash; months of free rein to move laterally and steal data. This is the SolarWinds story.'
-      : f>0.3
-      ? '<b style="color:#B45309">Getting faster.</b> Dwell time is down to '+mttd+'. Less time inside means less damage &mdash; but there&rsquo;s still room to improve.'
-      : '<b style="color:#2e7d57">Fast detection.</b> Caught in '+mttd+'. The attacker barely gets started before the SOC and automated response shut them down. This is the goal.';
+    stage.className='fade'; stage.innerHTML=s;
+    setTimeout(()=>stage.classList.remove('fade'),360);
+
+    // ---- the three real numbers ----
+    stats.innerHTML = chip('MTTD &middot; dwell time', d.txt, '#B45309')
+      + chip('MTTR &middot; response', humanize(MTTR_H), '#0E7490')
+      + chip('Total lifecycle', humanize(total), '#2D3748');
+
+    // ---- caption ----
+    cap.innerHTML = d.mood==='slow'
+      ? '<b style="color:#c0392b">Slow detection.</b> Dwell time is '+d.txt+' &mdash; that <i>is</i> the MTTD, and it swamps everything else, so the total lifecycle is essentially the dwell. Months of free rein. (SolarWinds territory.)'
+      : d.mood==='mid'
+      ? '<b style="color:#B45309">Getting faster.</b> Dwell is down to '+d.txt+', and the total lifecycle drops right along with it. MTTD is still the lever that matters most here.'
+      : '<b style="color:#2e7d57">Fast detection.</b> Dwell is just '+d.txt+' &mdash; now the <b>MTTR floor</b> sets the total ('+humanize(total)+'). You can&rsquo;t evict faster than you can respond, so past this point you improve by speeding up <i>response</i>, not detection.';
   }
   render();
   range.oninput=render;
