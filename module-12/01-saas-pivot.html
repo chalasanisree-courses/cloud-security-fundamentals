@@ -96,6 +96,7 @@ button.ui.ghost:hover{ background:var(--accent-soft); }
       <li>The pivot from <em>builder</em> (IaaS) to <em>buyer</em> (SaaS) &mdash; run your own Exchange vs. subscribe to Office&nbsp;365</li>
       <li>What changes: the vendor takes the network, host, and app &mdash; the security stack you secure shrinks</li>
       <li>The two layers that never transfer: <strong>identity</strong> and <strong>data</strong> &mdash; one note on each</li>
+      <li>How securing each <em>differs</em> in IaaS vs SaaS</li>
     </ul>
   </div>
 
@@ -153,6 +154,24 @@ button.ui.ghost:hover{ background:var(--accent-soft); }
         <div style="font-family:'Barlow Condensed';font-weight:900;font-size:22px;color:var(--text);margin:2px 0 5px">Securing Data &rarr;</div>
         <div style="font-size:12.5px;color:var(--text-muted);line-height:1.5">Keeping your information safe inside someone else&rsquo;s app &mdash; <b>DLP</b> and <b>CASB</b>.</div>
       </a>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> Securing identity &amp; data: IaaS vs SaaS</h2>
+    <p class="lead">The two layers that stay yours are secured <em>differently</em> once you&rsquo;re a buyer. Toggle each:</p>
+    <div class="widget" id="cmp">
+      <h4>What changes for each remaining layer</h4>
+      <div class="controls" style="margin:0 0 14px">
+        <button class="ui" data-k="identity">Identity security</button>
+        <button class="ui ghost" data-k="data">Data security</button>
+      </div>
+      <div id="cmpStage"></div>
+      <p id="cmpCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:42px"></p>
+    </div>
+    <div class="notebox">
+      <div class="lbl">One picture: the envelope analogy</div>
+      <b>Encryption</b> = a steel envelope &mdash; steal it, you still can&rsquo;t read it (stops <i>hackers</i>). <b>Access control</b> = the mailman checking ID &mdash; only Mary may hold it (stops <i>unauthorized users</i>). <b>DLP</b> = a scanner reading the letter &mdash; &ldquo;this shouldn&rsquo;t be mailed!&rdquo; (stops <i>bad content / insiders</i>). <b>CASB</b> = a GPS tracker &mdash; &ldquo;why is this going to a personal device?&rdquo; (stops <i>bad movement / exfiltration</i>).
     </div>
   </section>
 
@@ -233,6 +252,39 @@ button.ui.ghost:hover{ background:var(--accent-soft); }
   }
   render();
   document.querySelectorAll('#stack [data-m]').forEach(btn=>btn.onclick=()=>{m=btn.dataset.m;render();});
+})();
+
+/* ---------- 3. Identity & data: IaaS vs SaaS ---------- */
+(function(){
+  const stage=document.getElementById('cmpStage'),cap=document.getElementById('cmpCap');
+  let k='identity';
+  const C={
+    identity:{
+      iaas:['IaaS &mdash; you run it','You manage identity &amp; access yourself with <b>AWS IAM</b> &mdash; users, roles, and policies controlling who can touch your servers and storage. You configure it all.'],
+      saas:['SaaS &mdash; identity is the perimeter','The vendor runs the infrastructure; you manage <b>app users</b>, enforce <b>MFA</b>, and use <b>federation / SSO</b> (OIDC, SAML) plus <b>OAuth</b> for app-to-app access.'],
+      cap:'Identity shifts from <b>configuring infrastructure access</b> (IAM) to being the <b>front-line perimeter</b> &mdash; federated and delegated.'
+    },
+    data:{
+      iaas:['IaaS &mdash; confidentiality','<b>Encryption</b> (KMS, your keys) and <b>access control</b> (bucket / IAM policies). &ldquo;Can a hacker read it? Does Mary have permission?&rdquo;'],
+      saas:['SaaS &mdash; governance &amp; compliance','<b>DLP</b> (should this content be here?) and <b>CASB</b> (should it move?). The vendor encrypts by default; <b>BYOK</b> is your lever.'],
+      cap:'Data security shifts from <b>confidentiality</b> (keep it secret) to <b>governance</b> (keep the right data in the right place, used the right way).'
+    }
+  };
+  function card(col,d){
+    return `<div style="flex:1;min-width:230px;border:0.5px solid var(--border);border-top:3px solid ${col};border-radius:0 0 8px 8px;padding:13px 15px;background:var(--bg-card)">`+
+      `<div style="font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:${col};margin-bottom:6px">${d[0]}</div>`+
+      `<div style="font-size:13px;line-height:1.55">${d[1]}</div></div>`;
+  }
+  function render(){
+    const c=C[k];
+    stage.className='fade';
+    stage.innerHTML=`<div style="display:flex;gap:14px;flex-wrap:wrap">`+card('#0E7490',c.iaas)+card('#2e7d57',c.saas)+`</div>`;
+    cap.innerHTML=c.cap;
+    document.querySelectorAll('#cmp [data-k]').forEach(b=>b.className='ui'+(b.dataset.k===k?'':' ghost'));
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  render();
+  document.querySelectorAll('#cmp [data-k]').forEach(b=>b.onclick=()=>{k=b.dataset.k;render();});
 })();
 </script>
 </body></html>
