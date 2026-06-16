@@ -133,6 +133,12 @@ input[type=range]{ accent-color:var(--accent); }
 .kc .era-bd .inner{ padding:6px 16px 18px; }
 .kc .era-bd .inner p{ font-size:13.5px; line-height:1.7; margin:10px 0 0; }
 .kc .era-bd .inner .widget{ margin-top:14px; }
+
+/* ---- accessibility layer ---- */
+:root{ --text-light:#6c6b66; }
+@media (prefers-reduced-motion: reduce){ .fade{ animation:none !important; } }
+a:focus-visible, button:focus-visible, input:focus-visible, [data-akey]:focus-visible, [tabindex]:focus-visible{ outline:3px solid var(--accent-dark); outline-offset:2px; }
+a.navbtn.disabled{ }
 </style>
 </head><body>
 <header class="pagenav"><div class="pagenav-inner">
@@ -492,6 +498,66 @@ document.querySelectorAll('.kc .era-head').forEach(head=>{
   document.getElementById('synNext').onclick=()=>{if(st<S.length-1){st++;paint();}};
   document.getElementById('synReset').onclick=()=>{st=0;paint();};
   paint();
+})();
+</script>
+
+<script>
+/* ---- accessibility layer (auto-applied; idempotent) ---- */
+(function(){
+  function fixRanges(root){
+    (root||document).querySelectorAll('input[type=range]:not([data-a11y])').forEach(function(r){
+      r.setAttribute('data-a11y','1');
+      if(!r.getAttribute('aria-label')){
+        var l='', p=r.previousElementSibling;
+        if(p && p.tagName==='SPAN') l=p.textContent.replace(/:\s*$/,'').trim();
+        r.setAttribute('aria-label', l||'value slider');
+      }
+    });
+  }
+  function fixNav(){
+    document.querySelectorAll('a.navbtn.disabled').forEach(function(a){
+      a.setAttribute('aria-disabled','true'); a.setAttribute('tabindex','-1');
+    });
+  }
+  function fixSvg(root){
+    (root||document).querySelectorAll('svg:not([data-a11y])').forEach(function(s){
+      s.setAttribute('data-a11y','1');
+      if(!s.getAttribute('role') && s.getAttribute('aria-hidden')!=='true'){
+        s.setAttribute('role','img');
+        var w=s.closest('.widget'), h=w&&w.querySelector('h4'), sec=s.closest('section'), h2=sec&&sec.querySelector('h2');
+        var lab=(h&&h.textContent.trim())||(h2&&h2.textContent.replace(/\s+/g,' ').trim())||'diagram';
+        s.setAttribute('aria-label', lab);
+      }
+    });
+    (root||document).querySelectorAll('[data-i]:not([data-akey]), [style*="cursor:pointer"]:not([data-akey]), [onclick]:not([data-akey])').forEach(function(el){
+      var t=(el.tagName||'').toLowerCase();
+      if(t==='button'||el.closest('button'))return;
+      if(['rect','text','circle','path','g','image','polygon','ellipse'].indexOf(t)===-1)return;
+      if(el.getAttribute('role')==='button' && el.getAttribute('tabindex')!==null){ el.setAttribute('data-akey','1'); return; }
+      el.setAttribute('data-akey','1'); el.setAttribute('tabindex','0'); el.setAttribute('role','button');
+      el.addEventListener('keydown',function(e){
+        if(e.key==='Enter'||e.key===' '||e.key==='Spacebar'){ e.preventDefault(); el.dispatchEvent(new MouseEvent('click',{bubbles:true})); }
+      });
+    });
+  }
+  function fixToggles(){
+    var groups=[];
+    document.querySelectorAll('button.ui').forEach(function(b){ if(b.parentElement && groups.indexOf(b.parentElement)===-1) groups.push(b.parentElement); });
+    groups.forEach(function(g){
+      var btns=[].slice.call(g.children).filter(function(c){return c.tagName==='BUTTON' && c.classList.contains('ui');});
+      if(btns.length<2) return;
+      var nonGhost=btns.filter(function(b){return !b.classList.contains('ghost');});
+      if(nonGhost.length!==1) return; /* single-select toggle group only; skip action groups */
+      btns.forEach(function(b){
+        b.setAttribute('aria-pressed', b.classList.contains('ghost')?'false':'true');
+        if(!b.__ap){ b.__ap=new MutationObserver(function(){ b.setAttribute('aria-pressed', b.classList.contains('ghost')?'false':'true'); }); b.__ap.observe(b,{attributes:true,attributeFilter:['class']}); }
+      });
+    });
+  }
+  function runAll(){ fixRanges(); fixNav(); fixSvg(); fixToggles(); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',runAll); else runAll();
+  var mo=new MutationObserver(function(muts){ var run=false; muts.forEach(function(m){ if(m.addedNodes && m.addedNodes.length) run=true; }); if(run){ fixRanges(); fixSvg(); fixToggles(); } });
+  document.querySelectorAll('.page').forEach(function(n){ mo.observe(n,{childList:true,subtree:true}); });
 })();
 </script>
 </body></html>
