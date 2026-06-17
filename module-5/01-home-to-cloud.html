@@ -150,7 +150,7 @@ a.navbtn.disabled{ }
     </div>
     <div class="keybox">
       <div class="lbl">Why the DMZ exists</div>
-      Enterprises must let <b>strangers in</b> &mdash; customers hitting a website, partners calling an API &mdash; without exposing internal databases. The fix is the <b>DMZ</b>: a buffer segment that hosts the internet-facing systems and is isolated from the internal network, so a compromised web server can&rsquo;t reach straight into your data. It limits the <b>blast radius</b>.
+      Enterprises must let <b>strangers in</b> &mdash; customers hitting a website, partners calling an API &mdash; without exposing internal databases. The fix is the <b>DMZ</b>: a buffer segment that hosts the internet-facing systems and is isolated from the internal network, so a compromised web server can&rsquo;t reach straight into your data. It limits the <b>blast radius</b> (how far an attacker can spread if one system is breached).
     </div>
   </section>
 
@@ -171,7 +171,7 @@ a.navbtn.disabled{ }
 
   <div class="assessment-box">
     <div class="assess-label">Remember</div>
-    <p>Networking principles are <strong>the same from home to cloud</strong> &mdash; only the implementation changes. A <strong>home router</strong> collapses five jobs (routing, NAT, firewall, gateway, Wi-Fi) into one box and blocks inbound by default. <strong>NAT</strong> lets private IPs share one public address but is <strong>not a firewall</strong>. An <strong>enterprise</strong> explodes that box into specialized hardware and adds segmentation &mdash; notably a <strong>DMZ</strong> to accept inbound safely. An <strong>AWS VPC</strong> is that enterprise network in software: enterprise net&nbsp;&rarr;&nbsp;<strong>VPC</strong>, edge router&nbsp;&rarr;&nbsp;<strong>Internet Gateway</strong>, NAT device&nbsp;&rarr;&nbsp;<strong>NAT Gateway</strong>, DMZ&nbsp;&rarr;&nbsp;<strong>public subnet</strong>, internal net&nbsp;&rarr;&nbsp;<strong>private subnet</strong>.</p>
+    <p>Networking principles are <strong>the same from home to cloud</strong> &mdash; only the implementation changes. A <strong>home router</strong> collapses five jobs (routing, NAT, firewall, gateway, Wi-Fi) into one box and blocks inbound by default. <strong>NAT</strong> lets private IPs share one public address but is <strong>not a firewall</strong>. An <strong>enterprise</strong> explodes that box into specialized hardware (edge routers, firewalls, NAT devices, proxies, and load balancers that spread traffic across servers) and adds segmentation &mdash; notably a <strong>DMZ</strong> to accept inbound safely. An <strong>AWS VPC</strong> is that enterprise network in software: enterprise net&nbsp;&rarr;&nbsp;<strong>VPC</strong>, edge router&nbsp;&rarr;&nbsp;<strong>Internet Gateway</strong>, NAT device&nbsp;&rarr;&nbsp;<strong>NAT Gateway</strong>, DMZ&nbsp;&rarr;&nbsp;<strong>public subnet</strong>, internal net&nbsp;&rarr;&nbsp;<strong>private subnet</strong>.</p>
   </div>
 
 </div>
@@ -283,10 +283,10 @@ a.navbtn.disabled{ }
   const cloud=(x,y,t)=>`<path d="M${x} ${y+30} a13 13 0 0 1 3 -24 a15 15 0 0 1 28 4 a11 11 0 0 1 -2 20 z" fill="#cfd6db"/><text x="${x+15}" y="${y+20}" text-anchor="middle" font-size="8.5" font-weight="800" fill="#fff">${t}</text>`;
   const D={
     home:{ draw:()=>svg(
-        box(20,40,96,30,'#eef1f3','Devices','one subnet','#1a1a18')+
-        A(116,55,210,110)+
-        box(210,90,110,46,'#0E7490','ROUTER','routing·NAT·firewall')+
-        A(320,113,400,113)+ cloud(400,98,'WWW')),
+        cloud(14,96,'WWW')+ A(46,113,86,113)+
+        box(86,90,110,46,'#0E7490','ROUTER','routing·NAT·firewall')+
+        A(196,113,236,113)+
+        box(236,98,110,30,'#eef1f3','Devices','one subnet','#1a1a18')),
       cap:'<b>Home.</b> One subnet, one box. Routing, NAT, firewall, gateway, and Wi-Fi are all collapsed into the single router.'},
     ent:{ draw:()=>svg(
         cloud(14,96,'WWW')+ A(46,113,86,113)+
@@ -296,12 +296,12 @@ a.navbtn.disabled{ }
         box(270,96,110,60,'#eef1f3','Internal','employees','#1a1a18')+
         box(396,96,110,60,'#eef1f3','Servers','databases','#1a1a18')+
         A(348,80,348,96)),
-      cap:'<b>Enterprise.</b> The router &ldquo;explodes&rdquo; into specialized hardware &mdash; edge router, firewall, NAT devices, load balancers &mdash; and the network is segmented into <b>DMZ</b>, internal, and server subnets.'},
+      cap:'<b>Enterprise.</b> The router &ldquo;explodes&rdquo; into specialized hardware &mdash; edge router, firewall, NAT devices, proxies, and load balancers &mdash; and the network is segmented into <b>DMZ</b>, internal, and server subnets.'},
     cloud:{ draw:()=>svg(
         cloud(14,96,'WWW')+ A(46,113,84,113)+
         box(84,96,54,34,'#0E7490','IGW','')+
         `<rect x="150" y="26" width="356" height="168" rx="12" fill="none" stroke="#0E7490" stroke-width="1.6" stroke-dasharray="5 4"/><text x="165" y="44" font-size="9.5" font-weight="800" fill="#0E7490">VPC 10.0.0.0/16</text>`+
-        A(138,113,168,70)+
+        A(138,113,150,113)+
         box(168,56,150,44,'#E7F3F6','Public subnet','NAT GW + web','#0B5567')+
         box(168,120,150,44,'#eef1f3','Private subnet','app + database','#1a1a18')+
         box(360,56,130,44,'#E7F3F6','Route table','0.0.0.0/0 &rarr; IGW','#0B5567')+
