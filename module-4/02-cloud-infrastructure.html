@@ -100,6 +100,7 @@ a.navbtn.disabled{ }
     <span class="module-pill">Module 4</span>
     <span class="topic-pill">Infrastructure as Code</span>
     <span class="topic-pill accent">Multi-tenancy &amp; VPC</span>
+    <span class="topic-pill">Regions &amp; AZs</span>
   </div>
 </div></div>
 
@@ -110,6 +111,7 @@ a.navbtn.disabled{ }
     <ul>
       <li>Traditional infrastructure and its siloed teams</li>
       <li>The cloud's multi-tenant model &mdash; what a <em>VPC</em> isolates</li>
+      <li>Where the cloud physically lives &mdash; regions &amp; availability zones</li>
       <li>Mapping old infrastructure onto AWS services</li>
       <li>Infrastructure as Code, and the DevOps loop</li>
     </ul>
@@ -148,7 +150,35 @@ a.navbtn.disabled{ }
   </section>
 
   <section>
-    <h2><span class="num">3</span> Old infrastructure &rarr; AWS services</h2>
+    <h2><span class="num">3</span> Where the cloud lives: regions &amp; zones</h2>
+    <p class="lead">The landlord doesn't own one building &mdash; it owns clusters of data centers all over the world. Two words describe that geography, and together they're what make the cloud resilient.</p>
+    <div style="margin-left:58px;max-width:660px">
+      <p>A <strong>region</strong> is a geographic cluster of data centers in one part of the world &mdash; N. Virginia, Ireland, Mumbai, S&atilde;o Paulo. Each region is <strong>fully independent</strong>: an outage in one does not affect the others. You choose which region to deploy in, driven by <strong>latency</strong> (put the app near your users) and <strong>data-residency law</strong> (EU customer data may be required to stay in the EU).</p>
+      <p>Inside a region are <strong>Availability Zones (AZs)</strong> &mdash; one or more physically separate data centers, each with its own power, cooling, and networking, linked to the others by fast private fiber. Because the buildings are isolated, a fire, flood, or power failure in one AZ doesn't touch the next. Spreading your app across AZs is how a single building can go dark while your service stays up.</p>
+    </div>
+    <div class="widget" id="resilience">
+      <h4>How far does your app survive?</h4>
+      <div style="font-size:12.5px;color:var(--text-muted);margin:0 0 8px">1. Choose how widely the app is deployed:</div>
+      <div class="controls" style="margin:0 0 12px">
+        <button class="ui" data-z="single">Single AZ</button>
+        <button class="ui ghost" data-z="multiaz">Multi-AZ</button>
+        <button class="ui ghost" data-z="multiregion">Multi-region</button>
+      </div>
+      <div id="resStage"></div>
+      <div class="controls" style="margin:12px 0 0">
+        <button class="ui" id="resFail">2. Simulate outage &#9654;</button>
+        <button class="ui ghost" id="resReset">Reset</button>
+      </div>
+      <p id="resCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:48px"></p>
+    </div>
+    <div class="keybox">
+      <div class="lbl">Regions &amp; AZs are shared responsibility</div>
+      AWS guarantees the infrastructure <em>within</em> each region &mdash; the buildings, power, and the isolation between AZs. Whether your application actually <em>survives</em> a failure is <b>your</b> design choice: running across multiple AZs (or regions) is something you architect and pay for, not something you get automatically.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> Old infrastructure &rarr; AWS services</h2>
     <p class="lead">Whatever you used to rack and wire, you now request as a service. Click a resource:</p>
     <div class="widget" id="map">
       <h4>Traditional resource &rarr; AWS service</h4>
@@ -163,7 +193,7 @@ a.navbtn.disabled{ }
   </section>
 
   <section>
-    <h2><span class="num">4</span> Infrastructure as Code</h2>
+    <h2><span class="num">5</span> Infrastructure as Code</h2>
     <p class="lead">You don't click to build &mdash; you <strong>describe</strong> what you want in code, and <strong>Terraform</strong> reconciles reality to match. Drag the slider:</p>
     <div class="widget" id="iac">
       <h4>Desired state &rarr; Terraform plan &rarr; apply</h4>
@@ -196,7 +226,7 @@ a.navbtn.disabled{ }
   </section>
 
   <section>
-    <h2><span class="num">5</span> Putting it together</h2>
+    <h2><span class="num">6</span> Putting it together</h2>
     <p class="lead">Consider a company that wants to move the web server hosting its public website to the cloud &mdash; for example, Coca-Cola moving the server behind <code class="inline">cocacola.com</code> to AWS. Step through it:</p>
     <div class="widget" id="deploy">
       <h4>From on-prem to live on AWS</h4>
@@ -206,7 +236,7 @@ a.navbtn.disabled{ }
   </section>
 
   <section>
-    <h2><span class="num">6</span> The DevOps loop</h2>
+    <h2><span class="num">7</span> The DevOps loop</h2>
     <p class="lead">Development and operations run as one continuous loop &mdash; monitoring feeds straight back into planning. Click a stage:</p>
     <div class="widget" id="devops">
       <h4>The continuous loop</h4>
@@ -219,7 +249,7 @@ a.navbtn.disabled{ }
 
   <div class="assessment-box">
     <div class="assess-label">Remember</div>
-    <p>Traditional infrastructure means <strong>siloed teams</strong> (storage, systems, network) whose coordination is the bottleneck. The cloud is a <strong>multi-tenant landlord</strong> giving each tenant an isolated <strong>VPC</strong> &mdash; the network boundary covered next. Old resources map onto services: compute&nbsp;&rarr;&nbsp;<strong>EC2</strong>, networking&nbsp;&rarr;&nbsp;<strong>VPC subnets/route tables</strong> (+ Internet Gateway), storage&nbsp;&rarr;&nbsp;<strong>S3</strong>. You provision by <strong>writing code</strong> &mdash; Infrastructure as Code, reconciled by <strong>Terraform</strong> &mdash; and ship through a continuous <strong>DevOps</strong> loop.</p>
+    <p>Traditional infrastructure means <strong>siloed teams</strong> (storage, systems, network) whose coordination is the bottleneck. The cloud is a <strong>multi-tenant landlord</strong> giving each tenant an isolated <strong>VPC</strong> &mdash; the network boundary covered next. That hardware lives in independent <strong>regions</strong> worldwide, each split into isolated <strong>Availability Zones</strong>; spreading an app across them is how it survives a data-center failure. Old resources map onto services: compute&nbsp;&rarr;&nbsp;<strong>EC2</strong>, networking&nbsp;&rarr;&nbsp;<strong>VPC subnets/route tables</strong> (+ Internet Gateway), storage&nbsp;&rarr;&nbsp;<strong>S3</strong>. You provision by <strong>writing code</strong> &mdash; Infrastructure as Code, reconciled by <strong>Terraform</strong> &mdash; and ship through a continuous <strong>DevOps</strong> loop.</p>
   </div>
 
 </div>
@@ -316,7 +346,97 @@ a.navbtn.disabled{ }
   document.querySelectorAll('#tenants [data-t]').forEach(b=>b.onclick=()=>{mode=b.dataset.t;render();});
 })();
 
-/* ---------- 3. Resource mapping ---------- */
+/* ---------- 3. Regions & AZ resilience with failover ---------- */
+(function(){
+  const stage=document.getElementById('resStage'),cap=document.getElementById('resCap');
+  const failBtn=document.getElementById('resFail'),resetBtn=document.getElementById('resReset');
+  const reduce=window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const AZ={'A-a':{cx:86.5,x:38},'A-b':{cx:193.5,x:145},'B-a':{cx:326.5,x:278},'B-b':{cx:433.5,x:385}};
+  const AZW=97, AZY=128, AZH=80;
+  const REG={A:{x:24,w:232,name:'REGION — N. VIRGINIA',azs:['A-a','A-b']},
+             B:{x:264,w:232,name:'REGION — IRELAND',azs:['B-a','B-b']}};
+  const SCEN={
+    single:{apps:['A-a'],outage:['A-a'],failover:null},
+    multiaz:{apps:['A-a','A-b'],outage:['A-a'],failover:'A-b'},
+    multiregion:{apps:['A-a','A-b','B-a','B-b'],outage:['A-a','A-b'],failover:'B-a'}
+  };
+  let scen='single', state=0, timer=null;   // state 0 healthy, 1 rerouting, 2 final
+
+  function azBox(key,hasApp,dead,serving){
+    const cx=AZ[key].cx, x=AZ[key].x;
+    let s=`<rect x="${x}" y="${AZY}" width="${AZW}" height="${AZH}" rx="8" fill="${dead?'#fbeae7':'#fff'}" stroke="${dead?'#c0392b':(serving?'#0E7490':'#cfd6db')}" stroke-width="${serving&&!dead?2.6:1.4}"/>`;
+    s+=`<text x="${cx}" y="${AZY+17}" text-anchor="middle" font-size="9" font-weight="700" letter-spacing=".4" fill="#9aa3a8">AZ ${key.slice(-1)}</text>`;
+    if(dead){
+      s+=`<text x="${cx}" y="${AZY+58}" text-anchor="middle" font-size="26" font-weight="900" fill="#c0392b">&#215;</text>`;
+    } else if(hasApp){
+      s+=`<rect x="${cx-26}" y="${AZY+37}" width="52" height="23" rx="5" fill="#0E7490"/>`;
+      s+=`<text x="${cx}" y="${AZY+53}" text-anchor="middle" font-size="9.5" font-weight="800" fill="#fff">app</text>`;
+      if(serving) s+=`<circle cx="${cx+34}" cy="${AZY+13}" r="4" fill="#2e7d57"/>`;
+    } else {
+      s+=`<text x="${cx}" y="${AZY+53}" text-anchor="middle" font-size="9" fill="#c2c8cc">(empty)</text>`;
+    }
+    return s;
+  }
+  function regionBox(k,deadSet){
+    const r=REG[k], allDead=r.azs.every(a=>deadSet.has(a));
+    let s=`<rect x="${r.x}" y="84" width="${r.w}" height="148" rx="12" fill="${allDead?'#fdf1ef':'#f4f6f8'}" stroke="${allDead?'#c0392b':'#cfd6db'}" stroke-width="1.5" stroke-opacity="${allDead?0.7:1}"/>`;
+    s+=`<text x="${r.x+14}" y="106" font-size="10" font-weight="800" letter-spacing=".5" fill="${allDead?'#c0392b':'#5f5e5a'}">${r.name}</text>`;
+    return s;
+  }
+  function render(){
+    const sc=SCEN[scen], apps=new Set(sc.apps);
+    let deadSet=new Set(), serving='A-a', up=true, broken=false;
+    if(state>=1){ deadSet=new Set(sc.outage);
+      if(state===1){ serving=null; up=null; broken=true; }
+      else { serving=sc.failover; up=!!sc.failover; broken=!sc.failover; }
+    }
+    let s=`<svg viewBox="0 0 520 250" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    s+=`<rect x="200" y="12" width="120" height="32" rx="8" fill="#2D3748"/><text x="260" y="32" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">Users &middot; DNS</text>`;
+    s+=regionBox('A',deadSet)+regionBox('B',deadSet);
+    ['A-a','A-b','B-a','B-b'].forEach(k=>{ s+=azBox(k,apps.has(k),deadSet.has(k),serving===k); });
+    s+=`<defs><marker id="ta" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="${broken?'#c0392b':'#0E7490'}"/></marker></defs>`;
+    if(broken){
+      const bx=AZ[sc.outage[0]].cx;
+      s+=`<path d="M260 46 L ${bx} ${AZY-34}" fill="none" stroke="#c0392b" stroke-width="2.4" stroke-dasharray="5 4"/>`;
+      s+=`<text x="${(260+bx)/2}" y="${(46+AZY-34)/2+5}" text-anchor="middle" font-size="15" font-weight="900" fill="#c0392b">&#9889;</text>`;
+    } else {
+      const tx=AZ[serving].cx;
+      const flow=reduce?'':`<animate attributeName="stroke-dashoffset" from="22" to="0" dur="0.7s" repeatCount="indefinite"/>`;
+      s+=`<path d="M260 46 L ${tx} ${AZY}" fill="none" stroke="#0E7490" stroke-width="2.6" stroke-dasharray="6 5" marker-end="url(#ta)">${flow}</path>`;
+    }
+    s+=`</svg>`;
+    let statusTxt,statusCol;
+    if(state===1){ statusTxt='Outage — rerouting…'; statusCol='#b65416'; }
+    else if(up){ statusTxt='Service status: UP'; statusCol='#2e7d57'; }
+    else { statusTxt='Service status: DOWN'; statusCol='#c0392b'; }
+    stage.className='fade';
+    stage.innerHTML=s+`<div style="margin-top:8px;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:${statusCol}">${statusTxt}</div>`;
+    const C={
+      single:{0:'<b>Single AZ.</b> One copy of the app, in one availability zone &mdash; Region B sits idle. Cheapest, least resilient. Press <b>Simulate outage</b>.',
+              2:'<b style="color:#c0392b">Down.</b> The only AZ failed and there is nowhere to fail over to. The service is offline until AWS restores that data center.'},
+      multiaz:{0:'<b>Multi-AZ.</b> Copies run in two AZs of one region. Press <b>Simulate outage</b> to knock out the primary AZ.',
+               2:'<b style="color:#2e7d57">Still up.</b> The primary AZ failed, so traffic fails over to the copy in the other AZ &mdash; survives a fire, flood, or power loss in one building. A whole-region outage would still take you down.'},
+      multiregion:{0:'<b>Multi-region.</b> Copies run in two regions. Press <b>Simulate outage</b> to take out an entire region.',
+                   2:'<b style="color:#2e7d57">Still up.</b> An entire region failed, and DNS reroutes users to the healthy region &mdash; the highest resilience, at the highest cost and complexity.'}
+    };
+    cap.innerHTML = state===1 ? 'Rerouting traffic around the failure&hellip;' : C[scen][state===0?0:2];
+    document.querySelectorAll('#resilience [data-z]').forEach(b=>b.className='ui'+(b.dataset.z===scen?'':' ghost'));
+    failBtn.disabled=state!==0; failBtn.style.opacity=state!==0?0.4:1; failBtn.style.cursor=state!==0?'default':'pointer';
+    setTimeout(()=>stage.classList.remove('fade'),360);
+  }
+  function setScen(x){ scen=x; state=0; if(timer){clearTimeout(timer);timer=null;} render(); }
+  render();
+  document.querySelectorAll('#resilience [data-z]').forEach(b=>b.onclick=()=>setScen(b.dataset.z));
+  failBtn.onclick=()=>{
+    if(state!==0) return;
+    if(reduce){ state=2; render(); return; }
+    state=1; render();
+    timer=setTimeout(()=>{ state=2; render(); timer=null; }, 1100);
+  };
+  resetBtn.onclick=()=>{ if(timer){clearTimeout(timer);timer=null;} state=0; render(); };
+})();
+
+/* ---------- 4. Resource mapping ---------- */
 (function(){
   const stage=document.getElementById('mapStage'),cap=document.getElementById('mapCaption');
   const D={
