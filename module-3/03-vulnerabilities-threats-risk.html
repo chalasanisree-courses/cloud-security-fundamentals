@@ -178,7 +178,7 @@ a.navbtn.disabled{ }
 
   <section>
     <h2><span class="num">3</span> How do you even know a vulnerability exists?</h2>
-    <p>You don't discover most weaknesses yourself &mdash; you look them up. <strong>NIST</strong> publishes the <strong>National Vulnerability Database (NVD)</strong>, where disclosed vulnerabilities are catalogued. Each gets a <strong>CVE identifier</strong> (Common Vulnerabilities and Exposures) &mdash; a year plus a number, like <code class="inline">CVE-2014-6271</code> &mdash; and a <strong>CVSS score</strong> from 0 to 10 that tells you how urgently to act. Drag the score to see the severity bands:</p>
+    <p>You don't discover most weaknesses yourself &mdash; you look them up. When a vulnerability is disclosed, it's assigned a <strong>CVE identifier</strong> (Common Vulnerabilities and Exposures) by <strong>MITRE</strong> and its partner organizations &mdash; a year plus a number, like <code class="inline">CVE-2014-6271</code>. <strong>NIST</strong> then catalogs each one in the <strong>National Vulnerability Database (NVD)</strong>, adding a <strong>CVSS score</strong> from 0 to 10 that tells you how urgently to act. Drag the score to see the severity bands:</p>
     <div class="widget" id="cvss">
       <h4>CVSS severity</h4>
       <input type="range" id="cvssSlide" min="0" max="100" value="98" style="width:100%">
@@ -210,7 +210,7 @@ a.navbtn.disabled{ }
 <span class="code-comment"># ...and the web server returns it in the HTTP response</span></code></pre>
     <div class="notebox">
       <div class="lbl">A modern echo &mdash; Log4Shell</div>
-      Shellshock's pattern returned in 2021 as <b>Log4Shell</b> (<code class="inline">CVE-2021-44228</code>) in the <b>Log4j</b> logging library: another tiny, ubiquitous component, another path to remote code execution, present in countless applications at once. The lesson repeats &mdash; a flaw in something <em>everywhere</em> is catastrophic.
+      Shellshock's pattern returned in 2021 as <b>Log4Shell</b> in the <b>Log4j</b> logging library: another tiny, ubiquitous component, another path to remote code execution, present in countless applications at once. The lesson repeats &mdash; a flaw in something <em>everywhere</em> is catastrophic.
     </div>
   </section>
 
