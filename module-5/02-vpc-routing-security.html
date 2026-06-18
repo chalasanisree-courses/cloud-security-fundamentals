@@ -137,18 +137,23 @@ a.navbtn.disabled{ }
     <h2><span class="num">3</span> Public or private? The route table decides</h2>
     <p class="lead">Subnets are physically identical. A subnet is &ldquo;public&rdquo; <em>only</em> because its <strong>route table</strong> sends internet-bound traffic to the Internet Gateway. Change the route table and the subnet&rsquo;s nature flips:</p>
     <div class="widget" id="route">
-      <h4>Same subnet, three route tables</h4>
+      <h4>How each subnet reaches the internet</h4>
+      <div style="font-size:12.5px;color:var(--text-muted);margin:0 0 12px">Click a subnet to trace its path to the internet. The subnets are identical hardware &mdash; only the <b>route table</b> differs. (<code class="inline">0.0.0.0/0</code> = &ldquo;any internet address&rdquo;.)</div>
       <div class="controls" style="margin:0 0 14px">
-        <button class="ui" data-r="igw">0.0.0.0/0 &rarr; IGW</button>
-        <button class="ui ghost" data-r="nat">0.0.0.0/0 &rarr; NAT GW</button>
-        <button class="ui ghost" data-r="none">local only</button>
+        <button class="ui" data-r="public">Public subnet</button>
+        <button class="ui ghost" data-r="private">Private subnet</button>
+        <button class="ui ghost" data-r="isolated">Isolated subnet</button>
       </div>
       <div id="routeStage"></div>
-      <p id="routeCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:34px"></p>
+      <p id="routeCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:48px"></p>
     </div>
     <div class="keybox">
       <div class="lbl">Public-capable &ne; publicly reachable</div>
       A public route table only makes a subnet <b>able</b> to face the internet. A resource is actually reachable only if it <b>also</b> has a public IP <i>and</i> the NACL and Security Group allow the traffic. Routing and security are separate jobs.
+    </div>
+    <div class="notebox">
+      <div class="lbl">Route-table rules worth memorizing</div>
+      Every subnet is associated with <b>exactly one</b> route table &mdash; but a single route table can be <b>shared by many subnets</b>. And the Internet Gateway is non-negotiable: <b>without an Internet Gateway attached to the VPC, nothing inside can reach the public internet at all</b> &mdash; no matter what the route table says.
     </div>
   </section>
 
@@ -335,39 +340,65 @@ a.navbtn.disabled{ }
   render();
 })();
 
-/* ---------- 3. Public/private by route table ---------- */
+/* ---------- 3. How each subnet reaches the internet (VPC topology) ---------- */
 (function(){
   const stage=document.getElementById('routeStage'),cap=document.getElementById('routeCap');
-  let mode='igw';
-  const D={
-    igw:{kind:'PUBLIC',col:'#2e7d57',target:'Internet Gateway',
-      cap:'With <code class="inline">0.0.0.0/0 &rarr; IGW</code>, the subnet is <b>public-capable</b> &mdash; resources with a public IP can be reached from, and reach, the internet.'},
-    nat:{kind:'PRIVATE (outbound)',col:'#0E7490',target:'NAT Gateway',
-      cap:'With <code class="inline">0.0.0.0/0 &rarr; NAT GW</code>, instances can reach <b>out</b> (updates, APIs) but nothing on the internet can start a connection <b>in</b>.'},
-    none:{kind:'PRIVATE (isolated)',col:'#B45309',target:'— (no internet route)',
-      cap:'With only the <code class="inline">local</code> route, the subnet is fully <b>isolated</b> &mdash; it can talk inside the VPC and nowhere else.'}
+  const GREEN='#2e7d57',TEAL='#0E7490',RED='#c0392b',FAINT='#cfd6db';
+  let mode='public';
+  const CAP={
+    public:'<b>Public subnet.</b> Its route table sends <code class="inline">0.0.0.0/0</code> to the <b>Internet Gateway</b>. A resource here that also has a public IP can reach out to the internet <b>and</b> be reached from it &mdash; two-way.',
+    private:'<b>Private subnet.</b> Its route sends <code class="inline">0.0.0.0/0</code> to a <b>NAT Gateway</b> &mdash; which lives in the <i>public</i> subnet and forwards out through the IGW. Instances reach the internet <b>outbound only</b>: replies to connections they start come back, but nothing on the internet can start a connection inward.',
+    isolated:'<b>Isolated subnet.</b> With only the <code class="inline">local</code> route and no <code class="inline">0.0.0.0/0</code>, there is <b>no path to the internet at all</b> &mdash; it can talk only to other subnets inside the VPC.'
   };
+  function poly(pts,stroke,w,o){o=o||{};
+    const d=pts.map((p,i)=>(i?'L':'M')+p[0]+' '+p[1]).join(' ');
+    return `<path d="${d}" fill="none" stroke="${stroke}" stroke-width="${w}" ${o.dash?`stroke-dasharray="${o.dash}"`:''} ${o.end?`marker-end="url(#${o.end})"`:''} ${o.start?`marker-start="url(#${o.start})"`:''}/>`;
+  }
   function render(){
-    const d=D[mode];
-    let s=`<svg viewBox="0 0 560 150" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
-    // the (identical) subnet
-    s+=`<rect x="20" y="40" width="170" height="70" rx="9" fill="#eef1f3" stroke="${d.col}" stroke-width="2"/>`;
-    s+=`<text x="105" y="66" text-anchor="middle" font-size="11" font-weight="800" fill="#1a1a18">Subnet 10.0.1.0/24</text>`;
-    s+=`<text x="105" y="84" text-anchor="middle" font-size="9.5" fill="#5f5e5a">(physically identical)</text>`;
-    s+=`<rect x="58" y="92" width="94" height="12" rx="3" fill="${d.col}"/><text x="105" y="101" text-anchor="middle" font-size="8" font-weight="800" fill="#fff">${d.kind}</text>`;
-    // route table card
-    s+=`<rect x="240" y="34" width="190" height="82" rx="9" fill="#fff" stroke="#cfd6db" stroke-width="1.2"/>`;
-    s+=`<text x="252" y="52" font-size="9" font-weight="800" letter-spacing=".5" fill="#6c6b66">ROUTE TABLE</text>`;
-    s+=`<text x="252" y="72" font-size="10" font-family="JetBrains Mono,monospace" fill="#5f5e5a">10.0.0.0/16  &rarr; local</text>`;
-    if(mode!=='none') s+=`<text x="252" y="92" font-size="10" font-family="JetBrains Mono,monospace" fill="${d.col}" font-weight="700">0.0.0.0/0   &rarr; ${mode==='igw'?'igw':'nat'}</text>`;
-    else s+=`<text x="252" y="92" font-size="10" font-family="JetBrains Mono,monospace" fill="#6c6b66">(no default route)</text>`;
-    // target
-    s+=`<line x1="430" y1="75" x2="468" y2="75" stroke="#b9c0c6" stroke-width="1.6" ${mode==='none'?'stroke-dasharray="4 4"':''}/>`;
-    s+=`<rect x="468" y="56" width="84" height="38" rx="7" fill="${mode==='none'?'#f4f6f8':d.col}"/>`;
-    s+=`<text x="510" y="79" text-anchor="middle" font-size="9" font-weight="800" fill="${mode==='none'?'#9aa3a8':'#fff'}">${mode==='igw'?'INTERNET':mode==='nat'?'OUTBOUND':'ISOLATED'}</text>`;
+    const pub=mode==='public', priv=mode==='private', iso=mode==='isolated';
+    let s=`<svg viewBox="0 0 560 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    s+=`<defs>`+
+       `<marker id="gE" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="${GREEN}"/></marker>`+
+       `<marker id="gS" markerWidth="9" markerHeight="9" refX="0" refY="3" orient="auto"><path d="M6,0 L0,3 L6,6 Z" fill="${GREEN}"/></marker>`+
+       `<marker id="tE" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="${TEAL}"/></marker></defs>`;
+    // internet + IGW
+    s+=`<rect x="224" y="12" width="112" height="30" rx="15" fill="#2D3748"/><text x="280" y="31" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">INTERNET</text>`;
+    s+=`<rect x="240" y="58" width="80" height="30" rx="6" fill="${iso?'#9aa3a8':(pub?GREEN:TEAL)}"/><text x="280" y="77" text-anchor="middle" font-size="10" font-weight="800" fill="#fff">IGW</text>`;
+    s+=`<line x1="280" y1="42" x2="280" y2="58" stroke="${FAINT}" stroke-width="1.5"/>`;
+    // VPC
+    s+=`<rect x="60" y="104" width="440" height="184" rx="12" fill="none" stroke="#0E7490" stroke-width="1.5" stroke-dasharray="5 4"/><text x="74" y="122" font-size="9.5" font-weight="800" fill="#0E7490">VPC 10.0.0.0/16</text>`;
+    // public subnet
+    s+=`<rect x="84" y="132" width="392" height="68" rx="9" fill="#E7F3F6" stroke="${pub?GREEN:'#bcdfe6'}" stroke-width="${pub?2:1}"/>`;
+    s+=`<text x="96" y="148" font-size="8.5" font-weight="800" letter-spacing=".3" fill="#0B5567">PUBLIC SUBNET</text>`;
+    s+=`<text x="462" y="148" text-anchor="end" font-size="8.5" font-weight="700" fill="#0B5567">0.0.0.0/0 &rarr; IGW</text>`;
+    s+=`<rect x="110" y="158" width="150" height="32" rx="6" fill="#fff" stroke="${pub?GREEN:'#cfd6db'}" stroke-width="${pub?2:1}"/><text x="185" y="178" text-anchor="middle" font-size="10" font-weight="700" fill="#1a1a18">Web server</text>`;
+    s+=`<rect x="300" y="158" width="150" height="32" rx="6" fill="#fff" stroke="${priv?TEAL:'#cfd6db'}" stroke-width="${priv?2:1}"/><text x="375" y="178" text-anchor="middle" font-size="10" font-weight="700" fill="#1a1a18">NAT Gateway</text>`;
+    // private subnet
+    const privRoute = iso?'route: local only (no 0.0.0.0/0)':'0.0.0.0/0 &rarr; NAT GW';
+    s+=`<rect x="84" y="212" width="392" height="64" rx="9" fill="#eef1f3" stroke="${priv?TEAL:iso?RED:'#d9dde0'}" stroke-width="${(priv||iso)?2:1}"/>`;
+    s+=`<text x="96" y="228" font-size="8.5" font-weight="800" letter-spacing=".3" fill="${iso?RED:'#5f5e5a'}">PRIVATE SUBNET</text>`;
+    s+=`<text x="462" y="228" text-anchor="end" font-size="8.5" font-weight="700" fill="${iso?RED:'#5f5e5a'}">${privRoute}</text>`;
+    s+=`<rect x="110" y="238" width="170" height="30" rx="6" fill="#fff" stroke="${(priv||iso)?(iso?RED:TEAL):'#cfd6db'}" stroke-width="${(priv||iso)?2:1}"/><text x="195" y="257" text-anchor="middle" font-size="10" font-weight="700" fill="#1a1a18">App server</text>`;
+    // dynamic paths
+    if(pub){
+      s+=poly([[185,158],[185,100],[280,100],[280,88]],GREEN,2.4,{end:'gE',start:'gS'});
+      s+=poly([[280,58],[280,42]],GREEN,2.4,{end:'gE',start:'gS'});
+      s+=`<text x="300" y="113" font-size="8" font-weight="700" fill="${GREEN}">in &amp; out</text>`;
+    }
+    if(priv){
+      s+=poly([[195,238],[195,206],[375,206],[375,190]],TEAL,2.4,{end:'tE'});
+      s+=poly([[375,158],[375,100],[280,100],[280,88]],TEAL,2.4,{end:'tE'});
+      s+=poly([[280,58],[280,42]],TEAL,2.4,{end:'tE'});
+      s+=`<text x="392" y="203" font-size="8" font-weight="700" fill="${TEAL}">outbound</text>`;
+    }
+    if(iso){
+      s+=poly([[195,238],[195,214]],RED,2.4,{});
+      s+=`<text x="205" y="210" font-size="16" font-weight="900" fill="${RED}">&#215;</text>`;
+      s+=`<text x="232" y="210" font-size="8" font-weight="700" fill="${RED}">no route out</text>`;
+    }
     s+=`</svg>`;
     stage.className='fade'; stage.innerHTML=s;
-    cap.innerHTML=d.cap;
+    cap.innerHTML=CAP[mode];
     document.querySelectorAll('#route [data-r]').forEach(b=>b.className='ui'+(b.dataset.r===mode?'':' ghost'));
     setTimeout(()=>stage.classList.remove('fade'),360);
   }
@@ -387,7 +418,7 @@ a.navbtn.disabled{ }
       `<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#9aa3a8;margin-bottom:4px">subnet · stateless</div>`+
       rule('IN  rule 100  ALLOW :443', !rep, '#B45309')+
       rule('OUT rule 100  ALLOW :1024-65535', rep, '#B45309')+
-      `<div style="font-size:11.5px;color:${rep?'#B45309':'#9aa3a8'};margin-top:6px;line-height:1.5">${rep?'<b>You needed a second rule.</b> Stateless: the reply leaves on an ephemeral port and is only allowed because OUT was written too.':'Inbound :443 is allowed in.'}</div>`;
+      `<div style="font-size:11.5px;color:${rep?'#B45309':'#9aa3a8'};margin-top:6px;line-height:1.5">${rep?'<b>You needed a second rule.</b> Stateless: the reply leaves on an ephemeral port (a temporary high-numbered port the OS picks for the return traffic) and is only allowed because OUT was written too.':'Inbound :443 is allowed in.'}</div>`;
     // SG: one inbound rule; reply automatic.
     sg.innerHTML =
       `<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#9aa3a8;margin-bottom:4px">instance · stateful</div>`+
