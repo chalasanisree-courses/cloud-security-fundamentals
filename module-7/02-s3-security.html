@@ -138,13 +138,13 @@ a.navbtn.disabled{ }
     </div>
     <div class="notebox">
       <div class="lbl">Encrypted by default since 2023</div>
-      You no longer have to turn it on: since <b>January 2023</b>, S3 applies <b>server-side encryption to every new object automatically</b>. Data is never unencrypted at rest by default. The choice that remains is <b>key management</b> &mdash; who holds the key decides who can decrypt: S3 can manage keys for you, or you can control them yourself with KMS or your own keys.
+      You no longer have to turn it on: since <b>January 2023</b>, S3 applies <b>server-side encryption (SSE) to every new object automatically</b>. Data is never unencrypted at rest by default. The choice that remains is <b>key management</b> &mdash; who holds the key decides who can decrypt: S3 can manage keys for you, or you can control them yourself with <b>KMS</b> (Key Management Service) or your own keys.
     </div>
   </section>
 
   <section>
     <h2><span class="num">3</span> Access control: who gets in</h2>
-    <p class="lead">Three tools decide who can read or write an object. Bucket policies do the everyday work; ACLs are legacy; and Block Public Access is the guardrail that catches mistakes. Run a request through them:</p>
+    <p class="lead">Three tools decide who can read or write an object. Bucket policies do the everyday work; ACLs are legacy; and Block Public Access is the guardrail that catches mistakes. Pick a request and follow it through S3&rsquo;s decision:</p>
     <div class="widget" id="acl">
       <h4>Will the request reach the object?</h4>
       <div class="controls" style="margin:0 0 14px" id="aclBtns"></div>
@@ -153,7 +153,7 @@ a.navbtn.disabled{ }
     </div>
     <div class="notebox">
       <div class="lbl">The safe defaults (since April 2023)</div>
-      New buckets now ship locked down: <b>Block Public Access is ON</b> and <b>ACLs are disabled</b> (access is managed by <b>bucket policies and IAM</b>). Treat <b>bucket policies as the primary tool</b> and ACLs as a legacy mechanism you usually leave off. Most famous S3 leaks were buckets accidentally left open <i>before</i> these defaults existed.
+      New buckets now ship locked down: <b>Block Public Access is ON</b> and <b>ACLs are disabled</b> (access is managed by <b>bucket policies and IAM</b> &mdash; Identity and Access Management). Treat <b>bucket policies as the primary tool</b> and ACLs as a legacy mechanism you usually leave off. Most famous S3 leaks were buckets accidentally left open <i>before</i> these defaults existed.
     </div>
   </section>
 
@@ -222,47 +222,71 @@ a.navbtn.disabled{ }
   document.querySelectorAll('#enc [data-e]').forEach(b=>b.onclick=()=>{mode=b.dataset.e;render();});
 })();
 
-/* ---------- 3. Access control decision ---------- */
+/* ---------- 3. Access control decision (flowchart) ---------- */
 (function(){
   const btns=document.getElementById('aclBtns'),stage=document.getElementById('aclStage'),cap=document.getElementById('aclCap');
-  // scenarios: who is asking + what the policy says
+  const TEAL='#0E7490',RED='#c0392b',GREEN='#2e7d57',DIM='#cfd6db',DIMT='#9aa3a8';
   const SC=[
-    {k:'Anonymous (public)', bpa:'block', policy:'(a bucket policy allows public read)', allow:false,
+    {k:'Anonymous (public)', result:'T1', policy:'(a bucket policy allows public read)',
       reason:'<b>Blocked by Block Public Access.</b> The request is anonymous &mdash; public internet access. Block Public Access overrides any policy that would allow it, so the data stays private. This is the guardrail that stops accidental leaks.'},
-    {k:'Authenticated &mdash; allowed', bpa:'pass', policy:'bucket policy: ALLOW this user', allow:true,
+    {k:'Authenticated &mdash; allowed', result:'T4', policy:'bucket policy: ALLOW this user',
       reason:'<b>Allowed.</b> A known, authenticated user, and the bucket policy grants access with no deny anywhere. Block Public Access doesn&rsquo;t apply &mdash; it only blocks <i>public</i> access, not legitimate authenticated access.'},
-    {k:'Authenticated &mdash; explicit deny', bpa:'pass', policy:'bucket policy: DENY this user', allow:false,
+    {k:'Authenticated &mdash; explicit deny', result:'T2', policy:'bucket policy: DENY this user',
       reason:'<b>Denied.</b> Even though the user is authenticated, the bucket policy has an <b>explicit deny</b> for them &mdash; and an explicit deny always wins, over any allow.'},
-    {k:'Authenticated &mdash; no permission', bpa:'pass', policy:'no rule grants this user', allow:false,
+    {k:'Authenticated &mdash; no permission', result:'T3', policy:'no rule grants this user',
       reason:'<b>Denied by default.</b> Nothing explicitly allows this user, so S3 falls back to its default: <b>deny</b>. Access must be granted on purpose &mdash; silence means no.'}
   ];
+  const PATH={
+    T1:{nodes:['S','D1','T1'],edges:['S-D1','D1-T1']},
+    T2:{nodes:['S','D1','D2','T2'],edges:['S-D1','D1-D2','D2-T2']},
+    T3:{nodes:['S','D1','D2','D3','T3'],edges:['S-D1','D1-D2','D2-D3','D3-T3']},
+    T4:{nodes:['S','D1','D2','D3','T4'],edges:['S-D1','D1-D2','D2-D3','D3-T4']}
+  };
   let sel=0;
-  function gate(label,state){
-    // state: 'block'(red stop), 'pass'(green), 'deny'(red), 'na'(grey)
-    const map={block:['#c0392b','&#10007;','#fdecea'],pass:['#2e7d57','&#10003;','#eaf7ef'],deny:['#c0392b','&#10007;','#fdecea'],na:['#9aa3a8','&middot;','#f4f6f8']};
-    const [c,sym,bg]=map[state];
-    return `<div style="flex:1;min-width:150px;background:${bg};border:1.5px solid ${c};border-radius:8px;padding:11px 13px">`+
-      `<div style="font-size:12.5px;font-weight:800;color:#1a1a18">${label}</div>`+
-      `<div style="font-size:14px;font-weight:900;color:${c};margin-top:4px">${sym}</div></div>`;
+  function diamond(cx,cy,on,l1,l2){
+    const hw=94,hh=36,c=on?TEAL:DIM,tc=on?'#fff':DIMT,fill=on?TEAL:'#f4f6f8';
+    return `<polygon points="${cx},${cy-hh} ${cx+hw},${cy} ${cx},${cy+hh} ${cx-hw},${cy}" fill="${fill}" stroke="${c}" stroke-width="1.6"/>`+
+      `<text x="${cx}" y="${cy-2}" text-anchor="middle" font-size="10.5" font-weight="800" fill="${tc}">${l1}</text>`+
+      `<text x="${cx}" y="${cy+12}" text-anchor="middle" font-size="10.5" font-weight="800" fill="${tc}">${l2}</text>`;
   }
-  btns.innerHTML=SC.map((s,i)=>`<button class="ui${i===0?'':' ghost'}" data-i="${i}" style="font-size:11.5px;padding:6px 11px">${s.k}</button>`).join('');
+  function term(x,y,w,h,on,col,l1,l2){
+    const fill=on?col:'#f4f6f8',stroke=on?col:DIM,tc=on?'#fff':DIMT;
+    let s=`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="8" fill="${fill}" stroke="${stroke}" stroke-width="1.6"/>`;
+    s+=`<text x="${x+w/2}" y="${y+(l2?18:h/2+4)}" text-anchor="middle" font-size="10.5" font-weight="800" fill="${tc}">${l1}</text>`;
+    if(l2) s+=`<text x="${x+w/2}" y="${y+33}" text-anchor="middle" font-size="9" fill="${on?'rgba(255,255,255,.9)':DIMT}">${l2}</text>`;
+    return s;
+  }
+  function edge(x1,y1,x2,y2,on,col){
+    const k=col===RED?'r':col===GREEN?'g':'t';
+    return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${on?col:DIM}" stroke-width="${on?2.4:1.4}" marker-end="url(#fa-${on?'on':'off'}-${k})"/>`;
+  }
+  function lbl(x,y,t,on,col){return `<text x="${x}" y="${y}" text-anchor="middle" font-size="8.5" font-weight="700" fill="${on?col:DIMT}">${t}</text>`;}
   function render(){
-    const s=SC[sel];
-    // gate states
-    const bpaState = s.bpa==='block'?'block':'pass';
-    const polState = s.bpa==='block' ? 'na' : (s.allow?'pass':'deny');
-    let g=`<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:stretch">`+
-      gate('1 · Block Public Access', bpaState)+
-      `<div style="display:flex;align-items:center;font-size:18px;color:#cfd6db;font-weight:900">&rarr;</div>`+
-      gate('2 · Bucket policy / IAM', polState)+
-      `<div style="display:flex;align-items:center;font-size:18px;color:#cfd6db;font-weight:900">&rarr;</div>`+
-      gate(s.allow?'Object reached':'Object protected', s.allow?'pass':'deny')+`</div>`;
-    g+=`<div style="font-size:11px;color:var(--text-muted);margin-top:10px">Policy in effect: <code class="inline">${s.policy}</code></div>`;
-    stage.className='fade'; stage.innerHTML=g;
-    cap.innerHTML=s.reason;
+    const P=PATH[SC[sel].result], N=n=>P.nodes.includes(n), E=e=>P.edges.includes(e);
+    let s=`<svg viewBox="0 0 580 430" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    s+=`<defs>`+['t','r','g'].map(k=>{const col=k==='r'?RED:k==='g'?GREEN:TEAL;return `<marker id="fa-on-${k}" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="${col}"/></marker><marker id="fa-off-${k}" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="${DIM}"/></marker>`;}).join('')+`</defs>`;
+    s+=`<rect x="110" y="14" width="150" height="34" rx="17" fill="${N('S')?'#2D3748':'#f4f6f8'}" stroke="${N('S')?'#2D3748':DIM}" stroke-width="1.4"/><text x="185" y="35" text-anchor="middle" font-size="11" font-weight="800" fill="${N('S')?'#fff':DIMT}">Request arrives</text>`;
+    s+=edge(185,48,185,74,E('S-D1'),TEAL);
+    s+=edge(279,110,378,111,E('D1-T1'),RED)+lbl(330,104,'YES',E('D1-T1'),RED);
+    s+=edge(185,146,185,184,E('D1-D2'),TEAL)+lbl(198,168,'no',E('D1-D2'),TEAL);
+    s+=edge(279,220,378,221,E('D2-T2'),RED)+lbl(330,214,'YES',E('D2-T2'),RED);
+    s+=edge(185,256,185,294,E('D2-D3'),TEAL)+lbl(198,278,'no',E('D2-D3'),TEAL);
+    s+=edge(279,330,378,331,E('D3-T3'),RED)+lbl(330,324,'NO',E('D3-T3'),RED);
+    s+=edge(185,366,185,384,E('D3-T4'),GREEN)+lbl(202,378,'yes',E('D3-T4'),GREEN);
+    s+=diamond(185,110,N('D1'),'Public access','blocked by BPA?');
+    s+=diamond(185,220,N('D2'),'Any policy','explicitly DENIES?');
+    s+=diamond(185,330,N('D3'),'A policy','explicitly ALLOWS?');
+    s+=term(378,89,196,44,N('T1'),RED,'BLOCKED','by Block Public Access');
+    s+=term(378,199,196,44,N('T2'),RED,'DENIED','explicit deny wins');
+    s+=term(378,309,196,44,N('T3'),RED,'DENIED','deny by default');
+    s+=term(95,384,196,42,N('T4'),GREEN,'ALLOWED &mdash; object served','');
+    s+=`</svg>`;
+    stage.className='fade'; stage.innerHTML=s;
+    cap.innerHTML=`<div style="font-size:11px;color:var(--text-muted);margin-bottom:6px">Policy in effect: <code class="inline">${SC[sel].policy}</code></div>${SC[sel].reason}`;
     btns.querySelectorAll('button').forEach((b,i)=>b.className='ui'+(i===sel?'':' ghost'));
     setTimeout(()=>stage.classList.remove('fade'),360);
   }
+  btns.innerHTML=SC.map((s,i)=>`<button class="ui${i===0?'':' ghost'}" data-i="${i}" style="font-size:11.5px;padding:6px 11px">${s.k}</button>`).join('');
   btns.querySelectorAll('button').forEach(b=>b.onclick=()=>{sel=+b.dataset.i;render();});
   render();
 })();
