@@ -196,7 +196,7 @@ a.navbtn.disabled{ }
   function render(){
     const both=g==='both';
     let h=row('Did traffic reach the server?', true, 'VPC Flow Logs show the request hit the web server&rsquo;s interface on port 443.');
-    h+=row('Did the server error or succeed?', both, both?'Application logs show a 500 error &mdash; the request was malformed and the app failed.':'Unknown. Without application logs, you only see the packet arrive &mdash; never what happened next.');
+    h+=row('Did the server error or succeed?', both, both?'Application logs show a 404 &mdash; the server handled the request, but the page it asked for doesn&rsquo;t exist.':'Unknown. Without application logs, you only see the packet arrive &mdash; never what happened next.');
     h+=row('Was the request malicious?', both, both?'The app log shows the payload that triggered the error &mdash; now you can investigate.':'Unknown. The network log can&rsquo;t tell a normal request from an attack inside it.');
     stage.className='fade'; stage.innerHTML=h;
     cap.innerHTML = both
