@@ -108,6 +108,10 @@ a.navbtn.disabled{ }
       <div class="lbl">EC2 is the device / host layer</div>
       This is the next ring of <b>defense in depth</b>. The network controls the door; once a request is inside, the instance&rsquo;s own controls take over. No single layer is meant to be enough on its own.
     </div>
+    <div class="notebox">
+      <div class="lbl">Worked example &mdash; Log4j</div>
+      In 2021 the <b>Log4j</b> flaw let attackers run code on a server just by sending a crafted web request &mdash; traffic the network <em>had</em> to allow on port 443. Two host controls answer it: <b>patching</b> the affected Java application closes the hole so the request can&rsquo;t exploit anything, and if an attacker slips in first and tries to install a backdoor, <b>anti-malware</b> on the host can still detect it &mdash; even though no network rule was ever broken.
+    </div>
   </section>
 
   <section>
@@ -123,7 +127,7 @@ a.navbtn.disabled{ }
 
   <section>
     <h2><span class="num">3</span> Hardening: shrink the attack surface</h2>
-    <p class="lead">Zoom in on one layer of the stack &mdash; the OS. Every running service is a door an attacker can try. <strong>Hardening</strong> closes the doors you don&rsquo;t need. If an instance is only a web server, it has no reason to run FTP &mdash; so turn it off:</p>
+    <p class="lead">Zoom in on one layer of the stack &mdash; the OS. The <strong>attack surface</strong> is the sum of all the ways in &mdash; and every running service is one more door an attacker can try. <strong>Hardening</strong> closes the doors you don&rsquo;t need. If an instance is only a web server, it has no reason to run FTP &mdash; so turn it off:</p>
     <div class="widget" id="harden">
       <h4>Disable what you don&rsquo;t use</h4>
       <div class="controls" style="margin:0 0 14px">
@@ -163,7 +167,7 @@ a.navbtn.disabled{ }
     {k:'Hardening', layers:['os'], color:'#2D7D9A',
       d:'Securely configures the <b>operating system</b> and disables unnecessary services &mdash; fewer running services means a smaller attack surface.'},
     {k:'Anti-malware', layers:['app'], color:'#B45309',
-      d:'<b>Antivirus / EDR</b> watches the <b>running software</b> for malicious files or processes &mdash; the last catch if something gets past the other layers.'}
+      d:'<b>Antivirus / EDR</b> (Endpoint Detection and Response) watches the <b>running software</b> for malicious files or processes &mdash; the last catch if something gets past the other layers.'}
   ];
   let sel=0;
   function svg(){
