@@ -234,7 +234,7 @@ a.navbtn.disabled{ }
 (function(){
   const stage=document.getElementById('pillStage'),btns=document.getElementById('pillBtns'),cap=document.getElementById('pillCap');
   const P=[
-    ['Authentication','authn','#0E7490','Who are you?','Verify the user&rsquo;s credentials &mdash; password, plus MFA to resist phishing. <b>Owned by the IdP.</b> Example: prove you really are Bob.'],
+    ['Authentication','authn','#0E7490','Who are you?','Verify the user&rsquo;s credentials &mdash; password, plus MFA (multi-factor authentication) to resist phishing. <b>Owned by the IdP.</b> Example: prove you really are Bob.'],
     ['Access management','access','#8E5CA8','May you enter this app?','A yes/no decision about a whole app. <b>Owned by the IdP</b>, which issues a token only if you&rsquo;re allowed in. Example: an instructor may open Payroll; a student may not.'],
     ['Authorization','authz','#B45309','What may you do inside?','The fine-grained permissions once you&rsquo;re in. <b>Traditionally owned by the app.</b> Example: in Canvas, the instructor builds quizzes; Bob can only take them.']
   ];
@@ -321,15 +321,15 @@ a.navbtn.disabled{ }
       apps.forEach(a=>s+=node(a[0],a[1],16,'#2D3748','app'));
       s+=node(260,90,18,'#8E5CA8','local');
       s+=`<text x="260" y="116" text-anchor="middle" font-size="8" fill="#5f5e5a">IdP (proxy)</text>`;
-      idps.forEach(i=>s+=node(i[0],i[1],14,'#0E7490','ext'));
-      s+=`<text x="260" y="172" text-anchor="middle" font-size="9.5" font-weight="700" fill="#8E5CA8">apps trust the local IdP; it brokers external IdPs</text>`;
+      idps.forEach(i=>s+=node(i[0],i[1],16,'#0E7490','IdP'));
+      s+=`<text x="260" y="172" text-anchor="middle" font-size="9.5" font-weight="700" fill="#8E5CA8">apps trust the local IdP; it manages a link to every external IdP</text>`;
     } else {
       apps.forEach(a=>{ s+=`<line x1="${a[0]+16}" y1="${a[1]}" x2="240" y2="90" stroke="#2e7d57" stroke-width="1.5"/>`; });
       idps.forEach(i=>{ s+=`<line x1="280" y1="90" x2="${i[0]-16}" y2="${i[1]}" stroke="#2e7d57" stroke-width="1.5"/>`; });
       apps.forEach(a=>s+=node(a[0],a[1],16,'#2D3748','app'));
-      idps.forEach(i=>s+=node(i[0],i[1],14,'#0E7490','org'));
+      idps.forEach(i=>s+=node(i[0],i[1],16,'#0E7490','IdP'));
       s+=`<rect x="232" y="72" width="56" height="36" rx="8" fill="#2e7d57"/><text x="260" y="90" text-anchor="middle" font-size="9" font-weight="800" fill="#fff">Identity</text><text x="260" y="101" text-anchor="middle" font-size="9" font-weight="800" fill="#fff">Broker</text>`;
-      s+=`<text x="260" y="172" text-anchor="middle" font-size="9.5" font-weight="700" fill="#2e7d57">everyone trusts one broker &mdash; scales cleanly</text>`;
+      s+=`<text x="260" y="172" text-anchor="middle" font-size="9.5" font-weight="700" fill="#2e7d57">every app and every IdP trusts one broker &mdash; scales cleanly</text>`;
     }
     s+=`</svg>`;
     stage.className='fade'; stage.innerHTML=s;
