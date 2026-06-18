@@ -141,7 +141,7 @@ a.navbtn.disabled{ }
 
   <section>
     <h2><span class="num">3</span> How AWS decides: deny wins</h2>
-    <p class="lead">When you make a request, AWS gathers <em>every</em> policy that applies and evaluates them together by one rule. Run requests through it:</p>
+    <p class="lead">When you make a request, AWS gathers <em>every</em> policy that applies and evaluates them together by one rule. Pick a request and follow it through the decision:</p>
     <div class="widget" id="eval">
       <h4>Explicit deny &rarr; explicit allow &rarr; implicit deny</h4>
       <div class="controls" style="margin:0 0 14px" id="evalBtns"></div>
@@ -225,7 +225,7 @@ a.navbtn.disabled{ }
     code.className='fade';
     code.innerHTML=`<pre>${p==='identity'?IDENTITY:RESOURCE}</pre>`;
     cap.innerHTML = p==='identity'
-      ? '<b>Identity-based.</b> Attached to a user, group, or role. It says what <i>that</i> identity may do, so there&rsquo;s <b>no <code class="inline">Principal</code></b> &mdash; the &ldquo;who&rdquo; is whoever the policy is attached to. <i>&ldquo;Mike may read this bucket.&rdquo;</i>'
+      ? '<b>Identity-based.</b> Attached to a user, group, or role. It says what <i>that</i> identity may do, so there&rsquo;s <b>no <code class="inline">Principal</code></b> &mdash; the &ldquo;who&rdquo; is whoever the policy is attached to. <i>&ldquo;Mike may read this bucket.&rdquo;</i> (The <code class="inline">Resource</code> is named by its <b>ARN</b> &mdash; Amazon Resource Name, AWS&rsquo;s unique ID for a resource.)'
       : '<b>Resource-based.</b> Attached to the resource itself (here, the S3 bucket). It includes a <b><code class="inline">Principal</code></b> element &mdash; the actor it allows (or <code class="inline">NotPrincipal</code> to mean &ldquo;everyone except&rdquo;). <i>&ldquo;This bucket lets Mike read it.&rdquo;</i> This is what enables <b>cross-account</b> access.';
     document.querySelectorAll('#pol [data-p]').forEach(b=>b.className='ui'+(b.dataset.p===p?'':' ghost'));
     setTimeout(()=>code.classList.remove('fade'),360);
@@ -245,31 +245,54 @@ a.navbtn.disabled{ }
     {k:'No policy mentions it', deny:false, allow:false,
       reason:'<b>Denied by default.</b> Nothing grants this action, so AWS falls back to its default: <b>implicit deny</b>. In IAM, silence always means no.'}
   ];
+  const RES=[ 'T3','T1','T2' ]; // scenario index -> terminal (allow / explicit-deny / implicit-deny)
+  const TEAL='#0E7490',RED='#c0392b',GREEN='#2e7d57',DIM='#cfd6db',DIMT='#9aa3a8';
+  const PATH={
+    T1:{nodes:['S','D1','T1'],edges:['S-D1','D1-T1']},
+    T2:{nodes:['S','D1','D2','T2'],edges:['S-D1','D1-D2','D2-T2']},
+    T3:{nodes:['S','D1','D2','T3'],edges:['S-D1','D1-D2','D2-T3']}
+  };
   let sel=0;
-  function gate(label,state){
-    const map={deny:['#c0392b','&#10007;','#fdecea'],pass:['#2e7d57','&#10003;','#eaf7ef'],na:['#9aa3a8','&middot;','#f4f6f8']};
-    const [c,sym,bg]=map[state];
-    return `<div style="flex:1;min-width:140px;background:${bg};border:1.5px solid ${c};border-radius:8px;padding:11px 12px">`+
-      `<div style="font-size:12px;font-weight:800;color:#1a1a18">${label}</div>`+
-      `<div style="font-size:14px;font-weight:900;color:${c};margin-top:4px">${sym}</div></div>`;
+  function diamond(cx,cy,on,l1,l2){
+    const hw=94,hh=36,c=on?TEAL:DIM,tc=on?'#fff':DIMT,fill=on?TEAL:'#f4f6f8';
+    return `<polygon points="${cx},${cy-hh} ${cx+hw},${cy} ${cx},${cy+hh} ${cx-hw},${cy}" fill="${fill}" stroke="${c}" stroke-width="1.6"/>`+
+      `<text x="${cx}" y="${cy-2}" text-anchor="middle" font-size="10.5" font-weight="800" fill="${tc}">${l1}</text>`+
+      `<text x="${cx}" y="${cy+12}" text-anchor="middle" font-size="10.5" font-weight="800" fill="${tc}">${l2}</text>`;
   }
-  btns.innerHTML=SC.map((s,i)=>`<button class="ui${i===0?'':' ghost'}" data-i="${i}" style="font-size:11.5px;padding:6px 11px">${s.k}</button>`).join('');
+  function term(x,y,w,h,on,col,l1,l2){
+    const fill=on?col:'#f4f6f8',stroke=on?col:DIM,tc=on?'#fff':DIMT;
+    let s=`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="8" fill="${fill}" stroke="${stroke}" stroke-width="1.6"/>`;
+    s+=`<text x="${x+w/2}" y="${y+(l2?18:h/2+4)}" text-anchor="middle" font-size="10.5" font-weight="800" fill="${tc}">${l1}</text>`;
+    if(l2) s+=`<text x="${x+w/2}" y="${y+33}" text-anchor="middle" font-size="9" fill="${on?'rgba(255,255,255,.9)':DIMT}">${l2}</text>`;
+    return s;
+  }
+  function edge(x1,y1,x2,y2,on,col){
+    const k=col===RED?'r':col===GREEN?'g':'t';
+    return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${on?col:DIM}" stroke-width="${on?2.4:1.4}" marker-end="url(#ia-${on?'on':'off'}-${k})"/>`;
+  }
+  function lbl(x,y,t,on,col){return `<text x="${x}" y="${y}" text-anchor="middle" font-size="8.5" font-weight="700" fill="${on?col:DIMT}">${t}</text>`;}
   function render(){
-    const s=SC[sel];
-    const denyState=s.deny?'deny':'na';
-    const allowState=s.deny?'na':(s.allow?'pass':'na');
-    const result=(!s.deny && s.allow);
-    let g=`<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:stretch">`+
-      gate('1 · Any explicit Deny?', denyState)+
-      `<div style="display:flex;align-items:center;font-size:18px;color:#cfd6db;font-weight:900">&rarr;</div>`+
-      gate('2 · Any explicit Allow?', allowState)+
-      `<div style="display:flex;align-items:center;font-size:18px;color:#cfd6db;font-weight:900">&rarr;</div>`+
-      gate(result?'Request allowed':'Request denied', result?'pass':'deny')+`</div>`;
-    stage.className='fade'; stage.innerHTML=g;
-    cap.innerHTML=s.reason;
+    const P=PATH[RES[sel]], N=n=>P.nodes.includes(n), E=e=>P.edges.includes(e);
+    let s=`<svg viewBox="0 0 580 330" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    s+=`<defs>`+['t','r','g'].map(k=>{const col=k==='r'?RED:k==='g'?GREEN:TEAL;return `<marker id="ia-on-${k}" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="${col}"/></marker><marker id="ia-off-${k}" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="${DIM}"/></marker>`;}).join('')+`</defs>`;
+    s+=`<rect x="110" y="14" width="150" height="34" rx="17" fill="${N('S')?'#2D3748':'#f4f6f8'}" stroke="${N('S')?'#2D3748':DIM}" stroke-width="1.4"/><text x="185" y="35" text-anchor="middle" font-size="11" font-weight="800" fill="${N('S')?'#fff':DIMT}">Request arrives</text>`;
+    s+=edge(185,48,185,74,E('S-D1'),TEAL);
+    s+=edge(279,110,378,111,E('D1-T1'),RED)+lbl(330,104,'YES',E('D1-T1'),RED);
+    s+=edge(185,146,185,184,E('D1-D2'),TEAL)+lbl(198,168,'no',E('D1-D2'),TEAL);
+    s+=edge(279,230,378,231,E('D2-T2'),RED)+lbl(330,224,'NO',E('D2-T2'),RED);
+    s+=edge(185,266,185,284,E('D2-T3'),GREEN)+lbl(202,278,'yes',E('D2-T3'),GREEN);
+    s+=diamond(185,110,N('D1'),'Any explicit','DENY?');
+    s+=diamond(185,230,N('D2'),'Any explicit','ALLOW?');
+    s+=term(378,89,196,44,N('T1'),RED,'DENIED','explicit deny wins');
+    s+=term(378,209,196,44,N('T2'),RED,'DENIED','deny by default (no allow)');
+    s+=term(95,284,196,42,N('T3'),GREEN,'ALLOWED','');
+    s+=`</svg>`;
+    stage.className='fade'; stage.innerHTML=s;
+    cap.innerHTML=SC[sel].reason;
     btns.querySelectorAll('button').forEach((b,i)=>b.className='ui'+(i===sel?'':' ghost'));
     setTimeout(()=>stage.classList.remove('fade'),360);
   }
+  btns.innerHTML=SC.map((s,i)=>`<button class="ui${i===0?'':' ghost'}" data-i="${i}" style="font-size:11.5px;padding:6px 11px">${s.k}</button>`).join('');
   btns.querySelectorAll('button').forEach(b=>b.onclick=()=>{sel=+b.dataset.i;render();});
   render();
 })();
