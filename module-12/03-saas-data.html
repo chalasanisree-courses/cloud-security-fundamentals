@@ -167,8 +167,8 @@ a.navbtn.disabled{ }
             <p id="shareCap" style="font-size:13px;color:var(--text-muted);margin:14px 0 0;line-height:1.6;min-height:48px"></p>
           </div>
           <div class="notebox">
-            <div class="lbl">Tool &middot; sharing controls &amp; SSPM</div>
-            Tighten sharing defaults, expire links, and review who has access. <b>SSPM</b> (SaaS Security Posture Management) continuously scans your SaaS tenants for risky settings &mdash; public links, over-privileged guests, weak admin config &mdash; and flags them before they&rsquo;re exploited.
+            <div class="lbl">Tool &middot; sharing controls</div>
+            Tighten sharing defaults, expire links, and restrict each file or folder to <b>named people</b> instead of &ldquo;anyone with the link.&rdquo; Regular <b>access reviews</b> catch over-shared data and over-privileged guests before they&rsquo;re exploited.
           </div>
         </div>
       </div>
@@ -207,13 +207,13 @@ a.navbtn.disabled{ }
       <thead><tr><th>Risk</th><th>The question</th><th>Control</th><th>Example tools</th></tr></thead>
       <tbody>
         <tr><td><b>Compliance violation</b></td><td class="q">Allowed to exist here?</td><td class="ctrl">DLP &mdash; content inspection</td><td>AWS Macie, Box Shield</td></tr>
-        <tr><td><b>Unauthorized access</b></td><td class="q">Shared too widely?</td><td class="ctrl">Sharing controls + SSPM</td><td>SaaS posture tools</td></tr>
+        <tr><td><b>Unauthorized access</b></td><td class="q">Shared too widely?</td><td class="ctrl">Sharing controls + access reviews</td><td>Built-in sharing settings</td></tr>
         <tr><td><b>Data exfiltration</b></td><td class="q">Allowed to leave here?</td><td class="ctrl">CASB &mdash; movement control</td><td>CASB / SSE platforms</td></tr>
       </tbody>
     </table>
     <div class="keybox">
       <div class="lbl">How these fit together</div>
-      <b>Identity</b> (OIDC + MFA) gates <i>who</i> gets in; these controls protect the data once they&rsquo;re in. In practice the lines blur: <b>DLP usually runs inside a CASB</b>, and CASB itself now ships as part of a broader <b>SSE / SASE</b> platform (with secure web gateway and ZTNA). The concepts stay the same &mdash; the product names consolidate.
+      <b>Identity</b> (OIDC + MFA) gates <i>who</i> gets in; these controls protect the data once they&rsquo;re in. In practice the lines blur: <b>DLP usually runs inside a CASB</b>, and CASB itself now ships as part of a broader cloud-security platform &mdash; <b>SSE</b> (Security Service Edge) / <b>SASE</b> (Secure Access Service Edge) &mdash; alongside a secure web gateway and <b>ZTNA</b> (Zero Trust Network Access). The concepts stay the same &mdash; the product names consolidate.
     </div>
     <div class="notebox">
       <div class="lbl">Where encryption fits</div>
@@ -227,7 +227,7 @@ a.navbtn.disabled{ }
       <p style="margin:0 0 6px"><strong>Three security risks to SaaS data &mdash; each with a control:</strong></p>
       <ul style="list-style:none;margin:0;padding:0">
         <li style="padding:3px 0 3px 18px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">&#9671;</span> <strong>Compliance violation</strong> (data where it shouldn&rsquo;t be) &rarr; <strong>DLP</strong> inspects content for PCI/PII/HIPAA &mdash; quarantine / redact / alert</li>
-        <li style="padding:3px 0 3px 18px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">&#9671;</span> <strong>Unauthorized access</strong> (loose sharing / public links) &rarr; <strong>sharing controls + SSPM</strong></li>
+        <li style="padding:3px 0 3px 18px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">&#9671;</span> <strong>Unauthorized access</strong> (loose sharing / public links) &rarr; <strong>sharing controls + access reviews</strong></li>
         <li style="padding:3px 0 3px 18px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">&#9671;</span> <strong>Data exfiltration</strong> (to unmanaged device / cloud) &rarr; <strong>CASB</strong> blocks downloads and revokes cloud-to-cloud OAuth tokens</li>
       </ul>
       <p style="margin:10px 0 0">Identity gates who gets in; encryption/BYOK keeps data confidential. DLP often lives inside a CASB, now usually part of an SSE/SASE platform.</p>

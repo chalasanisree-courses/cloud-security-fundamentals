@@ -154,7 +154,7 @@ a.navbtn.disabled{ }
     <p class="lead">The new SaaS pattern: you let an app do something on your behalf &mdash; <em>without</em> handing over your master key. Two different things can be delegated, mapping onto the two questions from &sect;1:</p>
     <div class="keybox">
       <div class="lbl">Two things can be delegated</div>
-      <b>Authorization</b> &mdash; <i>what may the app do for you?</i> &rarr; <b>OAuth</b>. &nbsp; <b>Authentication</b> &mdash; <i>who are you?</i> (the app delegates verifying your identity to a trusted IdP) &rarr; <b>OIDC</b>. One grants permission; the other proves identity.
+      <b>Authorization</b> &mdash; <i>what may the app do for you?</i> &rarr; <b>OAuth</b>. &nbsp; <b>Authentication</b> &mdash; <i>who are you?</i> (the app delegates verifying your identity to a trusted identity provider, or <b>IdP</b>) &rarr; <b>OIDC</b>. One grants permission; the other proves identity.
     </div>
 
     <div class="subhead"><span class="tag">3a</span> Delegated authorization &mdash; OAuth</div>
@@ -192,7 +192,7 @@ a.navbtn.disabled{ }
     </div>
     <div class="notebox">
       <div class="lbl">OIDC vs SAML</div>
-      Both let you log in through a third party (<b>federated identity</b>) &mdash; the SSO idea from the Identity module. <b>SAML</b> is that enterprise SSO standard: heavier <b>XML</b>, browser-bound, and <i>authentication only</i> &mdash; it can&rsquo;t issue the scoped API tokens SaaS app-to-app calls need. <b>OIDC</b> is the modern successor: lightweight <b>JSON / JWT</b>, works for mobile and &ldquo;Log in with Google,&rdquo; and because it rides on OAuth, the same token stack does <i>both</i> authentication and scoped authorization.
+      Both let you log in through a third party (<b>federated identity</b>) &mdash; the SSO idea from the Identity module. <b>SAML</b> is that enterprise SSO standard: heavier <b>XML</b>, browser-bound, and <i>authentication only</i> &mdash; it can&rsquo;t issue the scoped API tokens SaaS app-to-app calls need. <b>OIDC</b> is the modern successor: lightweight <b>JSON / JWT</b> (JSON Web Token), works for mobile and &ldquo;Log in with Google,&rdquo; and because it rides on OAuth, the same token stack does <i>both</i> authentication and scoped authorization.
     </div>
   </section>
 
