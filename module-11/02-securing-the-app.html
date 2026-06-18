@@ -224,7 +224,7 @@ a.navbtn.disabled{ }
       ['Origin / CDN bypass','an attacker skips CloudFront and hits the load balancer&rsquo;s IP directly, dodging Shield and WAF.','Allow only CloudFront','restrict the load balancer&rsquo;s <b>Security Group</b> to CloudFront (via the CloudFront&#8209;managed prefix list), so direct hits are dropped. The LB also validates the token&rsquo;s signature here.']
     ]},
     {hi:['alb','app'],title:'Into the application',rows:[
-      ['SQL injection','a legitimate user types <code class="inline">DROP TABLE photos</code> into the search box.','AWS WAF','inspects Layer&#8209;7 HTTP and blocks malicious patterns before they reach the app (and the app sanitizes input).'],
+      ['SQL injection','untrusted input is run as a database command &mdash; a user types <code class="inline">DROP TABLE photos</code> into the search box and the app executes it. It&rsquo;s one of the <a href="https://owasp.org/www-project-top-ten/" target="_blank" rel="noopener">OWASP Top&nbsp;10</a>, the most common classes of web-app attack.','AWS WAF','inspects Layer&#8209;7 HTTP and blocks malicious patterns before they reach the app (and the app sanitizes input).'],
       ['Vulnerable library','the app depends on a flawed package (e.g. Log4j).','Amazon Inspector','continuously scans the servers for known vulnerabilities (CVEs) in the OS and packages.'],
       ['Broken access control','a logged-in user tries to open someone else&rsquo;s photos.','Authorization in the app','Cognito proved <i>who</i> she is; the app decides <i>what</i> she may touch &mdash; <code class="inline">WHERE owner=&#39;Mary&#39;</code> returns only her rows.']
     ]}
