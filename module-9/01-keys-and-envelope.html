@@ -95,7 +95,7 @@ a.navbtn.disabled{ }
     <div class="obj-label">In this note</div>
     <ul>
       <li>Why a key needs a vault &mdash; protecting secrets even when the OS is compromised</li>
-      <li>The hardware vaults: TPM, TEE / Secure Enclave, and the HSM</li>
+      <li>The hardware vaults: TPM, TEE / Secure Enclave, and the HSM (Hardware Security Module)</li>
       <li>Envelope encryption: why we don&rsquo;t encrypt data with the master key directly</li>
       <li>The KEK / DEK workflow for encrypting and decrypting</li>
     </ul>
@@ -252,35 +252,37 @@ a.navbtn.disabled{ }
   function key(x,y,c,s){s=s||1;return `<g transform="translate(${x},${y}) scale(${s})"><circle cx="0" cy="0" r="7" fill="none" stroke="${c}" stroke-width="2.2"/><rect x="5" y="-2" width="13" height="4" fill="${c}"/><rect x="15" y="-2" width="3" height="6" fill="${c}"/></g>`;}
   function render(){
     const enc=w==='enc';
-    let s=`<svg viewBox="0 0 520 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
-    // CPU (left), Vault (middle), Storage (right)
-    s+=`<rect x="14" y="40" width="120" height="110" rx="9" fill="#2D3748"/><text x="74" y="60" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">CPU / memory</text><text x="74" y="74" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.7)">fast, but exposed</text>`;
-    s+=`<rect x="200" y="40" width="120" height="110" rx="9" fill="#0E7490"/><text x="260" y="60" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">VAULT (HSM)</text>`;
-    s+=key(238,86,'#fff',1.1)+`<text x="260" y="104" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,.9)">KEK stays here</text>`;
-    s+=`<rect x="386" y="40" width="120" height="110" rx="9" fill="#fff" stroke="#cfd6db" stroke-width="1.3"/><text x="446" y="60" text-anchor="middle" font-size="11" font-weight="800" fill="#1a1a18">Stored data</text>`;
-    const A=(x1,y1,x2,y2,c,dash)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c}" stroke-width="2" ${dash?'stroke-dasharray="5 4"':''} marker-end="url(#fa)"/>`;
+    let s=`<svg viewBox="0 0 520 210" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:Barlow,Arial,sans-serif">`;
+    s+=`<defs><marker id="me" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#5f5e5a"/></marker><marker id="ms" markerWidth="9" markerHeight="9" refX="2" refY="3" orient="auto"><path d="M6,0 L0,3 L6,6 Z" fill="#5f5e5a"/></marker></defs>`;
+    const badge=(x,y,n)=>`<circle cx="${x}" cy="${y}" r="10" fill="#1a1a18"/><text x="${x}" y="${y+3.5}" text-anchor="middle" font-size="11" font-weight="900" fill="#fff">${n}</text>`;
+    // LEFT column: CPU (top) over Vault (bottom) — the compute side
+    s+=`<rect x="20" y="22" width="178" height="68" rx="9" fill="#2D3748"/><text x="109" y="46" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">CPU / memory</text><text x="109" y="60" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.7)">fast, but exposed</text>`;
+    s+=`<text x="109" y="80" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.85)">${enc?'encrypts data, then wipes the DEK':'decrypts data, then wipes the DEK'}</text>`;
+    s+=`<rect x="20" y="126" width="178" height="62" rx="9" fill="#0E7490"/><text x="109" y="150" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">VAULT (HSM)</text>`;
+    s+=key(58,170,'#fff',1.0)+`<text x="80" y="174" font-size="8.5" fill="rgba(255,255,255,.9)">KEK never leaves</text>`;
+    // RIGHT: storage
+    s+=`<rect x="330" y="40" width="170" height="130" rx="9" fill="#fff" stroke="#cfd6db" stroke-width="1.3"/><text x="415" y="66" text-anchor="middle" font-size="11" font-weight="800" fill="#1a1a18">Stored data</text><text x="415" y="88" text-anchor="middle" font-size="9" fill="#5f5e5a">ciphertext +</text><text x="415" y="101" text-anchor="middle" font-size="9" fill="#5f5e5a">wrapped DEK</text>`;
+    // vertical link: CPU <-> Vault (DEK exchange) — points UP when the vault hands keys out, DOWN when the CPU sends a key to unwrap
     if(enc){
-      s+=A(200,78,134,78,'#2e7d57');                  // vault -> CPU plaintext DEK
-      s+=key(150,78,'#2e7d57')+`<text x="167" y="82" font-size="8" fill="#2e7d57">DEK</text>`;
-      s+=`<text x="167" y="70" font-size="8" font-weight="700" fill="#2e7d57">1 plaintext DEK</text>`;
-      s+=A(320,118,386,118,'#B45309');                // vault -> storage encrypted DEK
-      s+=`<rect x="338" y="110" width="34" height="16" rx="3" fill="#B45309"/><text x="355" y="122" text-anchor="middle" font-size="7.5" font-weight="700" fill="#fff">enc DEK</text>`;
-      s+=`<text x="446" y="92" text-anchor="middle" font-size="8.5" fill="#5f5e5a">ciphertext +</text><text x="446" y="104" text-anchor="middle" font-size="8.5" fill="#5f5e5a">wrapped DEK</text>`;
-      s+=`<text x="74" y="138" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.85)">encrypts data,</text><text x="74" y="148" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.85)">then wipes DEK</text>`;
+      s+=`<line x1="72" y1="124" x2="72" y2="92" stroke="#5f5e5a" stroke-width="2" marker-end="url(#me)"/>`;
+      s+=`<text x="152" y="111" text-anchor="middle" font-size="8.5" font-weight="700" fill="#0E7490">plaintext + wrapped DEK</text>`;
     } else {
-      s+=A(386,118,322,118,'#B45309',true);           // storage -> vault encrypted DEK
-      s+=`<rect x="344" y="110" width="34" height="16" rx="3" fill="#B45309"/><text x="361" y="122" text-anchor="middle" font-size="7.5" font-weight="700" fill="#fff">enc DEK</text>`;
-      s+=A(200,78,134,78,'#2e7d57');                  // vault -> CPU plaintext DEK
-      s+=key(150,78,'#2e7d57')+`<text x="167" y="82" font-size="8" fill="#2e7d57">DEK</text>`;
-      s+=`<text x="260" y="138" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.85)">validates caller,</text><text x="260" y="148" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.85)">unwraps DEK</text>`;
-      s+=`<text x="74" y="142" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.85)">decrypts the data</text>`;
+      s+=`<line x1="72" y1="92" x2="72" y2="124" stroke="#5f5e5a" stroke-width="2" marker-end="url(#me)"/>`;
+      s+=`<text x="150" y="105" text-anchor="middle" font-size="8.5" font-weight="700" fill="#0E7490">wrapped DEK, to unwrap</text>`;
+      s+=`<text x="150" y="118" text-anchor="middle" font-size="8" fill="#5f5e5a">(plaintext DEK returns)</text>`;
     }
-    s+=`<defs><marker id="fa" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#7a8589"/></marker></defs>`;
+    // horizontal dotted link: CPU <-> Storage (persistence)
+    if(enc) s+=`<line x1="198" y1="56" x2="328" y2="56" stroke="#5f5e5a" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#me)"/>`;
+    else    s+=`<line x1="328" y1="56" x2="200" y2="56" stroke="#5f5e5a" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#me)"/>`;
+    s+=`<text x="263" y="44" text-anchor="middle" font-size="8.5" font-weight="700" fill="#B45309">ciphertext + wrapped DEK</text>`;
+    // numbered step badges, placed beside each link (order flips by mode)
+    if(enc){ s+=badge(48,108,'1')+badge(263,68,'2'); }
+    else   { s+=badge(263,68,'1')+badge(48,108,'2'); }
     s+=`</svg>`;
     stage.className='fade'; stage.innerHTML=s;
     cap.innerHTML = enc
-      ? '<b>Encrypting.</b> The CPU asks the vault for a key. The vault returns a <b>plaintext DEK</b> (to use now) and a <b>wrapped DEK</b> (to keep). The CPU encrypts the data, then <b>deletes the plaintext DEK</b> &mdash; only the ciphertext and the wrapped DEK are stored.'
-      : '<b>Decrypting.</b> The CPU sends the <b>wrapped DEK</b> back to the vault. The vault checks you&rsquo;re allowed, <b>unwraps</b> it with the KEK, and returns the plaintext DEK so the CPU can decrypt &mdash; then the DEK is discarded again.';
+      ? '<b>Encrypting.</b> <b>(1)</b> The CPU asks the vault for a key; the vault returns a <b>plaintext DEK</b> to use now plus a <b>wrapped DEK</b> to keep. <b>(2)</b> The CPU encrypts the data and writes the <b>ciphertext + wrapped DEK</b> to storage, then deletes the plaintext DEK.'
+      : '<b>Decrypting.</b> <b>(1)</b> The CPU reads the <b>ciphertext + wrapped DEK</b> from storage. <b>(2)</b> It sends the wrapped DEK to the vault, which <b>unwraps</b> it with the KEK and returns the plaintext DEK &mdash; the CPU decrypts, then deletes the DEK.';
     document.querySelectorAll('#flow [data-w]').forEach(b=>b.className='ui'+(b.dataset.w===w?'':' ghost'));
     setTimeout(()=>stage.classList.remove('fade'),360);
   }
