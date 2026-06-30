@@ -619,6 +619,15 @@ html[data-a11y-pointer] a:focus-visible,html[data-a11y-pointer] button:focus-vis
    entirely to the page's existing fixSvg()/fixRanges() handlers. */
 (function(){
   function ready(fn){if(document.readyState!=='loading')fn();else document.addEventListener('DOMContentLoaded',fn);}
+  function nameSvgButtons(scope){
+    (scope||document).querySelectorAll('svg').forEach(function(svg){
+      var clicks=[].slice.call(svg.querySelectorAll('[role="button"]')).filter(function(e){return !(e.getAttribute('aria-label')||e.getAttribute('aria-labelledby')||(e.textContent||'').trim());});
+      if(!clicks.length)return;
+      var texts=[].slice.call(svg.querySelectorAll('text')).map(function(t){return (t.textContent||'').replace(/\s+/g,' ').trim();}).filter(function(x){return x;});
+      var oneToOne=(texts.length===clicks.length);
+      clicks.forEach(function(el,i){ el.setAttribute('aria-label', oneToOne?texts[i]:((svg.getAttribute('aria-label')||'Diagram')+' \u2014 option '+(i+1)+' of '+clicks.length)); });
+    });
+  }
   document.addEventListener('pointerdown',function(){document.documentElement.setAttribute('data-a11y-pointer','');},true);
   document.addEventListener('keydown',function(e){if(e.key==='Tab')document.documentElement.removeAttribute('data-a11y-pointer');},true);
   ready(function(){
@@ -660,6 +669,9 @@ html[data-a11y-pointer] a:focus-visible,html[data-a11y-pointer] button:focus-vis
       if(!el.hasAttribute('role'))el.setAttribute('role','button');
       el.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '||e.key==='Spacebar'){e.preventDefault();el.click();}});
     });
+    // 5. Name interactive SVG shapes the page makes focusable but leaves unnamed (WCAG 4.1.2)
+    nameSvgButtons(document);
+    try{var __nmo=new MutationObserver(function(){setTimeout(function(){nameSvgButtons(document);},0);});document.querySelectorAll('.page').forEach(function(n){__nmo.observe(n,{childList:true,subtree:true});});}catch(e){}
   });
 })();
 </script>

@@ -349,19 +349,38 @@ a.navbtn.disabled{ }
 })();
 </script>
 
-<!-- ===== Accessibility remediation block (added by audit, WCAG 2.1 AA) ===== -->
+<!-- ===== Accessibility remediation block (minimal; complements page's own a11y layer) ===== -->
 <style id="a11y-fixes-style">
 .skip-link{position:absolute;left:-9999px;top:0;z-index:10000;background:#1F4E79;color:#fff;padding:10px 16px;border-radius:0 0 6px 0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-weight:600;font-size:14px;text-decoration:none}
 .skip-link:focus{left:0}
 .a11y-sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-[onclick]:focus-visible,[role="button"]:focus-visible{outline:3px solid #85B7EB;outline-offset:2px}
 [role="main"]:focus{outline:none}
+/* Keyboard-only focus ring: after any pointer interaction, suppress the focus outline
+   (incl. the page's own [data-akey]/[tabindex]:focus-visible rule) so clicking an
+   interactive SVG shape never flashes a focus box. Tab restores it for keyboard users. */
+html[data-a11y-pointer] a:focus-visible,html[data-a11y-pointer] button:focus-visible,html[data-a11y-pointer] input:focus-visible,html[data-a11y-pointer] select:focus-visible,html[data-a11y-pointer] textarea:focus-visible,html[data-a11y-pointer] [data-akey]:focus-visible,html[data-a11y-pointer] [tabindex]:focus-visible,html[data-a11y-pointer] [role="button"]:focus,html[data-a11y-pointer] [role="button"]:focus-visible{outline:none}
 </style>
 <script id="a11y-fixes-script">
+/* Adds only what the page's own accessibility layer does not: a main landmark,
+   a skip link, a corrected heading outline, and keyboard support for non-SVG
+   onclick elements (e.g. toggle <div>s). SVG shapes and range inputs are left
+   entirely to the page's existing fixSvg()/fixRanges() handlers. */
 (function(){
   function ready(fn){if(document.readyState!=='loading')fn();else document.addEventListener('DOMContentLoaded',fn);}
+  function nameSvgButtons(scope){
+    (scope||document).querySelectorAll('svg').forEach(function(svg){
+      var clicks=[].slice.call(svg.querySelectorAll('[role="button"]')).filter(function(e){return !(e.getAttribute('aria-label')||e.getAttribute('aria-labelledby')||(e.textContent||'').trim());});
+      if(!clicks.length)return;
+      var texts=[].slice.call(svg.querySelectorAll('text')).map(function(t){return (t.textContent||'').replace(/\s+/g,' ').trim();}).filter(function(x){return x;});
+      var oneToOne=(texts.length===clicks.length);
+      clicks.forEach(function(el,i){ el.setAttribute('aria-label', oneToOne?texts[i]:((svg.getAttribute('aria-label')||'Diagram')+' \u2014 option '+(i+1)+' of '+clicks.length)); });
+    });
+  }
+  document.addEventListener('pointerdown',function(){document.documentElement.setAttribute('data-a11y-pointer','');},true);
+  document.addEventListener('keydown',function(e){if(e.key==='Tab')document.documentElement.removeAttribute('data-a11y-pointer');},true);
   ready(function(){
     var body=document.body;if(!body)return;
+    // 1. Main landmark
     var main=document.querySelector('main, [role="main"]');
     if(!main){var best=null,len=0;
       Array.prototype.forEach.call(body.children,function(el){
@@ -373,36 +392,34 @@ a.navbtn.disabled{ }
       if(best){main=best;main.setAttribute('role','main');}
     }
     if(main){if(!main.id)main.id='a11y-main';main.setAttribute('tabindex','-1');}
+    // 2. Skip link
     if(main&&!document.querySelector('a.skip-link')){
       var sk=document.createElement('a');sk.className='skip-link';sk.href='#'+main.id;sk.textContent='Skip to main content';
       body.insertBefore(sk,body.firstChild);
     }
-    var h1s=document.querySelectorAll('h1');
-    if(h1s.length===0 && main){
+    // 3. Heading outline: ensure one level-1, correct skipped levels via aria-level
+    if(document.querySelectorAll('h1').length===0 && main){
       var t=(document.title||'Page').split(/[\u2014\u2013|]/)[0].trim();
       var h1=document.createElement('h1');h1.className='a11y-sr-only';h1.textContent=t;
       main.insertBefore(h1,main.firstChild);
     }
-    var heads=[].slice.call(document.querySelectorAll('h1,h2,h3,h4,h5,h6'));var last=0;
-    heads.forEach(function(h){var nat=parseInt(h.tagName.charAt(1),10);var eff=nat;if(last>0&&nat>last+1)eff=last+1;if(eff!==nat){h.setAttribute('role','heading');h.setAttribute('aria-level',String(eff));}last=eff;});
+    var heads=[].slice.call(document.querySelectorAll('h1,h2,h3,h4,h5,h6')),last=0;
+    heads.forEach(function(h){var nat=parseInt(h.tagName.charAt(1),10),eff=nat;if(last>0&&nat>last+1)eff=last+1;if(eff!==nat){h.setAttribute('role','heading');h.setAttribute('aria-level',String(eff));}last=eff;});
+    // 4. Keyboard support for NON-SVG onclick elements only (page handles SVG shapes itself)
+    var SVG=['svg','circle','g','path','rect','text','image','polygon','ellipse','line','use'];
     Array.prototype.forEach.call(document.querySelectorAll('[onclick]'),function(el){
-      var t=el.tagName.toLowerCase();if(['a','button','input','select','textarea'].indexOf(t)>-1)return;
+      var t=(el.tagName||'').toLowerCase();
+      if(['a','button','input','select','textarea'].indexOf(t)>-1)return;
+      if(SVG.indexOf(t)>-1)return;            // leave SVG to the page's own layer
+      if(el.hasAttribute('data-akey'))return; // already handled by the page
+      if(el.closest('svg'))return;
       if(!el.hasAttribute('tabindex'))el.setAttribute('tabindex','0');
       if(!el.hasAttribute('role'))el.setAttribute('role','button');
       el.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '||e.key==='Spacebar'){e.preventDefault();el.click();}});
     });
-    Array.prototype.forEach.call(document.querySelectorAll('button,[role="button"]'),function(el){
-      if(el.getAttribute('aria-label')||el.getAttribute('aria-labelledby')||el.getAttribute('title'))return;
-      var txt=(el.textContent||'').replace(/\s+/g,'');if(txt.length!==1)return;
-      if(/[\u2715\u2716\u00d7]/.test(txt))el.setAttribute('aria-label','Close');
-      else if(/[\u25b6\u25b8\u25ba\u25b7\u203a\u2039]/.test(txt))el.setAttribute('aria-label','Expand');
-      else if(/[\u25bc\u25be\u25bd]/.test(txt))el.setAttribute('aria-label','Collapse');
-    });
-    Array.prototype.forEach.call(document.querySelectorAll('a[target="_blank"]'),function(a){
-      if(!a.getAttribute('rel'))a.setAttribute('rel','noopener noreferrer');
-      if(a.getAttribute('aria-label'))return;
-      var t=(a.textContent||'').replace(/\s+/g,' ').trim();if(t)a.setAttribute('aria-label',t+' (opens in new tab)');
-    });
+    // 5. Name interactive SVG shapes the page makes focusable but leaves unnamed (WCAG 4.1.2)
+    nameSvgButtons(document);
+    try{var __nmo=new MutationObserver(function(){setTimeout(function(){nameSvgButtons(document);},0);});document.querySelectorAll('.page').forEach(function(n){__nmo.observe(n,{childList:true,subtree:true});});}catch(e){}
   });
 })();
 </script>
