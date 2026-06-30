@@ -607,6 +607,10 @@ function goToModule(n){ try{ openSection('m'+n); }catch(e){} var el=document.get
 .skip-link:focus{left:0}
 .a11y-sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 [role="main"]:focus{outline:none}
+/* Keyboard-only focus ring: after any pointer interaction, suppress the focus outline
+   (incl. the page's own [data-akey]/[tabindex]:focus-visible rule) so clicking an
+   interactive SVG shape never flashes a focus box. Tab restores it for keyboard users. */
+html[data-a11y-pointer] a:focus-visible,html[data-a11y-pointer] button:focus-visible,html[data-a11y-pointer] input:focus-visible,html[data-a11y-pointer] select:focus-visible,html[data-a11y-pointer] textarea:focus-visible,html[data-a11y-pointer] [data-akey]:focus-visible,html[data-a11y-pointer] [tabindex]:focus-visible,html[data-a11y-pointer] [role="button"]:focus,html[data-a11y-pointer] [role="button"]:focus-visible{outline:none}
 </style>
 <script id="a11y-fixes-script">
 /* Adds only what the page's own accessibility layer does not: a main landmark,
@@ -615,6 +619,8 @@ function goToModule(n){ try{ openSection('m'+n); }catch(e){} var el=document.get
    entirely to the page's existing fixSvg()/fixRanges() handlers. */
 (function(){
   function ready(fn){if(document.readyState!=='loading')fn();else document.addEventListener('DOMContentLoaded',fn);}
+  document.addEventListener('pointerdown',function(){document.documentElement.setAttribute('data-a11y-pointer','');},true);
+  document.addEventListener('keydown',function(e){if(e.key==='Tab')document.documentElement.removeAttribute('data-a11y-pointer');},true);
   ready(function(){
     var body=document.body;if(!body)return;
     // 1. Main landmark
